@@ -323,14 +323,8 @@ public:
         }
     }
     
-    mat transitionDipole(vec& x0, vec& charges, mat& MU, mat& C)
+    mat transitionDipole(vec& charges, mat& MU, mat& C)
     {
-        vec mu0(3);
-        
-        mu0.fill(0.0);
-        for (int i=0; i<x0.n_rows; i += 3) {
-            mu0 += x0(span(i,i+2)) * charges[i/3];
-        }
         mat Q(3,MU.n_rows);
         Q.fill(0);
         for (int i=0; i<Q.n_cols; i += 3) {

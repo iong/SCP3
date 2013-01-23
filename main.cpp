@@ -198,17 +198,6 @@ int main (int argc, char *  argv[]) {
     TIP4P_charges.fill(0.5*qM);
     for (int i=0; i<N; i+= 3) TIP4P_charges[i] = -qM;
     
-    if (vm.count("spectrum") > 0) {
-        M.load(vm["spectrum"].as<string>(), raw_ascii);
-        mat C;
-        vec evals = dsyevr(M, &C);
-        mat mu = me.transitionDipole(x0, TIP4P_charges, MU, C);
-        for (int ii=1; ii< evals.n_rows; ii++) {
-            cout << (evals(ii) - evals(0))*autocm << " ";
-            cout << norm(mu.col(ii-1), 2) << endl;
-        }
-        exit(EXIT_SUCCESS);
-    }
     
     int64_t sobol_skip=1<<int(ceil(log2((double)NSobol)));
     if (continue_skip > 0) {
@@ -256,7 +245,7 @@ int main (int argc, char *  argv[]) {
             
             mat C;
             vec evals = dsyevr(Mout, &C);
-            mat mu = me.transitionDipole(x0, TIP4P_charges, MU, C);
+            mat mu = me.transitionDipole(TIP4P_charges, MU, C);
             for (int ii=1; ii< evals.n_rows; ii++) {
                 specout << (evals(ii) - evals(0))*autocm << " ";
                 dipoleout << norm(mu.col(ii-1), 2) << " ";
