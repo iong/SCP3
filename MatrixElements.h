@@ -29,10 +29,12 @@ class MatrixElements {
     vec alpha, alphaq;
     double V, *Vq, *q;
     int Nmodes;
+    bool doubles;
     
 public:
-    MatrixElements(vec &omega_) : omega(omega_)
+    MatrixElements(vec &omega_, bool doubles_=true) : omega(omega_)
     {
+        doubles = doubles_;
         alpha = sqrt(omega_);
         Nmodes = omega_.n_rows;
     }
@@ -342,16 +344,21 @@ public:
         
         mat mu(3,C.n_cols-1);
         for (int f=1; f<C.n_cols; f++) {
-            mu.col(f-1) = mu_0_m* (C(0,0)*C(span(1,Nmodes),f) + C(span(1,Nmodes), 0)*C(0,f));
+            mat d(3,3);
+            d.col(0) = mu_0_m* C(0,0)*C(span(1,Nmodes),f);
+            d.col(1) = mu_0_m* C(span(1,Nmodes), 0)*C(0,f);
             
             if (C.n_cols == Nmodes + 1) continue;
             
-            mu.col(f-1) += mu_m_m2* ( C(span(1,Nmodes),0) % C(span(Nmodes+1,2*Nmodes), f)
-                                   + C(span(Nmodes+1,2*Nmodes),0) % C(span(1,Nmodes),f) );
+            //vec d1 = mu_m_m2* ( C(span(1,Nmodes),0) % C(span(Nmodes+1,2*Nmodes), f)
+            //                       + C(span(Nmodes+1,2*Nmodes),0) % C(span(1,Nmodes),f) );
+            d.col(2).fill(0.0);
             for (int m=0; m<Nmodes-1; m++) {
                 span s(single2_index(m,m+1), single2_index(m,Nmodes-1));
-                mu.col(f-1) += mu_0_m.cols(m+1,Nmodes-1) * (C(m, 0)*C(s,f) + C(s,0)*C(m,f));
+                d.col(2) += mu_0_m.cols(m+1,Nmodes-1) * (C(m, 0)*C(s,f) + C(s,0)*C(m,f));
             }
+            cout << reshape(d, 1, 9);
+            mu.col(f-1) = d.col(0)+d.col(2);// + d1 + d2;
         }
         
         return mu;
