@@ -28,9 +28,9 @@ class ScaledMatrixElements {
     double V, *Vq, *q;
     int Nmodes, Nmodes2, Nmodes3;
     vec &omega;
-    
+
     int k_fence, k2_fence, kl_fence, k2l_fence, k3_fence, klj_fence;
-    
+
 public:
     ScaledMatrixElements(vec &omega_, int Nmodes2_ = 0, int Nmodes3_ = 0) :
     omega(omega_), Nmodes2(Nmodes2_), Nmodes3(Nmodes3_)
@@ -42,24 +42,24 @@ public:
         k3_fence = kl_fence + (Nmodes2*(Nmodes2-1)) / 2;
         k2l_fence = k3_fence + Nmodes3;
         klj_fence = k2l_fence + Nmodes3*(Nmodes3-1);
-        
+
         test_index();
     }
-    
+
 private:
 //#include "DoubleExcitations.h"
 #include "TripleExcitations.h"
-    
+
     int k_index(int k)
     {
         return k_fence + k;
     }
-    
+
     int k2_index(int k)
     {
         return k2_fence + k;
     }
-    
+
     /**
      1 + 2*Nmodes + (Nmodes - 1 + Nmodes - k)*k/2 + l - k - 1
      */
@@ -67,17 +67,17 @@ private:
     {
         return kl_fence + k*Nmodes2 - ((k + 2) * (k + 1))/2 + l;
     }
-    
+
     int k3_index(int k)
     {
         return k3_fence + k;
     }
-    
+
     int k2l_index(int k,int l)
     {
         return k2l_fence + 2*Nmodes3*k + 2*l - (k+2)*(k + 1);
     }
-    
+
     /**
      \f[
      \sum_{n=Nmodes3-(k-1)-1}^{Nmodes3-1} n*(n-1)/2 +l*(Nmodes3-k-1) - ((l + 2) * (l + 1))/2 + j;
