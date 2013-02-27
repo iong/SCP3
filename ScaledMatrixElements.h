@@ -84,8 +84,15 @@ private:
      */
     int klj_index(int k, int l, int j)
     {
-        int jl_offset = (k*(2 + k*k - 3*k*(Nmodes3 - 1) + 3*(Nmodes3 - 2)*Nmodes3))/6;
-        return klj_fence + jl_offset + l*(Nmodes3-k-1) - ((l + 2) * (l + 1))/2 + j;
+        int kth_plane_offset = (k*(2 + k*k - 3*k*(Nmodes3 - 1) + 3*(Nmodes3 - 2)*Nmodes3))/6;
+        /*
+        int Np = Nmodes3 - k - 1;
+        int lp = l - k - 1;
+        int jp = j - k - 1;
+        return klj_fence + jl_offset + lp*Np - ((lp + 2) * (lp + 1))/2 + jp;
+         */
+        int jl_pos = j + (k*k - l*(3 + l) + k*(3 - 2*Nmodes3) + 2*(l - 1)*Nmodes3)/2;
+        return klj_fence + kth_plane_offset + jl_pos;
     }
 
 
@@ -704,7 +711,7 @@ public:
     void test_index()
     {
         cout << klj_index(Nmodes3-3, Nmodes3-2, Nmodes3-1) << " ";
-        cout << (6*Nmodes + 3*Nmodes2*(1 + Nmodes2) + (3 + Nmodes3)*(2 + Nmodes3*Nmodes3))/6;
+        cout << 1 + Nmodes + Nmodes2*(Nmodes2 + 1)/2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
         cout << endl;
     }
 
