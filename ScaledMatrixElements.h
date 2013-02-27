@@ -92,152 +92,132 @@ private:
     void addEpotSingles(mat &M)
     {
         int m, k;
+
+        vec v(M.n_rows);
+
+#pragma omp for schedule(dynamic)
         for (k=0; k<Nmodes; k++) {
-            double v = f_k1(k);
-            M(0,k+1) += v;
-            M(k+1,0) += v;
-        }
-        
-        for (m=0; m<Nmodes; m++) {
-            M(m+1,m+1) += m1_f_m1(m);
-            for (k=m+1; k<Nmodes; k++) {
-                double v = m1_f_k1(m, k);
-                M(m+1,k+1) += v;
-                M(k+1,m+1) += v;
+            int C = k_index(k);
+            int R = 0;
+
+            v[R++] = f_k1(k);
+
+            for (m=0; m<k; m++) {
+                v[R++] = m1_f_k1(m, k);
             }
+
+            if (R != C) {
+                cerr << "singles: R != k" << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            v[R] = m1_f_m1(k);
+
+            M.col(C).subvec(0,R) += v.subvec(0,R);
         }
-        
+
         //cout << "+ " << m1_f_m1(Nmodes-2) << " " << m1_f_m1(Nmodes-1) << endl;
         //cout << "  " << M(Nmodes-1,Nmodes-1) << " " << M(Nmodes,Nmodes) << endl;
-        
+
     }
 
     void addEpotDoubles(mat &M)
     {
         int m, n, k, l;
-#pragma omp parallel private(m, n, k, l)
-        {
-#pragma omp for schedule(static) nowait
-            for (k=0; k<Nmodes2; k++) {
-                double v = f_k2(k);
-                int k2pos = k2_index(k);
-                M(0, k2pos) += v;
-                M(k2pos,0) += v;
-            }
-            
-#pragma omp for schedule(static) nowait
+
+        vec v(M.n_rows);
+#pragma omp for schedule(dynamic) nowait
+        for (k=0; k<Nmodes2; k++) {
+            int R = 0;
+            int C = k2_index(k);
+
+            v.subvec(0,C).fill(0.0);
+
+            v[R++] = f_k2(k);
+
             for (m=0; m<Nmodes; m++) {
-                for (k=0; k<Nmodes2; k++) {
-                    int k2pos = k2_index(k);
-                    double v = m1_f_k2(m, k);
-                    
-                    if (m==k) {
-                        v = m1_f_m2(m);
-                    }
-                    
-                    M(m+1, k2pos) += v;
-                    M(k2pos, m+1) += v;
-                }
+                v[R++] = m1_f_k2(m, k);
             }
-            
-#pragma omp for schedule(static) nowait
+            m=k;
+            v[k_index(m)] = m1_f_m2(k);
+
+            for (m=0; m<k; m++) {
+                v[R++] = m2_f_k2(m, k);
+            }
+
+            if (R != C) {
+                cerr << "doubles: R != C" << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            m=k;
+            v[R] = m2_f_m2(k);
+
+            M.col(C).subvec(0,R) += v.subvec(0,R);
+        }
+
+        SimplexIterator<2> s2(Nmodes2);
+
+#pragma omp for schedule(dynamic) nowait
+        for (int i=0; i<s2.end(); i++) {
+            s2 = i;
+
+            k = s2.index[0];
+            l = s2.index[1];
+
+            int C = kl_index(k,l);
+            v.subvec(0, C).fill(0.0);
+
+            int R = 0;
+            v[R++] = f_k1_l1(k, l);
+
+            for (m=0; m<Nmodes; m++) {
+                v[R++] = m1_f_k1_l1(m, k, l);
+            }
+            m=k;
+            v[k_index(m)] = m1_f_m1_l1(k, l);
+
+            m=l;
+            v[k_index(m)] = m1_f_m1_l1(l, k);
+
             for (m=0; m<Nmodes2; m++) {
-                int m2pos = k2_index(m);
-                M(m2pos, m2pos) += m2_f_m2(m);
-                for (k=m+1; k<Nmodes2; k++) {
-                    int k2pos = k2_index(k);
-                    double v = m2_f_k2(m, k);
-                    
-                    M(m2pos, k2pos) += v;
-                    M(k2pos, m2pos) += v;
-                }
+                v[R++] = m2_f_k1_l1(m, k, l);
             }
-            
-#pragma omp for schedule(static) nowait
-            for (k=0; k<Nmodes2; k++) {
-                for (l=k+1; l<Nmodes2; l++) {
-                    int klpos = kl_index(k,l);
-                    
-                    double v = f_k1_l1(k, l);
-                    M(0, klpos) += v;
-                    M(klpos, 0) += v;
-                }
-            }
-            
-#pragma omp for schedule(static) nowait
-            for (m=0; m<Nmodes; m++) {
-                for (k=0; k<Nmodes2; k++) {
-                    for (l=k+1; l<Nmodes2; l++) {
-                        int klpos = kl_index(k,l);
-                        double v = m1_f_k1_l1(m, k, l);
-                        
-                        if (m==l) {
-                            v = m1_f_m1_l1(m, k);
-                        }
-                        else if (m==k) {
-                            v = m1_f_m1_l1(m, l);
-                        }
-                        
-                        M(m+1, klpos) += v;
-                        M(klpos, m+1) += v;
-                    }
-                }
-            }
-            
-#pragma omp for schedule(static) nowait
-            for (m=0; m<Nmodes; m++) {
-                int m2pos = k2_index(m);
-                
-                for (k=0; k<Nmodes2; k++) {
-                    for (l=k+1; l<Nmodes2; l++) {
-                        int klpos = kl_index(k,l);
-                        double v = m2_f_k1_l1(m, k, l);
-                        
-                        if (m==l) {
-                            v = m2_f_m1_l1(m, k);
-                        }
-                        else if (m==k) {
-                            v = m2_f_m1_l1(m, l);
-                        }
-                        
-                        M(m2pos, klpos) += v;
-                        M(klpos, m2pos) += v;
-                    }
-                }
-            }
-            
-#pragma omp for schedule(dynamic,2)
-            for (m=0; m<Nmodes2; m++) {
+            m=k;
+            v[k_index(m)] = m2_f_m1_l1(k, l);
+
+            m=l;
+            v[k_index(m)] = m2_f_m1_l1(l, k);
+
+            for (m=0; m<k; m++) {
                 for (n=m+1; n<Nmodes2; n++) {
-                    k = m;
-                    l = n;
-                    
-                    int mnpos = kl_index(m, n);
-                    M(mnpos, mnpos) += m1_n1_f_m1_n1(m, n);
-                    
-                    for (l=n+1; l<Nmodes2; l++) {
-                        int klpos = kl_index(k, l);
-                        double v = m1_n1_f_m1_l1(m, n, l);
-                        
-                        M(mnpos, klpos) += v;
-                        M(klpos, mnpos) += v;
-                    }
-                    
-                    for (k=m+1; k<Nmodes2; k++) {
-                        for (l=k+1; l<Nmodes2; l++) {
-                            double v =  m1_n1_f_k1_l1(m, n, k, l);
-                            int klpos = kl_index(k, l);
-                            
-                            if (l==n) {
-                                v = m1_n1_f_m1_l1(n, m, k);
-                            }
-                            
-                            M(mnpos, klpos) += v;
-                            M(klpos, mnpos) += v;
-                        }
-                    }
+                    v[R++] = m1_n1_f_k1_l1(m, n, k, l);
                 }
             }
+
+            n=k;
+            for (m=0; m<k; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1(k, m, l);
+            }
+
+            n=l;
+            for (m=0; m<k; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1(l, m, k);
+            }
+
+            m=k;
+            for (n=m+1; n<l; n++) {
+                v[R++] = m1_n1_f_m1_l1(k, n, l);
+            }
+
+            if (R != C) {
+                cerr << "doubles_mn: R != C" << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            v[R] = m1_n1_f_m1_n1(k, l);
+
+            M.col(C).subvec(0, R) += v.subvec(0,R);
         }
     }
 
