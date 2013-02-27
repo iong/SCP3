@@ -710,27 +710,55 @@ public:
 
     void addHODiagonal(mat &M)
     {
+        int k, l, j, C;
         double E0 = 0.5*sum(omega);
-        
+
         M(0,0) += E0;
-        for (int i=0; i<Nmodes; i++) {
-            M(i+1,i+1) += E0+omega(i);
+        C = k_fence;
+        for (int k=0; k<Nmodes; k++, C++) {
+            M(C,C) += E0+omega(k);
         }
-        
-        for (int i=0; i<Nmodes2; i++) {
-            M(k2_index(i),k2_index(i)) += E0+2*omega(i);
+
+        for (k=0; k<Nmodes2; k++, C++) {
+            M(C,C) += E0+2*omega(k);
         }
-        
-        for (int k=0; k<Nmodes2; k++) {
-            for (int l=k+1; l<Nmodes2; l++) {
-                int klpos = kl_index(k, l);
-                
-                M(klpos,klpos) += E0 + omega(k) + omega(l);
+
+        for (k=0; k<Nmodes2; k++) {
+            for (l=k+1; l<Nmodes2; l++, C++) {
+                M(C,C) += E0 + omega(k) + omega(l);
             }
         }
+
+        for (k=0; k<Nmodes3; k++, C++) {
+            M(C,C) += E0 + 3.0*omega(k);
+        }
+
+        for (k=0; k<Nmodes3; k++) {
+            for (l=k+1; l<Nmodes3; l++) {
+                M(C,C) += E0 + 2.0*omega(k) +       omega(l);
+                C++;
+                M(C,C) += E0 +     omega(k) + 2.0 * omega(l);
+                C++;
+            }
+        }
+
+        for (k=0; k<Nmodes3; k++) {
+            for (l=k+1; l<Nmodes3; l++) {
+                for (j=l+1; j<Nmodes3; j++, C++) {
+                    M(C,C) += E0 + omega(k) + omega(l) + omega(j);
+                }
+            }
+        }
+
+        if (C-1 != klj_index(Nmodes3-3, Nmodes3-2, Nmodes3-1) ) {
+            cerr << "HO diagonal term ended in wrong col number." << endl;
+            cerr << C-1 << " != " << klj_index(Nmodes3-3, Nmodes3-2, Nmodes3-1);
+            cerr << endl;
+            exit(EXIT_FAILURE);
+        }
     }
-    
-    
+
+
     mat transitionDipole(vec& charges, mat& MUa, mat& C)
     {
         mat Q(3,MUa.n_rows);
