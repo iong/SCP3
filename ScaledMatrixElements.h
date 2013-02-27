@@ -16,6 +16,8 @@
 #include <algorithm>
 #include <armadillo>
 
+#include "SimplexIterator.h"
+
 using namespace std;
 using namespace arma;
 
