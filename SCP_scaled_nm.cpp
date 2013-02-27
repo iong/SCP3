@@ -293,8 +293,8 @@ int main (int argc, char *  argv[]) {
         V -= 0.5 * dot(y, omega%y);
         Vy = -MUaT * Vr - omega % y;
             //cout << y(Nmodes-2) << " " << y(Nmodes-1) << " " << Vy(Nmodes-2) << " " << Vy(Nmodes-1) << endl;
-        sme.addEpotDoubles(y, V, Vy, M);
-        
+        sme.addEpot(y, V, Vy, M);
+
         if ( (i+1)%10000==0) {
             cout << i+1 << endl;
             Mout = M / (i+1);
