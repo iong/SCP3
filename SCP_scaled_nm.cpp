@@ -278,6 +278,8 @@ int main (int argc, char *  argv[]) {
     ofstream dipoleout("sdipole.dat");
 
     ofstream E0out("E0.dat");
+    fixed(E0out);
+    E0out.precision(10);
     for (int i=continue_skip; i<continue_skip+NSobol; i++) {
         sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
         y = y / (sqrt(2.0));
@@ -299,12 +301,27 @@ int main (int argc, char *  argv[]) {
             cout << i+1 << endl;
             Mout = M / (i+1);
             sme.addHODiagonal(Mout);
-            
-            char s[100];
-            sprintf(s, "sM_%07d.dat", i+1);
-            Mout.save(s, raw_ascii);
-            
-            dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
+
+            if ( (i+1)%100000==0) {
+                char s[100];
+                sprintf(s, "sM_%07d.dat", i+1);
+                Mout.save(s, raw_ascii);
+            }
+
+            vec eigvals = eig_sym(Mout.submat(0,0, Nmodes0-1, Nmodes0-1));
+            double E0[3];
+
+            E0[0] = eigvals[0]*autocm;
+
+            eigvals = eig_sym(Mout.submat(0, 0, Nstates2-1, Nstates2-1));
+            E0[1] = eigvals[0]*autocm;
+
+            eigvals = eig_sym(Mout);
+            E0[2] = eigvals[0]*autocm;
+
+            E0out << i+1 << " " << E0[0] <<" "<< E0[1] <<" "<< E0[2] <<" ";
+            E0out << E0[1] - E0[0] <<" "<< E0[2] - E0[0] << endl;
+                //dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
         }
     }
     specout.close();
