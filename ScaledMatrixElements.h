@@ -707,7 +707,6 @@ public:
             addEpotTriples(M);
         }
     }
-    
     void test_index()
     {
         cout << klj_index(Nmodes3-3, Nmodes3-2, Nmodes3-1) << " ";
@@ -775,18 +774,18 @@ public:
             Q(1, i+1) = charges[i/3];
             Q(2, i+2) = charges[i/3];
         }
-        
+
         mat mu_m_m2 = Q*MUa;
         mat mu_0_m = mu_m_m2 / sqrt(2.0);
-        
+
         mat mu(3,C.n_cols-1);
         for (int f=1; f<C.n_cols; f++) {
             mat d(3,3);
             d.col(0) = mu_0_m* C(0,0)*C(span(1,Nmodes),f);
             d.col(1) = mu_0_m* C(span(1,Nmodes), 0)*C(0,f);
-            
+
             if (C.n_cols == Nmodes + 1) continue;
-            
+
             //vec d1 = mu_m_m2* ( C(span(1,Nmodes),0) % C(span(Nmodes+1,Nmodes+Nmodes2), f)
             //                       + C(span(Nmodes+1,Nmodes+Nmodes2),0) % C(span(1,Nmodes),f) );
             d.col(2).fill(0.0);
@@ -797,7 +796,7 @@ public:
             //cout << reshape(d, 1, 9);
             mu.col(f-1) = d.col(0)+d.col(2);// + d1 + d2;
         }
-        
+
         return mu;
     }
 };
