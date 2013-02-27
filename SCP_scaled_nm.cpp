@@ -29,7 +29,7 @@ static const double bohr=0.52917721092;
 static const double autocm=2.194746313e5;
 static const double qM = 1.1128;
 
-unsigned int NSobol, continue_skip=0, Nmodes2=0;
+unsigned int NSobol, continue_skip=0, Nmodes2=0, Nmodes3=0;
 string input_file, continue_from;
 
 po::variables_map process_options(int argc,  char *  argv[])
@@ -41,7 +41,8 @@ po::variables_map process_options(int argc,  char *  argv[])
     ("NSobol,N", po::value<unsigned int>(&NSobol)->default_value(100000), "Length of the Sobol sequence")
     ("continue,c", po::value<string>(), "Name (in format M_%06d.dat) of the file to continue from.")
     ("input-file,f",po::value<string>(), "Input file name from Vladimir")
-    ("modes,m", po::value<unsigned int>(&Nmodes2)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
+    ("doubles,2", po::value<unsigned int>(&Nmodes2)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
+    ("triples,3", po::value<unsigned int>(&Nmodes3)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
     ("spectrum,s", po::value<string>(), "Spectrum for Hamiltonian saved in M_%06d.dat");
     
     po::positional_options_description pos_opts;
@@ -230,10 +231,12 @@ int main (int argc, char *  argv[]) {
     }
     mat MUaT=MUa.t();
     
-    int Nstates = 1 + Nmodes0 + Nmodes2*(Nmodes2 + 1)/2;
+    int Nstates2 = 1 + Nmodes0 + Nmodes2*(Nmodes2 + 1)/2;
+    int Nstates = Nstates2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
     
     mat M(Nstates, Nstates);
-    ScaledMatrixElements  sme(omega, Nmodes2, 18);
+    M.fill(0.0);
+    ScaledMatrixElements  sme(omega, Nmodes2, Nmodes3);
     
     vec TIP4P_charges(N);
     TIP4P_charges.fill(0.5*qM);
