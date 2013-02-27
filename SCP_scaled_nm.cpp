@@ -34,7 +34,7 @@ string input_file, continue_from;
 
 po::variables_map process_options(int argc,  char *  argv[])
 {
-    
+
     po::options_description cmd_line_opts("Start Parameters");
     cmd_line_opts.add_options()
     ("help", "Help message")
@@ -44,12 +44,12 @@ po::variables_map process_options(int argc,  char *  argv[])
     ("doubles,2", po::value<unsigned int>(&Nmodes2)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
     ("triples,3", po::value<unsigned int>(&Nmodes3)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
     ("spectrum,s", po::value<string>(), "Spectrum for Hamiltonian saved in M_%06d.dat");
-    
+
     po::positional_options_description pos_opts;
     pos_opts.add("input-file", 1);
-    
+
     po::variables_map vm;
-    
+
     try {
         po::store(po::command_line_parser(argc, argv)
                   .options(cmd_line_opts).positional(pos_opts)
@@ -61,13 +61,13 @@ po::variables_map process_options(int argc,  char *  argv[])
         cerr << "Finished.\n";
         exit(EXIT_FAILURE);
     }
-    
+
     input_file = vm["input-file"].as<string>();
     if (vm.count("continue")) {
         continue_from = vm["continue"].as<string>();
         int i = continue_from.find_last_of('_')+1;
         int j = continue_from.find('.', i);
-        
+
         istringstream ss(continue_from.substr(i, j-i + 1));
         ss >> continue_skip;
     }
@@ -79,8 +79,8 @@ double NuclearMass(string &species)
 {
     static const double Hmass=1837.15137;
     static const double Cmass=21891.6543;
-    
-    
+
+
     if (species.compare("H") == 0 ) {
         return Hmass;
     }
@@ -93,7 +93,7 @@ double NuclearMass(string &species)
     else {
         return -1.0;
     }
-    
+
 }
 
 
@@ -101,33 +101,33 @@ void
 load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
 {
     ifstream fin(name.c_str());
-    
+
     fin >> N;
-    
+
     mass.resize(3*N);
     x0.resize(3*N);
     H.resize(3*N, 3*N);
-    
+
     char skipbuf[256];
     fin.getline(skipbuf, sizeof(skipbuf));
     fin.getline(skipbuf, sizeof(skipbuf));
-    
+
     for (int i=0; i<N; i++) {
         string species;
-        
+
         fin >> species;
         mass( span(3*i, 3*i+2) ).fill(NuclearMass(species));
         fin >> x0[3*i] >> x0[3*i+1] >> x0[3*i+2];
     }
     x0 /= bohr;
-    
+
     for (int i=0; i < 3*N; i++) {
         for (int j=0; j <= i; j++) {
             fin >> H(j, i);
             H(i, j) = H(j, i);
         }
     }
-    
+
     fin.close();
 }
 
@@ -145,9 +145,9 @@ extern "C" {
 
 vec dsyevr(mat &A, mat *C=NULL)
 {
-    
+
     char JOBZ='N';
-    
+
     char RANGE='A';
     char UPLO='U';
     int N = A.n_rows;
@@ -165,7 +165,7 @@ vec dsyevr(mat &A, mat *C=NULL)
     int LIWORK = 10*N;
     Col<int> IWORK(LIWORK);
     int INFO;
-    
+
     if (C != NULL) {
         JOBZ='V';
         C->set_size(A.n_rows, A.n_cols);
@@ -174,26 +174,26 @@ vec dsyevr(mat &A, mat *C=NULL)
     dsyevr_(&JOBZ, &RANGE, &UPLO,  &N,  A.memptr(),  &LDA,  &VL,  &VU,
             &IL,  &IU, &ABSTOL, &M,  W.memptr(),  Z, &LDZ, ISUPPZ.memptr(),
             WORK.memptr(), &LWORK, IWORK.memptr(), &LIWORK, &INFO );
-    
+
     return W;
 }
 
 
 
-void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me, 
+void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
                    ostream& specout, ostream& dipoleout, ostream& E0out,
                    string Cout="")
 {
     char s[256];
     mat C;
     vec evals = dsyevr(H, &C);
-    
+
     E0out << evals[0] << endl;
-    
+
     if (Cout.length() > 0) {
         C.save(Cout, raw_ascii);
     }
-    
+
     mat mu = me.transitionDipole(charges, MU, C);
     for (int ii=1; ii< evals.n_rows; ii++) {
         specout << (evals(ii) - evals(0))*autocm << " ";
@@ -209,53 +209,53 @@ int main (int argc, char *  argv[]) {
     mat H, U;
     vec mass, x0, omegasq0;
     po::variables_map vm;
-    
+
     vm = process_options(argc, argv);
     load_from_vladimir(input_file, N, mass, x0, H);
     omegasq0 = dsyevr(H, &U);
-    
+
     ofstream sout("omega0.dat");
     sout << sqrt(abs(omegasq0))*autocm << endl;
     sout.close();
-    
+
     int Nmodes0 = 3*N - 6;
     if (Nmodes2 == 0) Nmodes2 = 3*N - 6;
-    
+
     vec omega = sqrt(omegasq0.rows(6, 3*N - 1));
     vec alpha = sqrt(omega);
     mat MUa = U.cols(6, 3*N-1);
-    
-    
+
+
     for (int i=0; i<MUa.n_cols; i++) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
     mat MUaT=MUa.t();
-    
+
     int Nstates2 = 1 + Nmodes0 + Nmodes2*(Nmodes2 + 1)/2;
     int Nstates = Nstates2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
-    
+
     mat M(Nstates, Nstates);
     M.fill(0.0);
     ScaledMatrixElements  sme(omega, Nmodes2, Nmodes3);
-    
+
     vec TIP4P_charges(N);
     TIP4P_charges.fill(0.5*qM);
     for (int i=0; i<N; i+= 3) TIP4P_charges[i] = -qM;
-    
-    
+
+
     if (vm.count("spectrum") >0) {
         string iname = vm["spectrum"].as<string>();
-        
+
         M.load(iname, raw_ascii);
-        
+
         string tname = "freq" + iname.substr(1);
         ofstream specout(tname.c_str());
         ofstream dipoleout(("dipole" + iname.substr(1)).c_str());
-        
-        dump_spectrum(TIP4P_charges, MUa, M, sme, specout, dipoleout, cout, "C" + iname.substr(1)); 
+
+        dump_spectrum(TIP4P_charges, MUa, M, sme, specout, dipoleout, cout, "C" + iname.substr(1));
         exit(EXIT_SUCCESS);
     }
-    
+
     int64_t sobol_skip=1<<int(ceil(log2((double)NSobol)));
     if (continue_skip > 0) {
         sobol_skip += continue_skip;
@@ -264,31 +264,32 @@ int main (int argc, char *  argv[]) {
         sme.addHODiagonal(M);
         M *= -(double)continue_skip;
     }
-    
+
     vec y(Nmodes0), Vy(Nmodes0), r(3*N), Vr(3*N);
     double V;
-    
-    
+
+
     int NO = N/3;
     TIP4P_UF(NO, x0.memptr(), &V, Vr.memptr());
     cout << "V0 = "<<V<<endl;
-    
+
     mat Mout;
     ofstream specout("sfreq.dat");
     ofstream dipoleout("sdipole.dat");
-    
+
     ofstream E0out("E0.dat");
     for (int i=continue_skip; i<continue_skip+NSobol; i++) {
         sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
         y = y / (sqrt(2.0));
         r = MUa*y + x0;
         TIP4P_UF(NO, r.memptr(), &V, Vr.memptr());
+
         if (isnan(V)) {
             cerr << "V=NaN at i=" << i << endl;
             i--;
             continue;
         }
-        
+
         V -= 0.5 * dot(y, omega%y);
         Vy = -MUaT * Vr - omega % y;
             //cout << y(Nmodes-2) << " " << y(Nmodes-1) << " " << Vy(Nmodes-2) << " " << Vy(Nmodes-1) << endl;
