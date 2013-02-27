@@ -87,19 +87,11 @@ private:
         int jl_offset = (k*(2 + k*k - 3*k*(Nmodes3 - 1) + 3*(Nmodes3 - 2)*Nmodes3))/6;
         return klj_fence + jl_offset + l*(Nmodes3-k-1) - ((l + 2) * (l + 1))/2 + j;
     }
-    
-    
-public:
-    void addEpotSingles(vec &q_, double V_, vec& Vq_, mat &M)
+
+
+    void addEpotSingles(mat &M)
     {
         int m, k;
-        
-        q = q_.memptr();
-        V = V_;
-        Vq = Vq_.memptr();
-        
-        M(0,0) += V;
-        
         for (k=0; k<Nmodes; k++) {
             double v = f_k1(k);
             M(0,k+1) += v;
@@ -119,12 +111,10 @@ public:
         //cout << "  " << M(Nmodes-1,Nmodes-1) << " " << M(Nmodes,Nmodes) << endl;
         
     }
-    
-    void addEpotDoubles(vec &q_, double V_, vec& Vq_, mat &M)
+
+    void addEpotDoubles(mat &M)
     {
         int m, n, k, l;
-        
-        addEpotSingles(q_, V_, Vq_, M);
 #pragma omp parallel private(m, n, k, l)
         {
 #pragma omp for schedule(static) nowait
@@ -250,13 +240,10 @@ public:
             }
         }
     }
-    
-    void addEpotTriples(vec &q_, double V_, vec& Vq_, mat &M)
+
+    void addEpotTriples(mat &M)
     {
         int m, n, p, k, l, j;
-        
-        addEpotDoubles(q_, V_, Vq_, M);
-        
         vec v(M.n_rows);
         for (k=0; k<Nmodes3; k++) {
             int R = 0;
@@ -645,6 +632,20 @@ public:
                     M.col(C).subvec(0, C-1) += v.subvec(0, C-1);
                 }
             }
+public:
+    void addEpot(vec &q_, double V_, vec& Vq_, mat &M)
+    {
+        q = q_.memptr();
+        V = V_;
+        Vq = Vq_.memptr();
+
+        M(0,0) += V;
+
+#pragma omp parallel
+        {
+            addEpotSingles(M);
+            addEpotDoubles(M);
+            addEpotTriples(M);
         }
     }
     
