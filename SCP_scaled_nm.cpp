@@ -308,7 +308,7 @@ int main (int argc, char *  argv[]) {
                 Mout.save(s, raw_ascii);
             }
 
-            vec eigvals = eig_sym(Mout.submat(0,0, Nmodes0-1, Nmodes0-1));
+            vec eigvals = eig_sym(Mout.submat(0,0, Nmodes0, Nmodes0));
             double E0[3];
 
             E0[0] = eigvals[0]*autocm;
