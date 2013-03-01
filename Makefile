@@ -1,30 +1,34 @@
 #!/usr/bin/make
 
-CC:=/usr/bin/gcc
-CXX:=/usr/bin/g++
+CC:=gcc
+CXX:=g++
 FC:=gfortran
 
+GFORTRAN_LIBDIR := $(subst --libdir=,,$(filter --libdir=%,$(shell $(FC) -v 2>&1)))
+
 CPPFLAGS:=-I/opt/local/include# -DNDEBUG
-FFLAGS:=-O3 -ftree-vectorize
-FFLAGS:=-O2 -g
-CFLAGS:=-O3 -ftree-vectorize -fopenmp
-CFLAGS:=-O2 -g -fopenmp
+FFLAGS:=-O3 -ftree-vectorize -march=native
+#FFLAGS:=-O2 -g
+CFLAGS:=-O3 -ftree-vectorize -march=native -fopenmp
+#CFLAGS:=-O2 -g -fopenmp
 CXXFLAGS:=$(CFLAGS)
 
-LDFLAGS:=-L/opt/local/lib -larmadillo -lhdf5 -lboost_program_options-mt -framework Accelerate -Wl,-rpath -Wl,$(PWD)
+LDFLAGS:=-L/opt/local/lib #-L$(GFORTRAN_LIBDIR)
+LIBS :=-larmadillo -lhdf5 -framework Accelerate -lgfortran
 
-all: SCP_scaled_nm# fortran.dylib
+FOBJS := water.o sobol.o sobol_stdnormal.o
+
+all: SCP_scaled_nm
 
 %.o: %.f90
 	$(FC) -c $(FFLAGS) -o $@ $<
 
 sobol_stdnormal.o : sobol.o
 
-fortran.dylib: water.o sobol.o sobol_stdnormal.o
-	$(FC) $^ -shared -o $@ -install_name @rpath/$@ -static-libgcc
+fobjs: $(FOBJS)
 
-SCP_scaled_nm: SCP_scaled_nm.o fortran.dylib
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS)
+SCP_scaled_nm: SCP_scaled_nm.o $(FOBJS)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
 clean:
 	$(RM) *.o *.mod
