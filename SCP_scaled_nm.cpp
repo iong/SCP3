@@ -7,71 +7,81 @@
  *
  */
 
-
-#include <iostream>
-#include <fstream>
-#include <string>
+#include <armadillo>
 #include <cstdlib>
 #include <cstring>
-#include <armadillo>
+#include <fstream>
+#include <iostream>
 #include <string>
-#include <boost/program_options.hpp>
+#include <string>
 
+#include <getopt.h>
 
 #include "ScaledMatrixElements.h"
 
 
 using namespace std;
 using namespace arma;
-namespace po = boost::program_options;
 
 static const double bohr=0.52917721092;
 static const double autocm=2.194746313e5;
 static const double qM = 1.1128;
 
-unsigned int NSobol, continue_skip=0, Nmodes2=0, Nmodes3=0;
-string input_file, continue_from;
 
-po::variables_map process_options(int argc,  char *  argv[])
+
+static struct option program_options[] = {
+    { "NSobol", required_argument, NULL, 'N'} ,
+    { "doubles", required_argument, NULL, '2'},
+    { "triples", required_argument, NULL, '3'},
+    { "continue", required_argument, NULL, 'c'},
+    { "spectrum", required_argument, NULL, 's'},
+    {NULL, 0, NULL, 0}
+};
+
+static unsigned int NSobol=1000000, continue_skip=0, Nmodes2=0, Nmodes3=0;
+static string input_file, continue_from;
+static string spectrum_file;
+
+void process_options(int argc,  char *  argv[])
 {
-
-    po::options_description cmd_line_opts("Start Parameters");
-    cmd_line_opts.add_options()
-    ("help", "Help message")
-    ("NSobol,N", po::value<unsigned int>(&NSobol)->default_value(100000), "Length of the Sobol sequence")
-    ("continue,c", po::value<string>(), "Name (in format M_%06d.dat) of the file to continue from.")
-    ("input-file,f",po::value<string>(), "Input file name from Vladimir")
-    ("doubles,2", po::value<unsigned int>(&Nmodes2)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
-    ("triples,3", po::value<unsigned int>(&Nmodes3)->default_value(0), "Lowest number of modes to include, excluding the first 6.")
-    ("spectrum,s", po::value<string>(), "Spectrum for Hamiltonian saved in M_%06d.dat");
-
-    po::positional_options_description pos_opts;
-    pos_opts.add("input-file", 1);
-
-    po::variables_map vm;
-
-    try {
-        po::store(po::command_line_parser(argc, argv)
-                  .options(cmd_line_opts).positional(pos_opts)
-                  .run(), vm);
-        po::notify(vm);
+    int ch, i, j;
+    while ( (ch = getopt_long(argc, argv, "N:2:3:c:s:", program_options, NULL)) != -1) {
+        switch (ch) {
+            case 'N':
+                NSobol = atoi(optarg);
+                break;
+            case '2':
+                Nmodes2 = atoi(optarg);
+                break;
+            case '3':
+                Nmodes3 = atoi(optarg);
+                break;
+            case 'c':
+                continue_from = optarg;
+                i = continue_from.find_last_of('_')+1;
+                j = continue_from.find('.', i);
+                continue_skip = atoi(continue_from.substr(i, j-i + 1).c_str());
+                
+                break;
+            case 's':
+                spectrum_file = optarg;
+                break;
+            default:
+                cerr << "Unknown option: " << ch << endl;
+                exit(EXIT_FAILURE);
+                break;
+        }
     }
-    catch (po::error_with_option_name &e) {
-        cerr << e.what() << endl;
-        cerr << "Finished.\n";
+    
+    argc -= optind;
+    argv += optind;
+    
+    if (argc < 1) {
+        cerr << "No input file supplied\n";
         exit(EXIT_FAILURE);
     }
-
-    input_file = vm["input-file"].as<string>();
-    if (vm.count("continue")) {
-        continue_from = vm["continue"].as<string>();
-        int i = continue_from.find_last_of('_')+1;
-        int j = continue_from.find('.', i);
-
-        istringstream ss(continue_from.substr(i, j-i + 1));
-        ss >> continue_skip;
-    }
-    return vm;
+    
+    input_file = argv[0];
 }
 
 
@@ -208,9 +218,8 @@ int main (int argc, char *  argv[]) {
     int N;
     mat H, U;
     vec mass, x0, omegasq0;
-    po::variables_map vm;
 
-    vm = process_options(argc, argv);
+    process_options(argc, argv);
     load_from_vladimir(input_file, N, mass, x0, H);
     omegasq0 = dsyevr(H, &U);
 
@@ -243,16 +252,14 @@ int main (int argc, char *  argv[]) {
     for (int i=0; i<N; i+= 3) TIP4P_charges[i] = -qM;
 
 
-    if (vm.count("spectrum") >0) {
-        string iname = vm["spectrum"].as<string>();
+    if ( !spectrum_file.empty() ) {
+        M.load(spectrum_file, raw_ascii);
 
-        M.load(iname, raw_ascii);
-
-        string tname = "freq" + iname.substr(1);
+        string tname = "freq" + spectrum_file.substr(1);
         ofstream specout(tname.c_str());
-        ofstream dipoleout(("dipole" + iname.substr(1)).c_str());
+        ofstream dipoleout(("dipole" + spectrum_file.substr(1)).c_str());
 
-        dump_spectrum(TIP4P_charges, MUa, M, sme, specout, dipoleout, cout, "C" + iname.substr(1));
+        dump_spectrum(TIP4P_charges, MUa, M, sme, specout, dipoleout, cout, "C" + spectrum_file.substr(1));
         exit(EXIT_SUCCESS);
     }
 
