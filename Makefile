@@ -1,20 +1,27 @@
 #!/usr/bin/make
 
+OS := $(shell uname -s)
+
 CC:=gcc
 CXX:=g++
 FC:=gfortran
 
 GFORTRAN_LIBDIR := $(subst --libdir=,,$(filter --libdir=%,$(shell $(FC) -v 2>&1)))
 
-CPPFLAGS:=-I/opt/local/include# -DNDEBUG
-FFLAGS:=-O3 -ftree-vectorize -march=native
+#CPPFLAGS += -I/opt/local/include# -DNDEBUG
+OPTFLAGS := -O3 -ftree-vectorize -march=native
+FFLAGS += $(OPTFLAGS)
 #FFLAGS:=-O2 -g
-CFLAGS:=-O3 -ftree-vectorize -march=native -fopenmp
+CFLAGS += $(OPTFLAGS) -fopenmp
 #CFLAGS:=-O2 -g -fopenmp
-CXXFLAGS:=$(CFLAGS)
+CXXFLAGS := $(CFLAGS)
 
-LDFLAGS:=-L/opt/local/lib #-L$(GFORTRAN_LIBDIR)
+#LDFLAGS += -L/opt/local/lib #-L$(GFORTRAN_LIBDIR)
+
+LIBS :=-lacml_mp -lgfortran
+ifeq ($(OS),Darwin)
 LIBS :=-larmadillo -lhdf5 -framework Accelerate -lgfortran
+endif
 
 FOBJS := water.o sobol.o sobol_stdnormal.o
 
