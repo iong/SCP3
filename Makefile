@@ -27,7 +27,7 @@ sobol_stdnormal.o : sobol.o
 
 fobjs: $(FOBJS)
 
-SCP_scaled_nm: SCP_scaled_nm.o $(FOBJS)
+SCP_scaled_nm: SCP_scaled_nm.o ScaledMatrixElements.o $(FOBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
 clean:
