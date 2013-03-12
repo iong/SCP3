@@ -20,13 +20,19 @@
 #include "ScaledMatrixElements.h"
 
 
+extern "C" {
+    void sobol_stdnormal_c(int64_t d, int64_t *skip, void *x);
+    void TIP4P_UF(int N, double *r, double *U, double *UX);
+}
+
+
 using namespace std;
 using namespace arma;
+
 
 static const double bohr=0.52917721092;
 static const double autocm=2.194746313e5;
 static const double qM = 1.1128;
-
 
 
 static struct option program_options[] = {
@@ -141,52 +147,6 @@ load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
     fin.close();
 }
 
-extern "C" {
-    void sobol_stdnormal_c(int64_t d, int64_t *skip, void *x);
-    void TIP4P_UF(int N, double *r, double *U, double *UX);
-    void dsyevr_(char *, char *, char *,  int *,  double *,  int *,  double *,
-                 double* ,  int *IL,  int *IU, double *ABSTOL,  int *M,
-                 double *W, double *Z, int *LDZ, int *ISUPPZ, double *WORK,
-                 int *LWORK, int *IWORK, int *LIWORK, int *INFO);
-    double dlamch_(char *);
-}
-
-
-
-vec dsyevr(mat &A, mat *C=NULL)
-{
-
-    char JOBZ='N';
-
-    char RANGE='A';
-    char UPLO='U';
-    int N = A.n_rows;
-    int LDA = A.n_rows;
-    double VU = 0.0, VL = 0.0;
-    int IL = 0, IU = 0;
-    double ABSTOL = dlamch_("Safe minimum");
-    int M;
-    vec W(A.n_rows);
-    double *Z = NULL;
-    int LDZ = LDA;
-    Col<int> ISUPPZ(2*N);
-    int LWORK = 36*N;
-    vec WORK(LWORK);
-    int LIWORK = 10*N;
-    Col<int> IWORK(LIWORK);
-    int INFO;
-
-    if (C != NULL) {
-        JOBZ='V';
-        C->set_size(A.n_rows, A.n_cols);
-        Z = C->memptr();
-    }
-    dsyevr_(&JOBZ, &RANGE, &UPLO,  &N,  A.memptr(),  &LDA,  &VL,  &VU,
-            &IL,  &IU, &ABSTOL, &M,  W.memptr(),  Z, &LDZ, ISUPPZ.memptr(),
-            WORK.memptr(), &LWORK, IWORK.memptr(), &LIWORK, &INFO );
-
-    return W;
-}
 
 
 
@@ -196,17 +156,18 @@ void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
 {
     char s[256];
     mat C;
-    vec evals = dsyevr(H, &C);
+    vec E;
+    eig_sym(E, C, H);
 
-    E0out << evals[0] << endl;
-
+    /*
     if (Cout.length() > 0) {
         C.save(Cout, raw_ascii);
     }
+     */
 
     mat mu = me.transitionDipole(charges, MU, C);
-    for (int ii=1; ii< evals.n_rows; ii++) {
-        specout << (evals(ii) - evals(0))*autocm << " ";
+    for (int ii=1; ii< E.n_rows; ii++) {
+        specout << (E(ii) - E(0))*autocm << " ";
         dipoleout << norm(mu.col(ii-1), 2) << " ";
     }
     (specout  << endl).flush();
@@ -221,7 +182,7 @@ int main (int argc, char *  argv[]) {
 
     process_options(argc, argv);
     load_from_vladimir(input_file, N, mass, x0, H);
-    omegasq0 = dsyevr(H, &U);
+    eig_sym(omegasq0, U, H);
 
     ofstream sout("omega0.dat");
     sout << sqrt(abs(omegasq0))*autocm << endl;
