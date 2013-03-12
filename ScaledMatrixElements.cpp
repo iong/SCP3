@@ -414,7 +414,7 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
     
     SimplexIterator<3> s3(Nmodes3);
 #pragma omp for schedule(dynamic)
-    for (int i=0; i<s3.end(); i += 2) {
+    for (int i=0; i<s3.end(); i ++) {
         s3 = i;
         
         k = s3.index[0];
