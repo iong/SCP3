@@ -7,6 +7,7 @@
  *
  */
 
+#include <cstdlib>
 #include <iostream>
 
 #include "SimplexIterator.h"
@@ -15,17 +16,12 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    SimplexIterator<3>  s3(12);
+    int N = atoi(argv[1]);
     
-    for (int i=0; i < 20; i++) {
-        cout << s3.index[0] << " " << s3.index[1] << " " << s3.index[2] << endl;
-        s3++;
-    }
+    SimplexIterator<2>  s2(N);
+    SimplexIterator<3>  s3(N);
     
-    cout << ">> " << s3.index[0] << " " << s3.index[1] << " " << s3.index[2] << endl;
-    s3 = 19;
-    for (int i=0; i < s3.end()-18; i++) {
-        cout << i << " : " << s3.index[0] << " " << s3.index[1] << " " << s3.index[2] << endl;
-        s3++;
-    }
+    s3 = atoi(argv[2]);
+    
+    cout << s3 << endl;
 }

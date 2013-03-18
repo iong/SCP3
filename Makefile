@@ -10,13 +10,14 @@ GFORTRAN_LIBDIR := $(subst --libdir=,,$(filter --libdir=%,$(shell $(FC) -v 2>&1)
 
 #CPPFLAGS += -I/opt/local/include# -DNDEBUG
 OPTFLAGS := -O3 -ftree-vectorize -march=native
+OPTFLAGS := -O2 -g
 FFLAGS += $(OPTFLAGS)
 #FFLAGS:=-O2 -g
 CFLAGS += $(OPTFLAGS) -fopenmp
 #CFLAGS:=-O2 -g -fopenmp
 CXXFLAGS := $(CFLAGS)
 
-#LDFLAGS += -L/opt/local/lib #-L$(GFORTRAN_LIBDIR)
+LDFLAGS += -L/opt/local/lib #-L$(GFORTRAN_LIBDIR)
 
 LIBS :=-lacml_mp -lgfortran
 ifeq ($(OS),Darwin)
@@ -37,6 +38,8 @@ fobjs: $(FOBJS)
 SCP_scaled_nm: SCP_scaled_nm.o ScaledMatrixElements.o $(FOBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
+TestSimplexIterator: TestSimplexIterator.cpp
+	$(CXX) -o $@ $^ $(CXXFLAGS)
 clean:
 	$(RM) *.o *.mod
 
