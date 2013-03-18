@@ -24,6 +24,7 @@ static double sqr(double x)
 }
 
 class ScaledMatrixElements {
+protected:
     double V, *Vq, *q;
     int Nmodes, Nmodes2, Nmodes3;
     vec &omega;

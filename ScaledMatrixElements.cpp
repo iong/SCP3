@@ -672,6 +672,7 @@ void ScaledMatrixElements::addEpot(vec &q_, double V_, vec& Vq_, mat &M)
         addEpotTriples(M);
     }
 }
+
 void ScaledMatrixElements::test_index()
 {
     cout << klj_index(Nmodes3-3, Nmodes3-2, Nmodes3-1) << " ";
