@@ -37,6 +37,7 @@ static const double qM = 1.1128;
 
 static struct option program_options[] = {
     { "NSobol", required_argument, NULL, 'N'} ,
+    { "skip", required_argument, NULL, 'S'} ,
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
     { "continue", required_argument, NULL, 'c'},
@@ -44,7 +45,8 @@ static struct option program_options[] = {
     {NULL, 0, NULL, 0}
 };
 
-static unsigned int NSobol=1000000, continue_skip=0, Nmodes2=0, Nmodes3=0;
+static unsigned int NSobol=1<<20, continue_skip=0, Nmodes2=0, Nmodes3=0;
+static int64_t sobol_skip=1<<30;
 static string input_file, continue_from;
 static string spectrum_file;
 
@@ -55,6 +57,9 @@ void process_options(int argc,  char *  argv[])
         switch (ch) {
             case 'N':
                 NSobol = atoi(optarg);
+                break;
+            case 'S':
+                sobol_skip = 1<<atoi(optarg);
                 break;
             case '2':
                 Nmodes2 = atoi(optarg);
@@ -224,7 +229,6 @@ int main (int argc, char *  argv[]) {
         exit(EXIT_SUCCESS);
     }
 
-    int64_t sobol_skip=1<<int(ceil(log2((double)NSobol)));
     if (continue_skip > 0) {
         sobol_skip += continue_skip;
         M.load(continue_from, raw_ascii);
@@ -265,16 +269,16 @@ int main (int argc, char *  argv[]) {
             //cout << y(Nmodes-2) << " " << y(Nmodes-1) << " " << Vy(Nmodes-2) << " " << Vy(Nmodes-1) << endl;
         sme.addEpot(y, V, Vy, M);
 
-        if ( (i+1)%10000==0) {
+        if ( (i+1)%(1<<17)==0) {
             cout << i+1 << endl;
             Mout = M / (i+1);
             sme.addHODiagonal(Mout);
 
-            if ( (i+1)%100000==0) {
+      //      if ( (i+1)%1<<17==0) {
                 char s[100];
                 sprintf(s, "sM_%07d.dat", i+1);
                 Mout.save(s, raw_ascii);
-            }
+      //      }
 
             vec eigvals = eig_sym(Mout.submat(0,0, Nmodes0, Nmodes0));
             double E0[3];
