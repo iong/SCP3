@@ -1,5 +1,5 @@
 blas_default_intel:=mkl_sequential
-blas_default_GNU:=$(if $(findstring "darwin",$(OS)),"Apple","blas")
+blas_default_GNU:=$(if $(findstring darwin,$(OS)),Apple,blas)
 blas_default_PGI:=acml
 
 blas_mkl_sequential_intel:= -mkl=sequential
@@ -16,7 +16,7 @@ endif
 
 ifdef blas_$(BLAS)_$(COMPILER)
 	BLAS_LIBRARIES:=$(blas_$(BLAS)_$(COMPILER))
-else ifeq ($(BLAS),"Apple")
+else ifeq($(BLAS),Apple)
 	BLAS_LIBRARIES:=-framework Accelerate
 else
 	BLAS_LIBRARIES:=-l$(BLAS)

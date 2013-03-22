@@ -1,7 +1,7 @@
 OS := $(shell uname -s)
 
-BLAS ?= mkl_parallel
-COMPILER ?= intel
+BLAS ?= Apple
+COMPILER ?= GNU
 
 include config/$(COMPILER).mk
 include config/blas.mk
