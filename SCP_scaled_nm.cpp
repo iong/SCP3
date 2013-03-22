@@ -15,6 +15,8 @@
 #include <string>
 #include <string>
 
+#include <tr1/random>
+
 #include <getopt.h>
 
 #include "ScaledMatrixElements.h"
@@ -32,22 +34,19 @@ using namespace arma;
 
 static const double bohr=0.52917721092;
 static const double autocm=2.194746313e5;
-static const double qM = 1.1128;
-
 
 static struct option program_options[] = {
     { "NSobol", required_argument, NULL, 'N'} ,
     { "skip", required_argument, NULL, 'S'} ,
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
-    { "continue", required_argument, NULL, 'c'},
     { "spectrum", required_argument, NULL, 's'},
     {NULL, 0, NULL, 0}
 };
 
-static unsigned int NSobol=1<<20, continue_skip=0, Nmodes2=0, Nmodes3=0;
-static int64_t sobol_skip=1<<30;
-static string input_file, continue_from;
+static unsigned int  Nmodes2=0, Nmodes3=0;
+static int64_t NSobol=1<<20, sobol_skip=1<<30;
+static string input_file;
 static string spectrum_file;
 
 void process_options(int argc,  char *  argv[])
@@ -66,13 +65,6 @@ void process_options(int argc,  char *  argv[])
                 break;
             case '3':
                 Nmodes3 = atoi(optarg);
-                break;
-            case 'c':
-                continue_from = optarg;
-                i = continue_from.find_last_of('_')+1;
-                j = continue_from.find('.', i);
-                continue_skip = atoi(continue_from.substr(i, j-i + 1).c_str());
-                
                 break;
             case 's':
                 spectrum_file = optarg;
@@ -179,6 +171,20 @@ void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
     (dipoleout << endl).flush();
 }
 
+vec TIP4P_charges(size_t N)
+{
+    static const double qM = 1.1128;
+    vec q(N);
+
+    for (int i=0; i<N; ) {
+        q[i++] = -qM;
+        q[i++] = 0.5*qM;
+        q[i++] = 0.5*qM;
+    }
+    
+    return q;
+}
+
 
 int main (int argc, char *  argv[]) {
     int N;
@@ -213,10 +219,7 @@ int main (int argc, char *  argv[]) {
     M.fill(0.0);
     ScaledMatrixElements  sme(omega, Nmodes2, Nmodes3);
 
-    vec TIP4P_charges(N);
-    TIP4P_charges.fill(0.5*qM);
-    for (int i=0; i<N; i+= 3) TIP4P_charges[i] = -qM;
-
+    vec charge = TIP4P_charges(N);
 
     if ( !spectrum_file.empty() ) {
         M.load(spectrum_file, raw_ascii);
@@ -225,16 +228,8 @@ int main (int argc, char *  argv[]) {
         ofstream specout(tname.c_str());
         ofstream dipoleout(("dipole" + spectrum_file.substr(1)).c_str());
 
-        dump_spectrum(TIP4P_charges, MUa, M, sme, specout, dipoleout, cout, "C" + spectrum_file.substr(1));
+        dump_spectrum(charge, MUa, M, sme, specout, dipoleout, cout, "C" + spectrum_file.substr(1));
         exit(EXIT_SUCCESS);
-    }
-
-    if (continue_skip > 0) {
-        sobol_skip += continue_skip;
-        M.load(continue_from, raw_ascii);
-        M *= -1.0;
-        sme.addHODiagonal(M);
-        M *= -(double)continue_skip;
     }
 
     vec y(Nmodes0), Vy(Nmodes0), r(3*N), Vr(3*N);
@@ -245,16 +240,33 @@ int main (int argc, char *  argv[]) {
     TIP4P_UF(NO, x0.memptr(), &V, Vr.memptr());
     cout << "V0 = "<<V<<endl;
 
-    mat Mout;
     ofstream specout("sfreq.dat");
     ofstream dipoleout("sdipole.dat");
 
     ofstream E0out("E0.dat");
     fixed(E0out);
     E0out.precision(10);
-    for (int i=continue_skip; i<continue_skip+NSobol; i++) {
-        sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
-        y = y / (sqrt(2.0));
+    
+    mat sobol_sequence;
+    sobol_sequence.load("MatousekAffineOwen30.dat", raw_ascii);
+    
+    /*
+    for (int i=0; i<NSobol; i++) {
+        sobol_stdnormal_c(sobol_sequence.n_rows, &sobol_skip,
+                          sobol_sequence.colptr(i));
+    }
+    
+    tr1::mt19937 rng;
+    for (uint64_t i=0; i<NSobol-1; i++) {
+        uint64_t j = rng();
+        j = (j * (NSobol - i)) >> 32;
+        cout << i << " " << i+j << endl;
+        sobol_sequence.swap_cols(i, i + j);
+    }
+     */
+    
+    for (int i=0; i<NSobol; i++) {
+        y = sobol_sequence.row(i) / sqrt(2.0);
         r = MUa*y + x0;
         TIP4P_UF(NO, r.memptr(), &V, Vr.memptr());
 
@@ -269,9 +281,9 @@ int main (int argc, char *  argv[]) {
             //cout << y(Nmodes-2) << " " << y(Nmodes-1) << " " << Vy(Nmodes-2) << " " << Vy(Nmodes-1) << endl;
         sme.addEpot(y, V, Vy, M);
 
-        if ( (i+1)%(1<<17)==0) {
+        if ( (i+1)%(1<<15)==0) {
             cout << i+1 << endl;
-            Mout = M / (i+1);
+            mat Mout = M / (i+1);
             sme.addHODiagonal(Mout);
 
       //      if ( (i+1)%1<<17==0) {
