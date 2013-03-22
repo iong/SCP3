@@ -38,6 +38,7 @@ static const double autocm=2.194746313e5;
 static struct option program_options[] = {
     { "NSobol", required_argument, NULL, 'N'} ,
     { "skip", required_argument, NULL, 'S'} ,
+    { "rng-file", required_argument, NULL, 'r'} ,
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
     { "spectrum", required_argument, NULL, 's'},
@@ -49,10 +50,12 @@ static int64_t NSobol=1<<20, sobol_skip=1<<30;
 static string input_file;
 static string spectrum_file;
 
+static ifstream rng_in;
+
 void process_options(int argc,  char *  argv[])
 {
     int ch, i, j;
-    while ( (ch = getopt_long(argc, argv, "N:2:3:c:s:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "N:2:3:c:s:r:", program_options, NULL)) != -1) {
         switch (ch) {
             case 'N':
                 NSobol = atoi(optarg);
@@ -65,6 +68,9 @@ void process_options(int argc,  char *  argv[])
                 break;
             case '3':
                 Nmodes3 = atoi(optarg);
+                break;
+            case 'r':
+                rng_in.open(optarg);
                 break;
             case 's':
                 spectrum_file = optarg;
@@ -247,8 +253,12 @@ int main (int argc, char *  argv[]) {
     fixed(E0out);
     E0out.precision(10);
     
-    mat sobol_sequence;
-    sobol_sequence.load("MatousekAffineOwen30.dat", raw_ascii);
+/*
+    mat ss(NSobol, Nmodes0);
+    ss.load("MatousekAffineOwen30.dat", raw_ascii);
+    mat sobol_sequence = ss.t();
+    ss.reset();
+*/
     
     /*
     for (int i=0; i<NSobol; i++) {
@@ -266,7 +276,16 @@ int main (int argc, char *  argv[]) {
      */
     
     for (int i=0; i<NSobol; i++) {
-        y = sobol_sequence.row(i) / sqrt(2.0);
+	if (rng_in.is_open()) {
+		for (int j=0; j<Nmodes0; j++) {
+			rng_in >> y[j];
+		}
+	}
+	else {
+		sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
+	}
+
+        y /=  sqrt(2.0);
         r = MUa*y + x0;
         TIP4P_UF(NO, r.memptr(), &V, Vr.memptr());
 
@@ -310,5 +329,7 @@ int main (int argc, char *  argv[]) {
     }
     specout.close();
     dipoleout.close();
+    rng_in.close();
+
     M /= NSobol;
 }
