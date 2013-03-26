@@ -252,14 +252,7 @@ int main (int argc, char *  argv[]) {
     ofstream E0out("E0.dat");
     fixed(E0out);
     E0out.precision(10);
-    
-/*
-    mat ss(NSobol, Nmodes0);
-    ss.load("MatousekAffineOwen30.dat", raw_ascii);
-    mat sobol_sequence = ss.t();
-    ss.reset();
-*/
-    
+       
     /*
     for (int i=0; i<NSobol; i++) {
         sobol_stdnormal_c(sobol_sequence.n_rows, &sobol_skip,
@@ -276,14 +269,14 @@ int main (int argc, char *  argv[]) {
      */
     
     for (int i=0; i<NSobol; i++) {
-	if (rng_in.is_open()) {
-		for (int j=0; j<Nmodes0; j++) {
-			rng_in >> y[j];
-		}
-	}
-	else {
-		sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
-	}
+        if (rng_in.is_open()) {
+            for (int j=0; j<Nmodes0; j++) {
+                rng_in >> y[j];
+            }
+        }
+        else {
+            sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
+        }
 
         y /=  sqrt(2.0);
         r = MUa*y + x0;
