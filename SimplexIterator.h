@@ -33,6 +33,7 @@ public:
     SimplexIterator(int N_);
     SimplexIterator<dim>& operator=(int location);
     SimplexIterator operator++(int);
+    SimplexIterator operator--(int);
 
     const int& end() {
         return V[dim-1][N-1];
@@ -89,6 +90,12 @@ SimplexIterator<dim>& SimplexIterator<dim>::operator=(int location)
         
         return *this;
     }
+    else if (location == last_location - 1) {
+        (*this)--;
+        
+        return *this;
+    }
+ 
     
     last_location = location;
     
@@ -128,5 +135,28 @@ SimplexIterator<dim> SimplexIterator<dim>::operator++(int)
     
     return *this;
 }
+
+
+template<int dim>
+SimplexIterator<dim> SimplexIterator<dim>::operator--(int)
+{
+    int d;
+    
+    index[dim-1]--;
+    for (d=dim-1; d>0 && index[d]<=index[d-1]; d--) {
+        index[d] = N + d - (dim - 1) - 1;
+        index[d-1]--;
+    }
+    if (index[0] < 0) {
+        cerr << "Simplex incremented out of bounds.\n";
+        exit(EXIT_FAILURE);
+    }
+
+    last_location--;
+    
+    return *this;
+}
+
+
 
 #endif
