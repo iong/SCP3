@@ -131,68 +131,77 @@ void ScaledMatrixElements::addEpotDoubles(mat &M)
         M.col(C).subvec(0,R) += v.subvec(0,R);
     }
     
-    SimplexIterator<2> s2(Nmodes2);
-    
+    SimplexIterator<2> s2_incr(Nmodes2), s2_decr(Nmodes2);
+    s2_incr = 0;
+    s2_decr = s2_decr.end() - 1;
 #pragma omp for schedule(dynamic) nowait
-    for (int i=0; i<s2.end(); i++) {
-        s2 = i;
-        
-        k = s2.index[0];
-        l = s2.index[1];
-        
-        int C = kl_index(k,l);
-        v.subvec(0, C).fill(0.0);
-        
-        int R = 0;
-        v[R++] = f_k1_l1(k, l);
-        
-        for (m=0; m<Nmodes; m++) {
-            v[R++] = m1_f_k1_l1(m, k, l);
-        }
-        m=k;
-        v[k_index(m)] = m1_f_m1_l1(k, l);
-        
-        m=l;
-        v[k_index(m)] = m1_f_m1_l1(l, k);
-        
-        for (m=0; m<Nmodes2; m++) {
-            v[R++] = m2_f_k1_l1(m, k, l);
-        }
-        m=k;
-        v[k_index(m)] = m2_f_m1_l1(k, l);
-        
-        m=l;
-        v[k_index(m)] = m2_f_m1_l1(l, k);
-        
-        for (m=0; m<k; m++) {
-            for (n=m+1; n<Nmodes2; n++) {
-                v[R++] = m1_n1_f_k1_l1(m, n, k, l);
+    for (int i=0; i< (s2_incr.end() + 1) / 2; i++) {
+        int two = 1 + ((2 * i + 1) != s2_incr.end());
+	    for (int itwo = 0; itwo < two; itwo++) {
+            if (itwo == 0) {
+                k = s2_incr.index[0];
+                l = s2_incr.index[1];
             }
+            else {
+                k = s2_decr.index[0];
+                l = s2_decr.index[1];
+            }
+
+            int C = kl_index(k,l);
+            v.subvec(0, C).fill(0.0);
+            
+            int R = 0;
+            v[R++] = f_k1_l1(k, l);
+            
+            for (m=0; m<Nmodes; m++) {
+                v[R++] = m1_f_k1_l1(m, k, l);
+            }
+            m=k;
+            v[k_index(m)] = m1_f_m1_l1(k, l);
+            
+            m=l;
+            v[k_index(m)] = m1_f_m1_l1(l, k);
+            
+            for (m=0; m<Nmodes2; m++) {
+                v[R++] = m2_f_k1_l1(m, k, l);
+            }
+            m=k;
+            v[k_index(m)] = m2_f_m1_l1(k, l);
+            
+            m=l;
+            v[k_index(m)] = m2_f_m1_l1(l, k);
+            
+            for (m=0; m<k; m++) {
+                for (n=m+1; n<Nmodes2; n++) {
+                    v[R++] = m1_n1_f_k1_l1(m, n, k, l);
+                }
+            }
+            
+            n=k;
+            for (m=0; m<k; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1(k, m, l);
+            }
+            
+            n=l;
+            for (m=0; m<k; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1(l, m, k);
+            }
+            
+            m=k;
+            for (n=m+1; n<l; n++) {
+                v[R++] = m1_n1_f_m1_l1(k, n, l);
+            }
+            
+            if (R != C) {
+                cerr << "doubles_mn: R != C" << endl;
+                exit(EXIT_FAILURE);
+            }
+            
+            v[R] = m1_n1_f_m1_n1(k, l);
+            
+            M.col(C).subvec(0, R) += v.subvec(0,R);
         }
-        
-        n=k;
-        for (m=0; m<k; m++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1(k, m, l);
-        }
-        
-        n=l;
-        for (m=0; m<k; m++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1(l, m, k);
-        }
-        
-        m=k;
-        for (n=m+1; n<l; n++) {
-            v[R++] = m1_n1_f_m1_l1(k, n, l);
-        }
-        
-        if (R != C) {
-            cerr << "doubles_mn: R != C" << endl;
-            exit(EXIT_FAILURE);
-        }
-        
-        v[R] = m1_n1_f_m1_n1(k, l);
-        
-        M.col(C).subvec(0, R) += v.subvec(0,R);
+        s2_incr++; s2_decr--;
     }
 }
 
@@ -254,406 +263,427 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
         
         M.col(R).subvec(0,R) += v.subvec(0, R);
     }
-    
-    SimplexIterator<2> s2(Nmodes3);
+
+    SimplexIterator<2> s2_incr(Nmodes3), s2_decr(Nmodes3);
+    s2_incr = 0;
+    s2_decr = s2_decr.end() - 1;
 #pragma omp for schedule(dynamic) nowait
-    for (int i=0; i<s2.end(); i++) {
-        s2 = i;
-        
-        k = s2.index[0];
-        l = s2.index[1];
-        
-        int C = k2l_index(k, l);
-        
-        v.subvec(0, C).fill(0.0);
-        v2.subvec(0, C).fill(0.0);
-        
-        int R = 0;
-        v[R] = f_k2_l1(k, l);
-        v2[R++] = f_k2_l1(l, k);
-        
-        for (m=0; m<Nmodes; m++) {
-            v[R] = m1_f_k2_l1(m, k, l);
-            v2[R++] = m1_f_k2_l1(m, l, k);
-        }
-        m=k;
-        v[k_index(m)] = m1_f_m2_l1(m, l);
-        v2[k_index(m)] = m1_f_m1_l2(m, l);//unique, no coordinate swap possible!
-        
-        m=l;
-        v[k_index(m)] = m1_f_m1_l2(m, k);
-        v2[k_index(m)] = m1_f_m2_l1(m, k); // unique again.
-        
-        for (m=0; m<Nmodes2; m++) {
-            v[R] = m2_f_k2_l1(m, k, l);
-            v2[R++] = m2_f_k1_l2(m, k, l);
-        }
-        m=k;
-        v[k2_index(m)] = m2_f_m2_l1(m, l);
-        v2[k2_index(m)] = m2_f_m1_l2(m, l);
-        
-        m=l;
-        v[k2_index(m)] = m2_f_m1_l2(m, k);
-        v2[k2_index(m)] = m2_f_m2_l1(m, k);
-        
-        R = kl_fence;
-        for (m=0; m<Nmodes2; m++) {
-            for (n=m+1; n<Nmodes2; n++) {
-                v[R] = m1_n1_f_k2_l1(m, n, k, l);
-                v2[R++] = m1_n1_f_k1_l2(m, n, k, l);
+    for (int i=0; i< (s2_incr.end() + 1) / 2; i++) {
+        int two = 1 + ((2 * i + 1) != s2_incr.end());
+	    for (int itwo = 0; itwo < two; itwo++) {
+            if (itwo == 0) {
+                k = s2_incr.index[0];
+                l = s2_incr.index[1];
             }
-        }
-        
-        m=k;
-        for (n=m+1; n<Nmodes2; n++) {
-            R = kl_index(m, n);
-            v[R] = m1_n1_f_m2_l1(m, n, l);
-            v2[R] = m1_n1_f_m1_l2(m, n, l);
-        }
-        
-        m=l;
-        for (n=l+1; n<Nmodes2; n++) {
-            R = kl_index(l, n);
-            v[R] = m1_n1_f_m1_l2(l, n, k);
-            v2[R] = m1_n1_f_m2_l1(l, n, k);
-        }
-        
-        n=k;
-        for (m=0; m<n; m++) {
-            R = kl_index(m, n);
-            v[R] = m1_n1_f_m2_l1(n, m, l);
-            v2[R] = m1_n1_f_m1_l2(n, m, l);
-        }
-        
-        n=l;
-        for (m=0; m<n; m++) {
-            R = kl_index(m, n);
-            v[R] = m1_n1_f_m1_l2(n, m, k);
-            v2[R] = m1_n1_f_m2_l1(n, m, k);
-        }
-        m=k; n=l;
-        R = kl_index(m, n);
-        v[R] = m1_n1_f_m2_n1(m, n);
-        v2[R] = m1_n1_f_m1_n2(m, n);
-        
-        R = k3_fence;
-        for (m=0; m<Nmodes3; m++) {
-            v[R] = m3_f_k2_l1(m, k, l);
-            v2[R++] = m3_f_k1_l2(m, k, l);
-        }
-        
-        m=k;
-        v[k3_index(m)] = m3_f_m2_l1(k, l);
-        v2[k3_index(m)] = m3_f_m1_l2(k, l);
-        
-        m=l;
-        v[k3_index(m)] = m3_f_m1_l2(l, k);
-        v2[k3_index(m)] = m3_f_m2_l1(l, k);
-        
-        R=k2l_fence;
-        for (m=0; m<k; m++) {
-            for (n=m+1; n<Nmodes3; n++) {
-                v[R] = m2_n1_f_k2_l1(m, n, k, l);
-                    //v2[R++] = m2_n1_f_k1_l2(m, n, k, l);
-                v2[R++] = m1_n2_f_k2_l1(k, l, m, n);
-                
-                v[R] = m1_n2_f_k2_l1(m, n, k, l);
-                v2[R++] = m1_n2_f_k1_l2(m, n, k, l);
+            else {
+                k = s2_decr.index[0];
+                l = s2_decr.index[1];
             }
-        }
-        
-        n=k;
-        for (m=0; m<k; m++) {
-            R = k2l_index(m, n);
-            v[R] = m1_n2_f_m2_l1(k, m, l);
-            v2[R++] = m1_n2_f_m1_l2(k, m, l);
             
+            int C = k2l_index(k, l);
             
-            v[R] = m2_n1_f_m2_l1(k, m, l);
-            v2[R] = m1_n2_f_m2_l1(k, l, m);
-        }
-        
-        n=l;
-        for (m=0; m<k; m++) {
-            R = k2l_index(m, n);
-            v[R] = m1_n2_f_m1_l2(l, m, k);
-            v2[R++] = m1_n2_f_m2_l1(l, m, k);
+            v.subvec(0, C).fill(0.0);
+            v2.subvec(0, C).fill(0.0);
             
+            int R = 0;
+            v[R] = f_k2_l1(k, l);
+            v2[R++] = f_k2_l1(l, k);
             
-                //v[R] = m2_n1_f_m1_l2(l, m, k);
-            v[R] = m1_n2_f_m2_l1(l, k, m);
-            v2[R] = m2_n1_f_m2_l1(l, m, k);
-        }
-        
-        
-        m=k;
-        for (n=m+1; n<l; n++) {
-            R = k2l_index(m, n);
-            v[R] = m2_n1_f_m2_l1(k, n, l);
-            v2[R++] = m1_n2_f_m2_l1(k, l, n);
-            
-            
-            v[R] = m1_n2_f_m2_l1(k, n, l);
-            v2[R] = m1_n2_f_m1_l2(k, n, l);
-        }
-        
-        n=l;
-        R = k2l_index(m, n);
-        v[R] = m2_n1_f_m2_n1(m, n);
-        v2[R++] = m1_n2_f_m2_n1(m, n);
-        
-        v2[R] = m1_n2_f_m1_n2(m, n);
-        
-        if ( R!= C+1) {
-            cerr << "R != C\n";
-            exit(EXIT_FAILURE);
-        }
-        M.col(C).subvec(0,C) += v.subvec(0, C);
-        M.col(C+1).subvec(0,C+1) += v2.subvec(0, C+1);
-    }
-    
-    SimplexIterator<3> s3(Nmodes3);
-#pragma omp for schedule(dynamic)
-    for (int i=0; i<s3.end(); i ++) {
-        s3 = i;
-        
-        k = s3.index[0];
-        l = s3.index[1];
-        j = s3.index[2];
-        
-        int C = klj_index(k, l, j);
-        int R=0;
-        
-        v.subvec(0, C).fill(0.0);
-        
-        v[R++] = f_k1_l1_j1(k, l, j);
-        
-        for (m=0; m<Nmodes; m++) {
-            v[R++] = m1_f_k1_l1_j1(m, k, l, j);
-        }
-        v[k+1] = m1_f_m1_l1_j1(k, l, j);
-        v[l+1] = m1_f_m1_l1_j1(l, k, j);
-        v[j+1] = m1_f_m1_l1_j1(j, k, l);
-        
-        for (m=0; m<Nmodes2; m++) {
-            v[R++] = m2_f_k1_l1_j1(m, k, l, j);
-        }
-        v[k2_index(k)] = m2_f_m1_l1_j1(k, l, j);
-        v[k2_index(l)] = m2_f_m1_l1_j1(l, k, j);
-        v[k2_index(j)] = m2_f_m1_l1_j1(j, k, l);
-        
-        for (m=0; m<Nmodes2; m++) {
-            for (n=m+1; n<Nmodes2; n++) {
-                v[R++] = m1_n1_f_k1_l1_j1(m, n, k, l, j);
+            for (m=0; m<Nmodes; m++) {
+                v[R] = m1_f_k2_l1(m, k, l);
+                v2[R++] = m1_f_k2_l1(m, l, k);
             }
-        }
-        
-        m=k;
-        for (n=m+1; n<Nmodes2; n++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(m, n, l, j);
-        }
-        
-        m=l;
-        for (n=m+1; n<Nmodes2; n++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(m, n, k, j);
-        }
-        
-        m=j;
-        for (n=m+1; n<Nmodes2; n++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(m, n, k, l);
-        }
-        
-        n=k;
-        for (m=0; m<n; m++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(n, m, l, j);
-        }
-        
-        n=l;
-        for (m=0; m<n; m++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(n, m, k, j);
-        }
-        
-        n=j;
-        for (m=0; m<n; m++) {
-            v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(n, m, k, l);
-        }
-        
-        m=k; n=l;
-        v[kl_index(m, n)] = m1_n1_f_m1_n1_j1(k, l, j);
-        n=j;
-        v[kl_index(m, n)] = m1_n1_f_m1_n1_j1(k, j, l);
-        
-        
-        m=l; n=j;
-        v[kl_index(m, n)] = m1_n1_f_m1_n1_j1(l, j, k);
-        
-        
-        for (m=0; m<Nmodes3; m++) {
-            v[R++] = m3_f_k1_l1_j1(m, k, l, j);
-        }
-        v[k3_index(k)] = m3_f_m1_l1_j1(k, l, j);
-        v[k3_index(l)] = m3_f_m1_l1_j1(l, k, j);
-        v[k3_index(j)] = m3_f_m1_l1_j1(j, k, l);
-        
-        
-        for (m=0; m<Nmodes3; m++) {
-            for (n = m+1; n<Nmodes3; n++) {
-                v[R++] = m2_n1_f_k1_l1_j1(m, n, k, l, j);
-                v[R++] = m1_n2_f_k1_l1_j1(m, n, k, l, j);
+            m=k;
+            v[k_index(m)] = m1_f_m2_l1(m, l);
+            v2[k_index(m)] = m1_f_m1_l2(m, l);//unique, no coordinate swap possible!
+            
+            m=l;
+            v[k_index(m)] = m1_f_m1_l2(m, k);
+            v2[k_index(m)] = m1_f_m2_l1(m, k); // unique again.
+            
+            for (m=0; m<Nmodes2; m++) {
+                v[R] = m2_f_k2_l1(m, k, l);
+                v2[R++] = m2_f_k1_l2(m, k, l);
             }
-        }
-        
-        m=k;
-        for (n=m+1; n<Nmodes3; n++) {
-            R = k2l_index(m, n);
-            v[R++] = m2_n1_f_m1_l1_j1(m, n, l, j);
-            v[R++] = m1_n2_f_m1_l1_j1(m, n, l, j);
-        }
-        
-        m=l;
-        for (n=m+1; n<Nmodes3; n++) {
-            R = k2l_index(m, n);
-            v[R++] = m2_n1_f_m1_l1_j1(m, n, k, j);
-            v[R++] = m1_n2_f_m1_l1_j1(m, n, k, j);
-        }
-        
-        m=j;
-        for (n=m+1; n<Nmodes3; n++) {
-            R = k2l_index(m, n);
-            v[R++] = m2_n1_f_m1_l1_j1(m, n, k, l);
-            v[R++] = m1_n2_f_m1_l1_j1(m, n, k, l);
-        }
-        
-        n=k;
-        for (m=0; m<n; m++) {
-            R = k2l_index(m, n);
-            v[R++] = m1_n2_f_m1_l1_j1(n, m, l, j);
-            v[R++] = m2_n1_f_m1_l1_j1(n, m, l, j);
-        }
-        
-        n=l;
-        for (m=0; m<n; m++) {
-            R = k2l_index(m, n);
-            v[R++] = m1_n2_f_m1_l1_j1(n, m, k, j);
-            v[R++] = m2_n1_f_m1_l1_j1(n, m, k, j);
-        }
-        
-        n=j;
-        for (m=0; m<n; m++) {
-            R = k2l_index(m, n);
-            v[R++] = m1_n2_f_m1_l1_j1(n, m, k, l);
-            v[R++] = m2_n1_f_m1_l1_j1(n, m, k, l);
-        }
-        
-        m=k; n=l;
-        R = k2l_index(m, n);
-        v[R++] = m2_n1_f_m1_n1_j1(m, n, j);
-        v[R  ] = m1_n2_f_m1_n1_j1(m, n, j);
-        
-        n=j;
-        R = k2l_index(m, n);
-        v[R++] = m2_n1_f_m1_n1_j1(m, n, l);
-        v[R  ] = m1_n2_f_m1_n1_j1(m, n, l);
-        
-        m=l; n=j;
-        R = k2l_index(m, n);
-        v[R++] = m2_n1_f_m1_n1_j1(m, n, k);
-        v[R  ] = m1_n2_f_m1_n1_j1(m, n, k);
-        
-        
-        R = klj_fence;
-        for (m=0; m<k; m++) {
-            for (n=m+1; n<Nmodes3; n++) {
-                for (p=n+1; p<Nmodes3; p++) {
-                    v[R++] = m1_n1_p1_f_k1_l1_j1(m, n, p, k, l, j);
+            m=k;
+            v[k2_index(m)] = m2_f_m2_l1(m, l);
+            v2[k2_index(m)] = m2_f_m1_l2(m, l);
+            
+            m=l;
+            v[k2_index(m)] = m2_f_m1_l2(m, k);
+            v2[k2_index(m)] = m2_f_m2_l1(m, k);
+            
+            R = kl_fence;
+            for (m=0; m<Nmodes2; m++) {
+                for (n=m+1; n<Nmodes2; n++) {
+                    v[R] = m1_n1_f_k2_l1(m, n, k, l);
+                    v2[R++] = m1_n1_f_k1_l2(m, n, k, l);
                 }
             }
-        }
-        
-        /* m<k, n=k */
-        n=k;
-        for (m=0; m<n; m++) {
-            for (p=n+1; p<Nmodes3; p++) {
-                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(n, m, p, l, j);
+            
+            m=k;
+            for (n=m+1; n<Nmodes2; n++) {
+                R = kl_index(m, n);
+                v[R] = m1_n1_f_m2_l1(m, n, l);
+                v2[R] = m1_n1_f_m1_l2(m, n, l);
             }
-        }
-        n=l;
-        for (m=0; m<n; m++) {
-            for (p=n+1; p<Nmodes3; p++) {
-                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(n, m, p, k, j);
+            
+            m=l;
+            for (n=l+1; n<Nmodes2; n++) {
+                R = kl_index(l, n);
+                v[R] = m1_n1_f_m1_l2(l, n, k);
+                v2[R] = m1_n1_f_m2_l1(l, n, k);
             }
-        }
-        n=j;
-        for (m=0; m<n; m++) {
-            for (p=n+1; p<Nmodes3; p++) {
-                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(n, m, p, k, l);
+            
+            n=k;
+            for (m=0; m<n; m++) {
+                R = kl_index(m, n);
+                v[R] = m1_n1_f_m2_l1(n, m, l);
+                v2[R] = m1_n1_f_m1_l2(n, m, l);
             }
+            
+            n=l;
+            for (m=0; m<n; m++) {
+                R = kl_index(m, n);
+                v[R] = m1_n1_f_m1_l2(n, m, k);
+                v2[R] = m1_n1_f_m2_l1(n, m, k);
+            }
+            m=k; n=l;
+            R = kl_index(m, n);
+            v[R] = m1_n1_f_m2_n1(m, n);
+            v2[R] = m1_n1_f_m1_n2(m, n);
+            
+            R = k3_fence;
+            for (m=0; m<Nmodes3; m++) {
+                v[R] = m3_f_k2_l1(m, k, l);
+                v2[R++] = m3_f_k1_l2(m, k, l);
+            }
+            
+            m=k;
+            v[k3_index(m)] = m3_f_m2_l1(k, l);
+            v2[k3_index(m)] = m3_f_m1_l2(k, l);
+            
+            m=l;
+            v[k3_index(m)] = m3_f_m1_l2(l, k);
+            v2[k3_index(m)] = m3_f_m2_l1(l, k);
+            
+            R=k2l_fence;
+            for (m=0; m<k; m++) {
+                for (n=m+1; n<Nmodes3; n++) {
+                    v[R] = m2_n1_f_k2_l1(m, n, k, l);
+                        //v2[R++] = m2_n1_f_k1_l2(m, n, k, l);
+                    v2[R++] = m1_n2_f_k2_l1(k, l, m, n);
+                    
+                    v[R] = m1_n2_f_k2_l1(m, n, k, l);
+                    v2[R++] = m1_n2_f_k1_l2(m, n, k, l);
+                }
+            }
+            
+            n=k;
+            for (m=0; m<k; m++) {
+                R = k2l_index(m, n);
+                v[R] = m1_n2_f_m2_l1(k, m, l);
+                v2[R++] = m1_n2_f_m1_l2(k, m, l);
+                
+                
+                v[R] = m2_n1_f_m2_l1(k, m, l);
+                v2[R] = m1_n2_f_m2_l1(k, l, m);
+            }
+            
+            n=l;
+            for (m=0; m<k; m++) {
+                R = k2l_index(m, n);
+                v[R] = m1_n2_f_m1_l2(l, m, k);
+                v2[R++] = m1_n2_f_m2_l1(l, m, k);
+                
+                
+                    //v[R] = m2_n1_f_m1_l2(l, m, k);
+                v[R] = m1_n2_f_m2_l1(l, k, m);
+                v2[R] = m2_n1_f_m2_l1(l, m, k);
+            }
+            
+            
+            m=k;
+            for (n=m+1; n<l; n++) {
+                R = k2l_index(m, n);
+                v[R] = m2_n1_f_m2_l1(k, n, l);
+                v2[R++] = m1_n2_f_m2_l1(k, l, n);
+                
+                
+                v[R] = m1_n2_f_m2_l1(k, n, l);
+                v2[R] = m1_n2_f_m1_l2(k, n, l);
+            }
+            
+            n=l;
+            R = k2l_index(m, n);
+            v[R] = m2_n1_f_m2_n1(m, n);
+            v2[R++] = m1_n2_f_m2_n1(m, n);
+            
+            v2[R] = m1_n2_f_m1_n2(m, n);
+            
+            if ( R!= C+1) {
+                cerr << "R != C\n";
+                exit(EXIT_FAILURE);
+            }
+            M.col(C).subvec(0,C) += v.subvec(0, C);
+            M.col(C+1).subvec(0,C+1) += v2.subvec(0, C+1);
         }
-        
-        p=k;
-        for (m=0; m<k; m++) {
+        s2_incr++; s2_decr--;
+    }
+    
+    SimplexIterator<3> s3_incr(Nmodes3), s3_decr(Nmodes3);
+    s3_incr = 0;
+    s3_decr = s3_decr.end() - 1;
+#pragma omp for schedule(dynamic)
+    for (int i=0; i< (s3_incr.end() + 1) / 2; i++) {
+        int two = 1 + ((2 * i + 1) != s3_incr.end());
+	    for (int itwo = 0; itwo < two; itwo++) {
+            if (itwo == 0) {
+                k = s3_incr.index[0];
+                l = s3_incr.index[1];
+                j = s3_incr.index[2];
+            }
+            else {
+                k = s3_decr.index[0];
+                l = s3_decr.index[1];
+                j = s3_decr.index[2];
+            }
+            
+            int C = klj_index(k, l, j);
+            int R=0;
+            
+            v.subvec(0, C).fill(0.0);
+            
+            v[R++] = f_k1_l1_j1(k, l, j);
+            
+            for (m=0; m<Nmodes; m++) {
+                v[R++] = m1_f_k1_l1_j1(m, k, l, j);
+            }
+            v[k+1] = m1_f_m1_l1_j1(k, l, j);
+            v[l+1] = m1_f_m1_l1_j1(l, k, j);
+            v[j+1] = m1_f_m1_l1_j1(j, k, l);
+            
+            for (m=0; m<Nmodes2; m++) {
+                v[R++] = m2_f_k1_l1_j1(m, k, l, j);
+            }
+            v[k2_index(k)] = m2_f_m1_l1_j1(k, l, j);
+            v[k2_index(l)] = m2_f_m1_l1_j1(l, k, j);
+            v[k2_index(j)] = m2_f_m1_l1_j1(j, k, l);
+            
+            for (m=0; m<Nmodes2; m++) {
+                for (n=m+1; n<Nmodes2; n++) {
+                    v[R++] = m1_n1_f_k1_l1_j1(m, n, k, l, j);
+                }
+            }
+            
+            m=k;
+            for (n=m+1; n<Nmodes2; n++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(m, n, l, j);
+            }
+            
+            m=l;
+            for (n=m+1; n<Nmodes2; n++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(m, n, k, j);
+            }
+            
+            m=j;
+            for (n=m+1; n<Nmodes2; n++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(m, n, k, l);
+            }
+            
+            n=k;
+            for (m=0; m<n; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(n, m, l, j);
+            }
+            
+            n=l;
+            for (m=0; m<n; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(n, m, k, j);
+            }
+            
+            n=j;
+            for (m=0; m<n; m++) {
+                v[kl_index(m, n)] = m1_n1_f_m1_l1_j1(n, m, k, l);
+            }
+            
+            m=k; n=l;
+            v[kl_index(m, n)] = m1_n1_f_m1_n1_j1(k, l, j);
+            n=j;
+            v[kl_index(m, n)] = m1_n1_f_m1_n1_j1(k, j, l);
+            
+            
+            m=l; n=j;
+            v[kl_index(m, n)] = m1_n1_f_m1_n1_j1(l, j, k);
+            
+            
+            for (m=0; m<Nmodes3; m++) {
+                v[R++] = m3_f_k1_l1_j1(m, k, l, j);
+            }
+            v[k3_index(k)] = m3_f_m1_l1_j1(k, l, j);
+            v[k3_index(l)] = m3_f_m1_l1_j1(l, k, j);
+            v[k3_index(j)] = m3_f_m1_l1_j1(j, k, l);
+            
+            
+            for (m=0; m<Nmodes3; m++) {
+                for (n = m+1; n<Nmodes3; n++) {
+                    v[R++] = m2_n1_f_k1_l1_j1(m, n, k, l, j);
+                    v[R++] = m1_n2_f_k1_l1_j1(m, n, k, l, j);
+                }
+            }
+            
+            m=k;
+            for (n=m+1; n<Nmodes3; n++) {
+                R = k2l_index(m, n);
+                v[R++] = m2_n1_f_m1_l1_j1(m, n, l, j);
+                v[R++] = m1_n2_f_m1_l1_j1(m, n, l, j);
+            }
+            
+            m=l;
+            for (n=m+1; n<Nmodes3; n++) {
+                R = k2l_index(m, n);
+                v[R++] = m2_n1_f_m1_l1_j1(m, n, k, j);
+                v[R++] = m1_n2_f_m1_l1_j1(m, n, k, j);
+            }
+            
+            m=j;
+            for (n=m+1; n<Nmodes3; n++) {
+                R = k2l_index(m, n);
+                v[R++] = m2_n1_f_m1_l1_j1(m, n, k, l);
+                v[R++] = m1_n2_f_m1_l1_j1(m, n, k, l);
+            }
+            
+            n=k;
+            for (m=0; m<n; m++) {
+                R = k2l_index(m, n);
+                v[R++] = m1_n2_f_m1_l1_j1(n, m, l, j);
+                v[R++] = m2_n1_f_m1_l1_j1(n, m, l, j);
+            }
+            
+            n=l;
+            for (m=0; m<n; m++) {
+                R = k2l_index(m, n);
+                v[R++] = m1_n2_f_m1_l1_j1(n, m, k, j);
+                v[R++] = m2_n1_f_m1_l1_j1(n, m, k, j);
+            }
+            
+            n=j;
+            for (m=0; m<n; m++) {
+                R = k2l_index(m, n);
+                v[R++] = m1_n2_f_m1_l1_j1(n, m, k, l);
+                v[R++] = m2_n1_f_m1_l1_j1(n, m, k, l);
+            }
+            
+            m=k; n=l;
+            R = k2l_index(m, n);
+            v[R++] = m2_n1_f_m1_n1_j1(m, n, j);
+            v[R  ] = m1_n2_f_m1_n1_j1(m, n, j);
+            
+            n=j;
+            R = k2l_index(m, n);
+            v[R++] = m2_n1_f_m1_n1_j1(m, n, l);
+            v[R  ] = m1_n2_f_m1_n1_j1(m, n, l);
+            
+            m=l; n=j;
+            R = k2l_index(m, n);
+            v[R++] = m2_n1_f_m1_n1_j1(m, n, k);
+            v[R  ] = m1_n2_f_m1_n1_j1(m, n, k);
+            
+            
+            R = klj_fence;
+            for (m=0; m<k; m++) {
+                for (n=m+1; n<Nmodes3; n++) {
+                    for (p=n+1; p<Nmodes3; p++) {
+                        v[R++] = m1_n1_p1_f_k1_l1_j1(m, n, p, k, l, j);
+                    }
+                }
+            }
+            
+            /* m<k, n=k */
+            n=k;
+            for (m=0; m<n; m++) {
+                for (p=n+1; p<Nmodes3; p++) {
+                    v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(n, m, p, l, j);
+                }
+            }
+            n=l;
+            for (m=0; m<n; m++) {
+                for (p=n+1; p<Nmodes3; p++) {
+                    v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(n, m, p, k, j);
+                }
+            }
+            n=j;
+            for (m=0; m<n; m++) {
+                for (p=n+1; p<Nmodes3; p++) {
+                    v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(n, m, p, k, l);
+                }
+            }
+            
+            p=k;
+            for (m=0; m<k; m++) {
+                for (n=m+1; n<p; n++) {
+                    v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(p, m, n, l, j);
+                }
+            }
+            p=l;
+            for (m=0; m<k; m++) {
+                for (n=m+1; n<p; n++) {
+                    v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(p, m, n, k, j);
+                }
+            }
+            p=j;
+            for (m=0; m<k; m++) {
+                for (n=m+1; n<p; n++) {
+                    v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(p, m, n, k, l);
+                }
+            }
+            
+            n=k; p=l;
+            for (m=0; m<k; m++) {
+                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(n, p, m, j);
+            }
+            p=j;
+            for (m=0; m<k; m++) {
+                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(n, p, m, l);
+            }
+            n=l; p=j;
+            for (m=0; m<k; m++) {
+                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(n, p, m, k);
+            }
+            
+            m=k;
+            for (n=m+1; n<l; n++) {
+                R = klj_index(m, n, n+1);
+                for (p=n+1; p<Nmodes3; p++) {
+                    v[R++] = m1_n1_p1_f_m1_l1_j1(m, n, p, l, j);
+                }
+            }
+            
+            p=l;
             for (n=m+1; n<p; n++) {
-                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(p, m, n, l, j);
+                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(m, p, n, j);
             }
-        }
-        p=l;
-        for (m=0; m<k; m++) {
+            p=j;
             for (n=m+1; n<p; n++) {
-                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(p, m, n, k, j);
+                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(m, p, n, l);
             }
-        }
-        p=j;
-        for (m=0; m<k; m++) {
-            for (n=m+1; n<p; n++) {
-                v[klj_index(m, n, p)] = m1_n1_p1_f_m1_l1_j1(p, m, n, k, l);
-            }
-        }
-        
-        n=k; p=l;
-        for (m=0; m<k; m++) {
-            v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(n, p, m, j);
-        }
-        p=j;
-        for (m=0; m<k; m++) {
-            v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(n, p, m, l);
-        }
-        n=l; p=j;
-        for (m=0; m<k; m++) {
-            v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(n, p, m, k);
-        }
-        
-        m=k;
-        for (n=m+1; n<l; n++) {
+            
+            n=l;
             R = klj_index(m, n, n+1);
-            for (p=n+1; p<Nmodes3; p++) {
-                v[R++] = m1_n1_p1_f_m1_l1_j1(m, n, p, l, j);
+            for (p=n+1; p<j; p++) {
+                v[R++] = m1_n1_p1_f_m1_n1_j1(m, n, p, j);
             }
+            
+            p=j;
+            v[R] = m1_n1_p1_f_m1_n1_p1(m, n, p);
+            
+            if ( R!= C) {
+                cerr << "R != C\n";
+                exit(EXIT_FAILURE);
+            }
+            
+            M.col(C).subvec(0, C) += v.subvec(0, C);
         }
-        
-        p=l;
-        for (n=m+1; n<p; n++) {
-            v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(m, p, n, j);
-        }
-        p=j;
-        for (n=m+1; n<p; n++) {
-            v[klj_index(m, n, p)] = m1_n1_p1_f_m1_n1_j1(m, p, n, l);
-        }
-        
-        n=l;
-        R = klj_index(m, n, n+1);
-        for (p=n+1; p<j; p++) {
-            v[R++] = m1_n1_p1_f_m1_n1_j1(m, n, p, j);
-        }
-        
-        p=j;
-        v[R] = m1_n1_p1_f_m1_n1_p1(m, n, p);
-        
-        if ( R!= C) {
-            cerr << "R != C\n";
-            exit(EXIT_FAILURE);
-        }
-        
-        M.col(C).subvec(0, C) += v.subvec(0, C);
+	s3_incr++; s3_decr--;
     }
 }
 
