@@ -70,7 +70,7 @@ void ScaledMatrixElements::addEpotSingles(mat &M)
     
     vec v(M.n_rows);
     
-#pragma omp for schedule(dynamic)
+#pragma omp for schedule(dynamic) nowait
     for (k=0; k<Nmodes; k++) {
         int C = k_index(k);
         int R = 0;
