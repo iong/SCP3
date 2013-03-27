@@ -257,28 +257,20 @@ int main (int argc, char *  argv[]) {
     TIP4P_UF(NO, x0.memptr(), &V, Vr.memptr());
     cout << "V0 = "<<V<<endl;
 
+    /*
     ofstream specout("sfreq.dat");
     ofstream dipoleout("sdipole.dat");
+    */
 
-    ofstream E0out("E0.dat");
-    fixed(E0out);
-    E0out.precision(10);
+    ofstream E0out_sd("E0_singles+doubles.dat");
+    fixed(E0out_sd);
+    E0out_sd.precision(10);
+
+    ofstream E0out_t("E0_triples.dat");
+    fixed(E0out_t);
+    E0out_t.precision(10);
+
        
-    /*
-    for (int i=0; i<NSobol; i++) {
-        sobol_stdnormal_c(sobol_sequence.n_rows, &sobol_skip,
-                          sobol_sequence.colptr(i));
-    }
-    
-    tr1::mt19937 rng;
-    for (uint64_t i=0; i<NSobol-1; i++) {
-        uint64_t j = rng();
-        j = (j * (NSobol - i)) >> 32;
-        cout << i << " " << i+j << endl;
-        sobol_sequence.swap_cols(i, i + j);
-    }
-     */
-    
     for (int i=0; i<NSobol; i++) {
         if (rng_in.is_open()) {
             for (int j=0; j<Nmodes0; j++) {
@@ -301,19 +293,12 @@ int main (int argc, char *  argv[]) {
 
         V -= 0.5 * dot(y, omega%y);
         Vy = -MUaT * Vr - omega % y;
-            //cout << y(Nmodes-2) << " " << y(Nmodes-1) << " " << Vy(Nmodes-2) << " " << Vy(Nmodes-1) << endl;
         sme.addEpot(y, V, Vy, M);
 
-        if ( (i+1)%(1<<15)==0) {
+        if ( (i+1)%(1<<14)==0) {
             cout << i+1 << endl;
             mat Mout = M / (i+1);
             sme.addHODiagonal(Mout);
-
-      //      if ( (i+1)%1<<17==0) {
-                char s[100];
-                sprintf(s, "sM_%07d.dat", i+1);
-                Mout.save(s, raw_ascii);
-      //      }
 
             vec eigvals = eig_sym(Mout.submat(0,0, Nmodes0, Nmodes0));
             double E0[3];
@@ -323,16 +308,28 @@ int main (int argc, char *  argv[]) {
             eigvals = eig_sym(Mout.submat(0, 0, Nstates2-1, Nstates2-1));
             E0[1] = eigvals[0]*autocm;
 
-            eigvals = eig_sym(Mout);
-            E0[2] = eigvals[0]*autocm;
+            E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" ";
+            E0out_sd << E0[1] - E0[0] << endl;
 
-            E0out << i+1 << " " << E0[0] <<" "<< E0[1] <<" "<< E0[2] <<" ";
-            E0out << E0[1] - E0[0] <<" "<< E0[2] - E0[0] << endl;
-                //dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
+            if ( (i+1)%(1<<17)==0) {
+                char s[100];
+                sprintf(s, "sM_%07d.dat", i+1);
+                Mout.save(s, raw_ascii);
+
+                eigvals = eig_sym(Mout);
+                E0[2] = eigvals[0]*autocm;
+
+                E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
+            }
+            //dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
         }
     }
+    E0out_sd.close();
+    E0out_t.close();
+    /*
     specout.close();
     dipoleout.close();
+    */
     rng_in.close();
 
     M /= NSobol;
