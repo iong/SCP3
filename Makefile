@@ -1,10 +1,17 @@
+SRCDIR:=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 OS := $(shell uname -s)
 
 BLAS ?= Apple
 COMPILER ?= GNU
 
-include config/$(COMPILER).mk
-include config/blas.mk
+include $(SRCDIR)/config/$(COMPILER).mk
+include $(SRCDIR)/config/blas.mk
+
+vpath %.cpp $(SRCDIR)
+vpath %.h $(SRCDIR)
+vpath %.f90 $(SRCDIR)
+
+CPPFLAGS += -I$(SRCDIR)
 
 ifdef DEBUG
 $(foreach x,CFLAGS CXXFLAGS LDFLAGS,$(eval $(x) += $(CDBG) ) )
