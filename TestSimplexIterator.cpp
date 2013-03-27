@@ -17,11 +17,15 @@ using namespace std;
 int main(int argc, char *argv[])
 {
     int N = atoi(argv[1]);
+    int M;
     
     SimplexIterator<2>  s2(N);
     SimplexIterator<3>  s3(N);
     
-    s3 = atoi(argv[2]);
+    M = s3.end();
+    for (int i=M; i>0; i--) {
+	    s3 = i-1;
+	    cout << s3 << endl;
+    }
     
-    cout << s3 << endl;
 }
