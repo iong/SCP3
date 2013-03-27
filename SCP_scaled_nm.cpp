@@ -56,12 +56,23 @@ void process_options(int argc,  char *  argv[])
 {
     int ch, i, j;
     while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:", program_options, NULL)) != -1) {
+        int p2;
         switch (ch) {
             case 'N':
-                NSobol = atoi(optarg);
+                p2 = atoi(optarg);
+                if (p2>32) {
+                    cerr << "-N <N>: <N>is too large, NSobol = 2^<N>\n";
+                    exit(EXIT_FAILURE);
+                }
+                NSobol = 1<<p2;
                 break;
             case 'S':
-                sobol_skip = 1<<atoi(optarg);
+                p2 = atoi(optarg);
+                if (p2>32) {
+                    cerr << "-S <N>: <N>is too large, sobol_skip = 2^<N>\n";
+                    exit(EXIT_FAILURE);
+                }
+                sobol_skip = 1<<p2;
                 break;
             case '2':
                 Nmodes2 = atoi(optarg);
