@@ -55,7 +55,7 @@ static ifstream rng_in;
 void process_options(int argc,  char *  argv[])
 {
     int ch, i, j;
-    while ( (ch = getopt_long(argc, argv, "N:2:3:c:s:r:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:", program_options, NULL)) != -1) {
         switch (ch) {
             case 'N':
                 NSobol = atoi(optarg);
