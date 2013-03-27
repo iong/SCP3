@@ -16,10 +16,12 @@ endif
 
 ifdef blas_$(BLAS)_$(COMPILER)
 	BLAS_LIBRARIES:=$(blas_$(BLAS)_$(COMPILER))
-else ifeq($(BLAS),Apple)
+else
+ifeq ($(BLAS),Apple)
 	BLAS_LIBRARIES:=-framework Accelerate
 else
 	BLAS_LIBRARIES:=-l$(BLAS)
+endif
 endif
 #
 #
