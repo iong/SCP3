@@ -139,8 +139,6 @@ void ScaledMatrixElements::addEpotDoubles(mat &M)
             k = s2.index[0];
             l = s2.index[1];
 
-            cout << i <<": "<< k <<" "<< l<<endl;
-
             int C = kl_index(k,l);
             v.subvec(0, C).fill(0.0);
             
