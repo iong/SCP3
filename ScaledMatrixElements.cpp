@@ -131,21 +131,15 @@ void ScaledMatrixElements::addEpotDoubles(mat &M)
         M.col(C).subvec(0,R) += v.subvec(0,R);
     }
     
-    SimplexIterator<2> s2_incr(Nmodes2), s2_decr(Nmodes2);
-    s2_incr = 0;
-    s2_decr = s2_decr.end() - 1;
+    SimplexIterator<2> s2(Nmodes2);
 #pragma omp for schedule(dynamic) nowait
-    for (int i=0; i< (s2_incr.end() + 1) / 2; i++) {
-        int two = 1 + ((2 * i + 1) != s2_incr.end());
-	    for (int itwo = 0; itwo < two; itwo++) {
-            if (itwo == 0) {
-                k = s2_incr.index[0];
-                l = s2_incr.index[1];
-            }
-            else {
-                k = s2_decr.index[0];
-                l = s2_decr.index[1];
-            }
+    for (int i=0; i < (s2.volume() + 1) / 2; i++) {
+        s2 = i;
+        for (int i2=0; i2 < 2; i2++) {
+            k = s2.index[0];
+            l = s2.index[1];
+
+            cout << i <<": "<< k <<" "<< l<<endl;
 
             int C = kl_index(k,l);
             v.subvec(0, C).fill(0.0);
@@ -200,8 +194,11 @@ void ScaledMatrixElements::addEpotDoubles(mat &M)
             v[R] = m1_n1_f_m1_n1(k, l);
             
             M.col(C).subvec(0, R) += v.subvec(0,R);
+
+            if ( (2*i + 1) == s2.volume() ) break;
+
+            s2 = s2.volume() - 1 - i;
         }
-        s2_incr++; s2_decr--;
     }
 }
 
@@ -264,21 +261,13 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
         M.col(R).subvec(0,R) += v.subvec(0, R);
     }
 
-    SimplexIterator<2> s2_incr(Nmodes3), s2_decr(Nmodes3);
-    s2_incr = 0;
-    s2_decr = s2_decr.end() - 1;
+    SimplexIterator<2> s2(Nmodes3);
 #pragma omp for schedule(dynamic) nowait
-    for (int i=0; i< (s2_incr.end() + 1) / 2; i++) {
-        int two = 1 + ((2 * i + 1) != s2_incr.end());
-	    for (int itwo = 0; itwo < two; itwo++) {
-            if (itwo == 0) {
-                k = s2_incr.index[0];
-                l = s2_incr.index[1];
-            }
-            else {
-                k = s2_decr.index[0];
-                l = s2_decr.index[1];
-            }
+    for (int i=0; i< (s2.volume() + 1) / 2; i++) {
+        s2 = i;
+        for (int i2=0; i2 < 2; i2++) {
+            k = s2.index[0];
+            l = s2.index[1];
             
             int C = k2l_index(k, l);
             
@@ -427,28 +416,22 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
             }
             M.col(C).subvec(0,C) += v.subvec(0, C);
             M.col(C+1).subvec(0,C+1) += v2.subvec(0, C+1);
+
+            if ( (2*i + 1) == s2.volume() ) break;
+
+            s2 = s2.volume() - 1 - i;
         }
-        s2_incr++; s2_decr--;
     }
     
-    SimplexIterator<3> s3_incr(Nmodes3), s3_decr(Nmodes3);
-    s3_incr = 0;
-    s3_decr = s3_decr.end() - 1;
+    SimplexIterator<3> s3(Nmodes3);
 #pragma omp for schedule(dynamic)
-    for (int i=0; i< (s3_incr.end() + 1) / 2; i++) {
-        int two = 1 + ((2 * i + 1) != s3_incr.end());
-	    for (int itwo = 0; itwo < two; itwo++) {
-            if (itwo == 0) {
-                k = s3_incr.index[0];
-                l = s3_incr.index[1];
-                j = s3_incr.index[2];
-            }
-            else {
-                k = s3_decr.index[0];
-                l = s3_decr.index[1];
-                j = s3_decr.index[2];
-            }
-            
+    for (int i=0; i< (s3.volume() + 1) / 2; i++) {
+        s3 = i;
+        for (int i2=0; i2 < 2; i2++) {
+            k = s3.index[0];
+            l = s3.index[1];
+            j = s3.index[2];
+
             int C = klj_index(k, l, j);
             int R=0;
             
@@ -682,8 +665,11 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
             }
             
             M.col(C).subvec(0, C) += v.subvec(0, C);
+
+            if ( (2*i + 1) == s3.volume() ) break;
+
+            s3 = s3.volume() - 1 - i;
         }
-	s3_incr++; s3_decr--;
     }
 }
 
