@@ -1,8 +1,12 @@
 SRCDIR:=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 OS := $(shell uname -s)
 
-BLAS ?= Apple
+BLAS ?= acml_mp
 COMPILER ?= GNU
+
+ifdef PROFILE
+	include $(SRCDIR)/config/$(PROFILE).mk
+endif
 
 include $(SRCDIR)/config/$(COMPILER).mk
 include $(SRCDIR)/config/blas.mk
