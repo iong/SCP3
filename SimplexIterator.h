@@ -35,7 +35,7 @@ public:
     SimplexIterator operator++(int);
     SimplexIterator operator--(int);
 
-    const int& end() {
+    const int& volume() {
         return V[dim-1][N-1];
     }
 };
