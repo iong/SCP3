@@ -56,29 +56,27 @@ FUNCTION beasley_springer_moro(u) result(x)
     END DO
 
 END FUNCTION beasley_springer_moro
-end module bsm
 
 !==============================================================================!
 
 
 !> Returns a d-dimensional Sobol sequence of p points following a standard
 !  normal distribution
-subroutine sobol_stdnormal(d, skip, x_stdnormal)
+subroutine sobol_stdnormal(skip, x_stdnormal)
     use sobol
-    use bsm
     implicit none
-    !> dimension
-    INTEGER(kind = 4), INTENT(IN) :: d
- 
     !> number of initial points to be skipped
-    INTEGER(kind = 8), INTENT(IN) :: skip   
-
+    INTEGER(kind = 8), INTENT(INOUT) :: skip
     !> return an array of doubles, standard normal
-    DOUBLE PRECISION, DIMENSION(d), INTENT(OUT) :: x_stdnormal     
+    DOUBLE PRECISION, INTENT(INOUT) :: x_stdnormal(:)     
 
-    x_stdnormal = beasley_springer_moro(i8_sobol(int(d, 8), skip))
+    !> dimension
+    INTEGER(kind = 8) :: d
 
+    d = size(x_stdnormal)
+    x_stdnormal = beasley_springer_moro(i8_sobol(d, skip))
 END subroutine sobol_stdnormal
+end module bsm
 
 
 subroutine sobol_stdnormal_c(d, skip, x) bind(c)
