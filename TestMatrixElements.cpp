@@ -142,6 +142,8 @@ int main(int argc, char *argv[])
     vec mass, x0, omegasq0;
     
     init_fortran_runtime(argc, argv);
+    _MM_SET_EXCEPTION_MASK(_MM_GET_EXCEPTION_MASK() & ~_MM_MASK_INVALID);
+
     process_options(argc, argv);
     load_from_vladimir(input_file, N, mass, x0, H);
     eig_sym(omegasq0, U, H);
