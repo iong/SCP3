@@ -201,7 +201,46 @@ vec TIP4P_charges(size_t N)
     
     return q;
 }
+/*
+mat getHessian(vec& r)
+{
+    int N = r.n_cols;
 
+    vec Vrp(N);
+    mat H(N,N);
+
+    for (int i=0; i<N; i++) {
+        double ri0 = r[i];
+        
+        r[i] = ri0 + s;
+        TIP4P_UF(N, rp.memptr(), &V, H.col(i).memptr());
+
+        r[i] = ri0 - s;
+        TIP4P_UF(N, rp.memptr(), &V, Vrp.memptr());
+
+        H.col(i) = (H.col(i) - Vrp) / 2.0;
+        
+        r[i] = ri0;
+    }
+
+    for (int i=1; i<N; i++) {
+        H.col(i).subvec(0, i-1) = 0.5 * (H.col(i).subvec(0, i-1) 
+                                         + H.row(i).subvec(0, i-1) );
+    }
+    
+    return H;
+}
+
+
+void massScaleHessian(vec& mass, mat& H)
+{
+    vec isqrt_mass = 1.0/sqrt(mass);
+    
+    for (int i=0; i<H.n_cols; i++) {
+        H.col(i) *= isqrt_mass * isqrt_mass[i];
+    }
+}
+*/
 
 int main (int argc, char *  argv[]) {
     int N;
@@ -209,7 +248,16 @@ int main (int argc, char *  argv[]) {
     vec mass, x0, omegasq0;
 
     process_options(argc, argv);
-    load_from_vladimir(input_file, N, mass, x0, H);
+    
+        // if (harmonic_approximation) {
+            //load_from_vladimir(input_file, N, mass, x0);
+            //    H = getHessian(x0);
+            //   massScaleHessian(mass, H);
+            //   }
+            //  else {
+        load_from_vladimir(input_file, N, mass, x0, H);
+        //  }
+    
     eig_sym(omegasq0, U, H);
 
     ofstream sout("omega0.dat");
