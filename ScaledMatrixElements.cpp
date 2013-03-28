@@ -756,32 +756,76 @@ mat ScaledMatrixElements::transitionDipole(vec& charges, mat& MUa, mat& C)
         Q(1, i+1) = charges[i/3];
         Q(2, i+2) = charges[i/3];
     }
-    
+
     mat mu_m_m2 = Q*MUa;
     mat mu_0_m = mu_m_m2 / sqrt(2.0);
     
-    mat mu(3,C.n_cols-1);
+    mat mu(3,C.n_cols-1);    /*
     for (int f=1; f<C.n_cols; f++) {
-        mat d(3,3);
-        d.col(0) = mu_0_m* C(0,0)*C(span(1,Nmodes),f);
-        d.col(1) = mu_0_m* C(span(1,Nmodes), 0)*C(0,f);
+        vec d;
         
-        if (C.n_cols == Nmodes + 1) continue;
-        
-        //vec d1 = mu_m_m2* ( C(span(1,Nmodes),0) 
-        //                             % C(span(Nmodes+1,Nmodes+Nmodes2), f)
-        //                  + C(span(Nmodes+1,Nmodes+Nmodes2),0)
-        //                             % C(span(1,Nmodes),f) );
+        d = mu_0_m* C(0,0)*C(span(1,Nmodes),f);
+        d += mu_0_m* C(span(1,Nmodes), 0)*C(0,f);
 
-        d.col(2).fill(0.0);
-        for (int m=0; m<Nmodes2-1; m++) {
-            span s(kl_index(m,m+1), kl_index(m,Nmodes2-1));
-            d.col(2) += mu_0_m.cols(m+1,Nmodes2-1) 
-                            * (C(m, 0)*C(s,f) + C(s,0)*C(m,f));
+        for (m=0; m<Nmodes2; m++) {
+            
+            d+= mu_0_m2.col(m) * ( C(k_index(m), 0) % C(k2_index(m), f) 
+                                  + C(k2_index(m), 0) % C(k_index(m), f) );
+            double t0 = 0.0
+            for (n=0; n<m; n++) {
+                t0 += C(k_index(n), 0) * C(kl_index(n, m), f);
+                t0 += C(kl_index(n, m), 0) * C(k_index(n), f);
+            }
+            for (n=m+1; n<Nmodes2; n++) {
+                t0 += C(k_index(n), 0) * C(kl_index(m, n), f);
+                t0 += C(kl_index(m, n), 0) * C(k_index(n), f);
+            }
+            
+            d += mu_0_m.col(m)*t0;
         }
-            //cout << reshape(d, 1, 9);
-        mu.col(f-1) = d.col(0)+d.col(2);// + d1 + d2;
+        
+        for (m=0; m<Nmodes3; m++) {
+            double t1 = 0.0, t2 = 0.0, t3 = 0.0;
+            t3 = C(k2_index(m), 0) * C(k3_index(m), f)
+                + C(k3_index(m), 0) * C(k2_index(m), f);
+            
+            for (n=0; n<m; n++) {
+                t1 += C(k2_index(n), 0) * C(k2l_index(n, m), f);
+                t2 += C(kl_index(n, m), 0) * C(k2l_index(n, m)+1, f);
+                
+                t2 += C(k2l_index(n, m), 0) * C(k2_index(n), f);
+                t2 += C(k2l_index(n, m)+1, 0) * C(kl_index(n, m), f);
+                
+                for (p=m+1; p<Nmodes3; p++) {
+                    t1 += C(kl_index(n, p), 0) * C(klj_index(n, m, p), f);
+                    t1 += C(klj_index(n, m, p), 0) * C(kl_index(n, p), f);
+                }
+                for (p=n+1; p<m; p++) {
+                    t1 += C(kl_index(n, p), 0) * C(klj_index(n, p, m), f);
+                    t1 += C(klj_index(n, p, m), 0) * C(kl_index(n, p), f);
+                }
+            }
+            
+            for (n=m+1; n<Nmodes3; n++) {
+                t1 += C(k2_index(n), 0) * C(k2l_index(m, n)+1, f);
+                
+                t2 += C(kl_index(m, n), 0) * C(k2l_index(m, n), f);
+                t2 += C(k2l_index(m, n), 0) * C(kl_index(m, n), f);
+                
+                t1 += C(k2l_index(m, n)+1, 0) * C(k2_index(n), f);
+                
+                for (p=n+1; p<Nmodes3; p++) {
+                    t1 += C(kl_index(n, p), 0) * C(klj_index(m, n, p), f);
+                    t1 += C(klj_index(m, n, p), 0) * C(kl_index(n, p), f);
+                }
+            }
+            
+            d += mu_0_m.col(m)*t1 + mu_m_m2.col(m)*t2 + mu_m2_m3.col(m)*t3;
+        }
+        
+        mu.col(f-1) = d;
     }
+     */
     
     return mu;
 }
