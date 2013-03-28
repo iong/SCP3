@@ -1,4 +1,4 @@
-MODULE water_module
+MODULE water
 
   !DOUBLE PRECISION, PARAMETER :: epsilon = 0.1852D0            ! kcal/mol
   DOUBLE PRECISION, PARAMETER :: bohr = 0.52917721092           ! atomic units
@@ -404,12 +404,12 @@ CONTAINS
 
 
   END SUBROUTINE test_grad
-END MODULE water_module
+END MODULE water
 
 
 !! Interoperability with C/C++
 subroutine TIP4P_UF(N_H2O, r, U, UX) bind(C, name="TIP4P_UF")
-    use water_module, only: fortran_TIP4P_UF => TIP4P_UF
+    use water, only: fortran_TIP4P_UF => TIP4P_UF
     use iso_c_binding
     integer(c_int), value :: N_H2O
     real(c_double) :: r(3, 3*N_H2O), U, UX(3, 3*N_H2O)
@@ -418,7 +418,7 @@ subroutine TIP4P_UF(N_H2O, r, U, UX) bind(C, name="TIP4P_UF")
 end subroutine
 
 function TIP4P_U(N_H2O, r) result(Utot) bind(C, name="TIP4P_U")
-    use water_module, only: fortran_TIP4P_U => TIP4P_U
+    use water, only: fortran_TIP4P_U => TIP4P_U
     use iso_c_binding
     integer(c_int), value :: N_H2O
     real(c_double) :: r(3, 3*N_H2O), Utot
