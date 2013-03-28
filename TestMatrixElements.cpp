@@ -125,12 +125,23 @@ load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
 
 #include <cstdio>
 
+void init_fortran_runtime(int argc, char *argv[])
+{
+#ifdef __GNU__
+    _gfortran_set_args(argc, argv);
+    _gfortran_set_args(1<<6-1);|
+#endif
+}
+
+#include <xmmintrin.h>
+
 int main(int argc, char *argv[])
 {
     int N;
     mat H, U;
     vec mass, x0, omegasq0;
     
+    init_fortran_runtime(argc, argv);
     process_options(argc, argv);
     load_from_vladimir(input_file, N, mass, x0, H);
     eig_sym(omegasq0, U, H);
