@@ -85,7 +85,7 @@ subroutine sobol_stdnormal_c(d, skip, x) bind(c)
     use iso_c_binding
     implicit none
     INTEGER(c_int64_t), INTENT(IN), value :: d
-    INTEGER(c_int64_t), INTENT(IN) :: skip
+    INTEGER(c_int64_t), INTENT(INOUT) :: skip
     real(c_double), intent(out) :: x(d)
 
     real(c_double), pointer :: x_stdnormal(:)
