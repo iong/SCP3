@@ -7,7 +7,6 @@
  *
  */
 
-#include <armadillo>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -18,6 +17,9 @@
 #include <tr1/random>
 
 #include <getopt.h>
+
+#include <armadillo>
+#include <H5Cpp.h>
 
 #include "ScaledMatrixElements.h"
 
@@ -30,6 +32,8 @@ extern "C" {
 
 using namespace std;
 using namespace arma;
+using namespace H5;
+
 
 
 static const double bohr=0.52917721092;
@@ -242,6 +246,36 @@ void massScaleHessian(vec& mass, mat& H)
 }
 */
 
+
+/** Save in column major mode **/
+void save_hdf5(mat &M, char *name)
+{
+    H5File fout(name, H5F_ACC_TRUNC);
+    
+    hsize_t dims[2];
+    dims[0] = M.n_cols;
+    dims[1] = M.n_rows;
+    DataSpace dspace(2, dims);
+    
+    DSetCreatPropList plist;
+
+    hsize_t chunk_size[2];
+    chunk_size[0] = (128*1024 + dims[1] - 1)/ dims[1];
+    chunk_size[1] = dims[1];
+
+    plist.setChunk(2, chunk_size);
+    plist.setDeflate(6);
+    
+    FloatType dtype(PredType::NATIVE_FLOAT);
+    DataSet dset = fout.createDataSet("M", dtype, dspace, plist);
+    
+    FloatType mem_dtype(PredType::NATIVE_DOUBLE);
+    dset.write(M.memptr(), mem_dtype);
+    
+    dset.close();
+    fout.close();
+}
+
 int main (int argc, char *  argv[]) {
     int N;
     mat H, U;
@@ -360,9 +394,9 @@ int main (int argc, char *  argv[]) {
             E0out_sd << E0[1] - E0[0] << endl;
 
             if ( (i+1)%(1<<17)==0) {
-                char s[100];
-                sprintf(s, "sM_%07d.dat", i+1);
-                Mout.save(s, raw_ascii);
+                char s[128];
+                sprintf(s, "sM_%07d.h5", i+1);
+                save_hdf5(Mout, s);
 
                 eigvals = eig_sym(Mout);
                 E0[2] = eigvals[0]*autocm;
