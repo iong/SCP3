@@ -17,9 +17,7 @@ FDBG ?= -fbounds-check -ffpe-trap=invalid,zero,overflow,denormal \
 
 OPENMP_FLAGS ?= -fopenmp
 
-
 FORTRAN_LIBS := -lgfortran
-
 GFORTRAN_LIBDIR := $(subst --libdir=,,$(filter --libdir=%,$(shell $(FC) -v 2>&1)))
 ifneq ($(GFORTRAN_LIBDIR),)
 	FORTRAN_LIBS := -L$(GFORTRAN_LIBDIR) $(FORTRAN_LIBS)
