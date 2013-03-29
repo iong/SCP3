@@ -1,7 +1,6 @@
 SRCDIR:=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 OS := $(shell uname -s)
 
-BLAS ?= acml_mp
 COMPILER ?= GNU
 
 ifdef PROFILE

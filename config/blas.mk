@@ -1,5 +1,5 @@
-blas_default_intel:=mkl_sequential
-blas_default_GNU:=$(if $(findstring darwin,$(OS)),Apple,blas)
+blas_default_intel:=-mkl=sequential
+blas_default_GNU:=$(if $(findstring Darwin,$(OS)),-framework Accelerate,-lblas)
 blas_default_PGI:=acml
 
 blas_mkl_sequential_intel:= -mkl=sequential
@@ -10,15 +10,15 @@ blas_mkl_parallel_intel:= -mkl=parallel
 blas_mkl_parallel_GNU:=-lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lgomp
 blas_mkl_parallel_PGI:=-lmkl_intel_lp64 -lmkl_pgi_thread -lmkl_core
 
-ifndef BLAS
-	BLAS:=default
-endif
+blas_Apple := -framework Accelerate
+
+BLAS ?= default
 
 ifdef blas_$(BLAS)_$(COMPILER)
 	BLAS_LIBRARIES:=$(blas_$(BLAS)_$(COMPILER))
 else
-ifeq ($(BLAS),Apple)
-	BLAS_LIBRARIES:=-framework Accelerate
+ifdef blas_$(BLAS)
+	BLAS_LIBRARIES:=$(blas_$(BLAS))
 else
 	BLAS_LIBRARIES:=-l$(BLAS)
 endif
