@@ -17,14 +17,14 @@ vpath %.f90 $(SRCDIR)
 CPPFLAGS += -I$(SRCDIR)
 
 ifdef DEBUG
-$(foreach x,CFLAGS CXXFLAGS LDFLAGS,$(eval $(x) += $(CDBG) ) )
+$(foreach x,CFLAGS CXXFLAGS,$(eval $(x) += $(CDBG) ) )
 	FFLAGS    += $(FDBG)
 else
-$(foreach x,CFLAGS CXXFLAGS LDFLAGS,$(eval $(x) += $(COPT) ) )
+$(foreach x,CFLAGS CXXFLAGS,$(eval $(x) += $(COPT) ) )
 	FFLAGS    += $(FOPT)
 endif
-$(foreach x,CFLAGS CXXFLAGS FFLAGS LDFLAGS,$(eval $(x) += $(TARGET_FLAGS) ) )
-$(foreach x,CFLAGS CXXFLAGS FFLAGS LDFLAGS,$(eval $(x) += $(OPENMP_FLAGS) ) )
+$(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(TARGET_FLAGS) ) )
+$(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(OPENMP_FLAGS) ) )
 
 
 LIBS :=$(BLAS_LIBRARIES) -lhdf5 -lhdf5_cpp
