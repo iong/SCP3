@@ -34,7 +34,7 @@ endif
 
 FOBJS := water.o sobol.o sobol_stdnormal.o
 
-all: SCP_scaled_nm
+all: SCP3
 
 %.o: %.f90
 	$(FC) -c $(FFLAGS) -o $@ $<
@@ -43,7 +43,7 @@ sobol_stdnormal.o : sobol.o
 
 fobjs: $(FOBJS)
 
-SCP_scaled_nm: SCP_scaled_nm.o ScaledMatrixElements.o $(FOBJS)
+SCP3: SCP3.o ScaledMatrixElements.o $(FOBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(FORTRAN_LIBS)
 
 TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
