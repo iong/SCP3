@@ -1,0 +1,101 @@
+Potential energy surface (and dipole moment surface) for water [WHBB]
+
+I. INSTALLATION
+
+1) Uncompress and extract the tar file:
+
+        $ tar xzvf water_WHBB.tgz
+
+   This will create a target directory 'water_WHBB' inlcudes all library and
+   data files, source code, test program and some geometries.
+
+
+II. TEST
+   Source codes for test program are provided in the 'water_WHBB/src'.
+
+1) Edit the file 'Makefile' in 'water_WHBB/src' directory
+
+        $ cd water_WHBB/src
+        $ vi Makefile
+
+   You might want to modify some of the following variables in the Makefile
+        a. $FC     --- PATH to the Intel Fortran Compiler
+        b. $LIBDIR --- Location of the library files
+        c. $MODDIR --- Location of the module files
+
+3) Compile the source codes 
+
+	$ make 
+
+   This will generate an executable called 'getpot'. 
+
+4) Calculate the potential, gradient and the dipole moment at a given structure
+
+        >./getpot xyz/trimer.xyz 
+  
+   The code first reads the coordinates from the file given in the argument
+   and calculates the potential energy and gradient using the water potential,
+   WHBB/3b5, and then calls dipole moment routine to compute DMS(1,2).
+
+   * Please refer to References for detail about WHBB/3b5 and DMS(1,2).
+
+
+III Miscellaneoius
+ 
+1) Data files in the 'water_WHBB/data' directory
+
+   data/WHBB_MP2_3b5                 --- coefs of 5th-order 3-body fit
+   data/WHBB_MP2_3b6                 --- coefs of 6th-order 3-body fit
+   data/fit0000.out.pes4X1-T1.090915 --- coefs of 2-body potential fit
+   data/h4o2.dms4.coeff.dat          --- coefs of 1,2-body dipole moment fit
+
+   * WHBB/3b5 PES is used by default. One can change between 5th-order fit and
+   6th-order fit, or change the location of data file by modifying 'pes_init'
+   subroutine in 'src/pes_shell.f90'.
+
+2) Format of the input geometry
+   
+   By default, the unit of the Cartesian coordinates is assumed to be
+   Angstrom.  Atoms need to be in the order of ascending mass, so "H" always
+   goes before "O". All "H" atoms and "O" atoms should be listed in the same
+   monomer order.  For example, a water dimer should look like, "H1 H2 H3 H4
+   O5 O6", where H1-O5-H2 is one monomer and H3-O6-H4 is the second monomer.
+
+3) Numerical gradient and hessian
+   
+   According to the definition our water potential, numerical gradient and
+   hessian can be calculated highly efficiently. Thus, we provide in this
+   package optimized routines to calculate numerical gradient. Similar
+   routines for hessian would be available upon request.
+
+4) Both serial and parallel versions of library and module files compiled
+   using Intel Fortran Compiler (64 bit V.10.1) are provided. Parallel version
+   is clearly labelled with 'omp' suffix.
+
+5) The original F77 code of water monomer potential due to H. Partridge and
+   D. W. Schwenke (J. Chem. Phys. 106, 4618 (2007)) has been restructured in
+   the current release of our water potential (cf 'pot_monomer.f90' and
+   'pot_monomer_mod.f90').
+
+6) Also the latest extension of the flexible, polarizable, Thole-type model
+   potential (TTM3-F, v. 3.0) due to G. S. Fanourgakis and S. S. Xantheas
+   (J. Chem. Phys. 128, 074506 (2008), http://www.pnl.gov/science/ttm3f.asp)
+   are included in the current release with minor modifications on data
+   structure.
+ 
+
+IV REFERENCES
+
+   Ref 1. Yimin Wang, Benjamin C. Shepler, Bastiaan J. Braams, and Joel
+          M. Bowman, "Full-dimensional, ab initio potential energy and dipole
+          moment surfaces for water", J. Chem. Phys. 131, 054511 (2009);
+
+   Ref 2. Yimin Wang, Xinchuan Huang, Benjamin C. Shepler, Bastiaan J. Braams,
+          and Joel M. Bowman "Flexible, ab initio potential, and dipole moment
+          surfaces for water.  I. Tests and applications for clusters up to
+          the 22-mer", J. Chem. Phys. 134, 094509 (2011)
+
+V. CONTACT
+	"Bowman, Joel M" <jmbowma@emory.edu>
+        "Wang, Yimin" <ywang34@emory.edu>
+
