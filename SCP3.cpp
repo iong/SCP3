@@ -54,6 +54,8 @@ static int64_t NSobol=1<<20, sobol_skip=1<<30;
 static string input_file;
 static string spectrum_file;
 
+static string continue_from_file;
+static unsigned int continue_from;
 static ifstream rng_in;
 
 void process_options(int argc,  char *  argv[])
@@ -89,6 +91,10 @@ void process_options(int argc,  char *  argv[])
                 break;
             case 's':
                 spectrum_file = optarg;
+                break;
+            case 'c':
+                continue_from_file = optarg;
+                continue_from = strtol(strrchr(optarg, '_')+1, NULL, 10);
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;
@@ -341,9 +347,19 @@ int main (int argc, char *  argv[]) {
     int Nstates = Nstates2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
 
     mat M(Nstates, Nstates);
-    M.fill(0.0);
     ScaledMatrixElements  sme(omega, Nmodes2, Nmodes3);
 
+    
+    if (continue_from_file.empty()) {
+        M.fill(0.0);
+    }
+    else {
+        load_hdf5(continue_from_file, M);
+        M *= -1.0;
+        sme.addHODiagonal(M);
+        M *= -(double)continue_from;
+    }
+    
     vec charge = TIP4P_charges(N);
 
     if ( !spectrum_file.empty() ) {
@@ -370,11 +386,25 @@ int main (int argc, char *  argv[]) {
     ofstream dipoleout("sdipole.dat");
     */
 
-    ofstream E0out_sd("E0_singles+doubles.dat");
+    ofstream E0out_sd, E0out_t;
+    
+    if (continue_from_file.empty()) {
+        E0out_sd.open("E0_singles+doubles.dat");
+        E0out_t.open("E0_triples.dat");
+    }
+    else {
+        char fname[128];
+        
+        sprintf(fname, "E0_singles+doubles_%07d.dat", continue_from);
+        E0out_sd.open(fname);
+        
+        sprintf(fname, "E0_triples_%07d.dat", continue_from);
+        E0out_t.open(fname);
+    }
+
     fixed(E0out_sd);
     E0out_sd.precision(10);
 
-    ofstream E0out_t("E0_triples.dat");
     fixed(E0out_t);
     E0out_t.precision(10);
 
@@ -388,6 +418,8 @@ int main (int argc, char *  argv[]) {
         else {
             sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
         }
+        
+        if (i+1 <= continue_from) continue;
 
         y /=  sqrt(2.0);
         r = MUa*y + x0;
