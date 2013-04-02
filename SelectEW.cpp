@@ -78,10 +78,12 @@ int main(int argc, char *argv[])
     mat M;
 
     string h5name_in(argv[1]);
+    int subspace_size = atoi(argv[2]);
+
     load_hdf5(h5name_in, M);
     
     mat EV;
-    vec EW = dsyevr(M, 20, &EV);
+    vec EW = dsyevr(M, subspace_size, &EV);
     
     string h5name_out = h5name_in.substr(0, h5name_in.length() - 3) + "_EWV.h5";
     H5File h5out(h5name_out, H5F_ACC_TRUNC);
