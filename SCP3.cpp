@@ -60,7 +60,7 @@ static ifstream rng_in;
 
 void process_options(int argc,  char *  argv[])
 {
-    int ch, i, j;
+    int ch;
     while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
@@ -178,7 +178,6 @@ void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
                    ostream& specout, ostream& dipoleout, ostream& E0out,
                    string Cout="")
 {
-    char s[256];
     mat C;
     vec E;
     eig_sym(E, C, H);
