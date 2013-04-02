@@ -52,6 +52,9 @@ TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
 
 TestSimplexIterator: TestSimplexIterator.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS)
+
+SelectEW: SelectEW.o DiskIO.o
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 clean:
 	$(RM) *.o *.mod
 
