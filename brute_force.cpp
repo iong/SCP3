@@ -16,7 +16,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 
-
+#include "DiskIO.h"
 #include "ScaledMatrixElements.h"
 
 
@@ -71,75 +71,6 @@ po::variables_map process_options(int argc,  char *  argv[])
     }
     return vm;
 }
-
-
-double NuclearMass(string &species)
-{
-    static const double Hmass=1837.15137;
-    static const double Cmass=21891.6543;
-    
-    
-    if (species.compare("H") == 0 ) {
-        return Hmass;
-    }
-    else if (species.compare("C") == 0 ) {
-        return Cmass;
-    }
-    else if (species.compare("O") == 0 ) {
-        return Cmass*15.9994/12.0107;
-    }
-    else {
-        return -1.0;
-    }
-    
-}
-
-
-void
-load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
-{
-    ifstream fin(name.c_str());
-    
-    fin >> N;
-    
-    mass.resize(3*N);
-    x0.resize(3*N);
-    H.resize(3*N, 3*N);
-    
-    char skipbuf[256];
-    fin.getline(skipbuf, sizeof(skipbuf));
-    fin.getline(skipbuf, sizeof(skipbuf));
-    
-    for (int i=0; i<N; i++) {
-        string species;
-        
-        fin >> species;
-        mass( span(3*i, 3*i+2) ).fill(NuclearMass(species));
-        fin >> x0[3*i] >> x0[3*i+1] >> x0[3*i+2];
-    }
-    x0 /= bohr;
-    
-    for (int i=0; i < 3*N; i++) {
-        for (int j=0; j <= i; j++) {
-            fin >> H(j, i);
-            H(i, j) = H(j, i);
-        }
-    }
-    
-    fin.close();
-}
-
-extern "C" {
-    void sobol_stdnormal_c(int64_t d, int64_t *skip, void *x);
-    double TIP4P_U(int N_H20, double *r);
-    void dsyevr_(char *, char *, char *,  int *,  double *,  int *,  double *,
-                 double* ,  int *IL,  int *IU, double *ABSTOL,  int *M,
-                 double *W, double *Z, int *LDZ, int *ISUPPZ, double *WORK,
-                 int *LWORK, int *IWORK, int *LIWORK, int *INFO);
-    double dlamch_(char *);
-}
-
-
 
 vec dsyevr(mat &A, mat *C=NULL)
 {

@@ -43,7 +43,7 @@ sobol_stdnormal.o : sobol.o
 
 fobjs: $(FOBJS)
 
-SCP3: SCP3.o ScaledMatrixElements.o $(FOBJS)
+SCP3: SCP3.o ScaledMatrixElements.o DiskIO.o $(FOBJS)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(FORTRAN_LIBS)
 
 TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
