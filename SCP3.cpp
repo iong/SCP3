@@ -276,6 +276,32 @@ void save_hdf5(mat &M, char *name)
     fout.close();
 }
 
+
+void load_hdf5(string& name, mat &M)
+{
+    H5File fin(name, H5F_ACC_RDONLY);
+    DataSet dset = fin.openDataSet("M");
+    
+    DataSpace file_space = dset.getSpace();
+    
+    hsize_t dims[2];
+    int ndims = file_space.getSimpleExtentDims(dims);
+    
+    if (ndims != 2 || dims[0] != dims[1]) {
+        cerr << "HDF5 dataset \"M\" has wrong shape. ndims = " << ndims
+             << ", dims = "<<dims[0]<<"x"<<dims[1]<<endl;
+    }
+    
+    M.set_size(dims[1], dims[0]);
+    
+    FloatType mem_dtype(PredType::NATIVE_DOUBLE);
+    dset.read(M.memptr(), mem_dtype);
+    
+    dset.close();
+    fin.close();
+}
+
+
 int main (int argc, char *  argv[]) {
     int N;
     mat H, U;
@@ -321,7 +347,7 @@ int main (int argc, char *  argv[]) {
     vec charge = TIP4P_charges(N);
 
     if ( !spectrum_file.empty() ) {
-        M.load(spectrum_file, raw_ascii);
+        load_hdf5(spectrum_file, M);
 
         string tname = "freq" + spectrum_file.substr(1);
         ofstream specout(tname.c_str());
