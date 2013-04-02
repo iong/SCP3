@@ -27,7 +27,7 @@ $(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(TARGET_FLAGS) ) )
 $(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(OPENMP_FLAGS) ) )
 
 
-LIBS :=$(BLAS_LIBRARIES) -lhdf5 -lhdf5_cpp
+LIBS :=$(BLAS_LIBRARIES) -lhdf5_cpp -lhdf5 -lz
 ifeq ($(OS),Darwin)
 LIBS +=-larmadillo
 endif
