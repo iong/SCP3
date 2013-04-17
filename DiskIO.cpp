@@ -34,6 +34,35 @@ static double NuclearMass(string &species)
     
 }
 
+void
+load_xyz(string &name, vec &mass, vec& x0)
+{
+    int N;
+    
+
+    ifstream fin(name.c_str());
+    
+    fin >> N;
+    
+    mass.resize(3*N);
+    x0.resize(3*N);
+    
+    char skipbuf[256];
+    fin.getline(skipbuf, sizeof(skipbuf));
+    fin.getline(skipbuf, sizeof(skipbuf));
+    
+    for (int i=0; i<N; i++) {
+        string species;
+        
+        fin >> species;
+        mass( span(3*i, 3*i+2) ).fill(NuclearMass(species));
+        fin >> x0[3*i] >> x0[3*i+1] >> x0[3*i+2];
+    }
+
+    fin.close();
+}
+
+
 
 void
 load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
