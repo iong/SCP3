@@ -24,15 +24,23 @@ contains
     use iso_c_binding
     integer(c_int),intent(in), value::nw
     !::::::::::::::::::::
+    character(256) :: data_dir
+    integer :: data_dir_len
+
+
+    call get_environment_variable('BOWMAN_DATADIR', data_dir, data_dir_len)
+    if (data_dir_len == 0) then
+        data_dir='./data'
+    end if
 
     ! 3-body init
-    call pes_init_3b('./data/WHBB_MP2_3b5')
+    call pes_init_3b(trim(data_dir)//'/WHBB_MP2_3b5')
     allocate(idx_3b(9,nw*(nw-1)*(nw-2)/6))
     call map_3b(nw,idx_3b)
 
     ! 2-body init
-    call prepot('./data/fit0000.out.pes4X1-T1.090915')
-    call predip('./data/h4o2.dms4.coeff.dat')
+    call prepot(trim(data_dir)//'/fit0000.out.pes4X1-T1.090915')
+    call predip(trim(data_dir)//'/h4o2.dms4.coeff.dat')
     allocate(idx_2b(6,nw*(nw-1)/2))
     call map_2b(nw,idx_2b)
 
