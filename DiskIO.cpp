@@ -18,11 +18,7 @@
 using namespace H5;
 
 static double NuclearMass(string &species)
-{
-    static const double Hmass=1837.15137;
-    static const double Cmass=21891.6543;
-    
-    
+{ 
     if (species.compare("H") == 0 ) {
         return Hmass;
     }

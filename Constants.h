@@ -8,5 +8,8 @@
  */
 
 
-static const double bohr=0.52917721092;
-static const double autocm=2.194746313e5;
+extern double bohr;
+extern double autocm;
+extern double Hmass;
+extern double Cmass;
+
