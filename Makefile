@@ -34,6 +34,17 @@ endif
 
 FOBJS := water.o sobol.o sobol_stdnormal.o
 
+WHBB_OBJ := math.o smear.o ttm3f_mod2.o mnasa_mod.o mnasa.o ttm3f_mb.o pot_monomer_mod.o pot_monomer.o pes3b.o pes_shell.o
+
+ifdef WHBB
+	OMP_SUFFIX:=$(if $(OPENMP_FLAGS),_omp,)
+
+	FFLAGS += -I$(SRCDIR)/water_WHBB/include/mod_3bifc$(OMP_SUFFIX)
+	LDFLAGS += -L$(SRCDIR)/water_WHBB/libs
+	LIBS += -lpes3bifc$(OMP_SUFFIX) -ldms2bifc$(OMP_SUFFIX) -lpes2bifc$(OMP_SUFFIX) 
+	FOBJS += $(WHBB_OBJ)
+endif
+
 all: SCP3
 
 %.o: %.f90

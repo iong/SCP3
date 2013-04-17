@@ -20,8 +20,9 @@ contains
   !=================================================!
   ! Initializing HBB water potential                !
   !=================================================!
-  subroutine pes_init(nw)
-    integer,intent(in)::nw
+  subroutine pes_init(nw) bind(C, name="whbb_pes_init")
+    use iso_c_binding
+    integer(c_int),intent(in), value::nw
     !::::::::::::::::::::
 
     ! 3-body init
@@ -126,5 +127,16 @@ contains
 
     return
   end function grad
+
+  subroutine f_grad(Natom, x, eps, V, Vx) bind(c, name="whbb_fgrad")
+    use iso_c_binding
+    integer(c_int), value, intent(IN) :: Natom
+    real(c_double), value, intent(IN) :: eps
+    real(c_double) :: x(3*Natom), V, Vx(3*Natom)
+
+
+    V = f(x)
+    Vx = grad(x, eps)
   
+  end subroutine
 end module pes_shell

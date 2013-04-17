@@ -16,4 +16,7 @@ extern "C" {
                  double *W, double *Z, int *LDZ, int *ISUPPZ, double *WORK,
                  int *LWORK, int *IWORK, int *LIWORK, int *INFO);
     double dlamch_(char *);
+
+    void whbb_pes_init(int nw);
+    void whbb_fgrad(int nw, double *x, double eps, double *V, double *Vx);
 }

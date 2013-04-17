@@ -22,6 +22,7 @@
 #include "Constants.h"
 #include "DiskIO.h"
 #include "F90.h"
+#include "Potentials.h"
 #include "ScaledMatrixElements.h"
 
 using namespace std;
@@ -34,6 +35,7 @@ static struct option program_options[] = {
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
     { "spectrum", required_argument, NULL, 's'},
+    { "whbb", no_argument, NULL, 'W'},
     {NULL, 0, NULL, 0}
 };
 
@@ -46,61 +48,8 @@ static string continue_from_file;
 static unsigned int continue_from;
 static ifstream rng_in;
 
-void process_options(int argc,  char *  argv[])
-{
-    int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:", program_options, NULL)) != -1) {
-        int p2;
-        switch (ch) {
-            case 'N':
-                p2 = atoi(optarg);
-                if (p2>32) {
-                    cerr << "-N <N>: <N>is too large, NSobol = 2^<N>\n";
-                    exit(EXIT_FAILURE);
-                }
-                NSobol = 1<<p2;
-                break;
-            case 'S':
-                p2 = atoi(optarg);
-                if (p2>32) {
-                    cerr << "-S <N>: <N>is too large, sobol_skip = 2^<N>\n";
-                    exit(EXIT_FAILURE);
-                }
-                sobol_skip = 1<<p2;
-                break;
-            case '2':
-                Nmodes2 = atoi(optarg);
-                break;
-            case '3':
-                Nmodes3 = atoi(optarg);
-                break;
-            case 'r':
-                rng_in.open(optarg);
-                break;
-            case 's':
-                spectrum_file = optarg;
-                break;
-            case 'c':
-                continue_from_file = optarg;
-                continue_from = strtol(strrchr(optarg, '_')+1, NULL, 10);
-                break;
-            default:
-                cerr << "Unknown option: " << ch << endl;
-                exit(EXIT_FAILURE);
-                break;
-        }
-    }
-    
-    argc -= optind;
-    argv += optind;
-    
-    if (argc < 1) {
-        cerr << "No input file supplied\n";
-        exit(EXIT_FAILURE);
-    }
-    
-    input_file = argv[0];
-}
+bool    use_whbb = false;
+Potential* pot;
 
 
 void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
@@ -181,12 +130,82 @@ void massScaleHessian(vec& mass, mat& H)
 */
 
 
+void process_options(int argc,  char *  argv[])
+{
+    int ch;
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:W", program_options, NULL)) != -1) {
+        int p2;
+        switch (ch) {
+            case 'N':
+                p2 = atoi(optarg);
+                if (p2>32) {
+                    cerr << "-N <N>: <N>is too large, NSobol = 2^<N>\n";
+                    exit(EXIT_FAILURE);
+                }
+                NSobol = 1<<p2;
+                break;
+            case 'S':
+                p2 = atoi(optarg);
+                if (p2>32) {
+                    cerr << "-S <N>: <N>is too large, sobol_skip = 2^<N>\n";
+                    exit(EXIT_FAILURE);
+                }
+                sobol_skip = 1<<p2;
+                break;
+            case '2':
+                Nmodes2 = atoi(optarg);
+                break;
+            case '3':
+                Nmodes3 = atoi(optarg);
+                break;
+            case 'r':
+                rng_in.open(optarg);
+                break;
+            case 's':
+                spectrum_file = optarg;
+                break;
+            case 'c':
+                continue_from_file = optarg;
+                continue_from = strtol(strrchr(optarg, '_')+1, NULL, 10);
+                break;
+            case 'W':
+                use_whbb = true;
+                break;
+            default:
+                cerr << "Unknown option: " << ch << endl;
+                exit(EXIT_FAILURE);
+                break;
+        }
+    }
+    
+    argc -= optind;
+    argv += optind;
+    
+    if (argc < 1) {
+        cerr << "No input file supplied\n";
+        exit(EXIT_FAILURE);
+    }
+    
+    input_file = argv[0];
+}
+
+
+
+
 int main (int argc, char *  argv[]) {
     int N;
     mat H, U;
     vec mass, x0, omegasq0;
 
     process_options(argc, argv);
+
+    if (use_whbb) {
+        pot = new WHBB(1e-3);
+    }
+    else {
+        pot = new qTIP4Pf();
+    }
+
     
         // if (harmonic_approximation) {
             //load_from_vladimir(input_file, N, mass, x0);
@@ -251,7 +270,7 @@ int main (int argc, char *  argv[]) {
 
 
     int NO = N/3;
-    TIP4P_UF(NO, x0.memptr(), &V, Vr.memptr());
+    (*pot)(x0, V, Vr);
     cout << "V0 = "<<V<<endl;
 
     /*
@@ -296,7 +315,7 @@ int main (int argc, char *  argv[]) {
 
         y /=  sqrt(2.0);
         r = MUa*y + x0;
-        TIP4P_UF(NO, r.memptr(), &V, Vr.memptr());
+        (*pot)(r, V, Vr);
 
         if (isnan(V)) {
             cerr << "V=NaN at i=" << i << endl;
