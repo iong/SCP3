@@ -21,7 +21,12 @@ vec dsyevr(mat &A, int IU=0, mat *C=NULL)
     char JOBZ='N';
     
     char RANGE='A';
+
     char UPLO='U';
+    if (A(0, A.n_cols-1) == 0.0) {
+        UPLO='L';
+    }
+
     int N = A.n_rows;
     int LDA = A.n_rows;
     double VU = 0.0, VL = 0.0;
