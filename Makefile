@@ -66,6 +66,10 @@ TestSimplexIterator: TestSimplexIterator.cpp
 
 SelectEW: SelectEW.o DiskIO.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
+
+Upot: $(FOBJS) Upot.o DiskIO.o
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS) $(FORTRAN_LIBS)
+
 clean:
 	$(RM) *.o *.mod
 
