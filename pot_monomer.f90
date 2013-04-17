@@ -15,12 +15,12 @@ subroutine vibpot(rij,v,n)
 !!$c     is the mass of the hydrogen associated with rij(i,2).
 !!$c     all masses are in au.
   integer,intent(in)::n
-  real,dimension(n,3),intent(in)::rij
-  real,dimension(n),intent(inout)::v
+  double precision,dimension(n,3),intent(in)::rij
+  double precision,dimension(n),intent(inout)::v
   !::::::::::::::::::::
   integer::i,j
-  real::x1,x2,x3,rhh,voh1,voh2,ex
-  real::fmat(15,3),v1,v2,term,vhh
+  double precision::x1,x2,x3,rhh,voh1,voh2,ex
+  double precision::fmat(15,3),v1,v2,term,vhh
   
   v=0.d0
   do i=1,n

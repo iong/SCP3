@@ -2,15 +2,15 @@ module pes_shell
   use pot_monomer_mod
   implicit none
   ! constants
-  real,parameter::auang=0.5291772083
-  real,parameter::aucm=219474.6313710
-  real,parameter::aukcal=627.51
+  double precision,parameter::auang=0.5291772083
+  double precision,parameter::aucm=219474.6313710
+  double precision,parameter::aukcal=627.51
 
   ! parameters for switching function
-  real,parameter::r2i=6.5/auang
-  real,parameter::r2f=7.5/auang
-  real,parameter::r3i=5.0/auang
-  real,parameter::r3f=6.0/auang
+  double precision,parameter::r2i=6.5/auang
+  double precision,parameter::r2f=7.5/auang
+  double precision,parameter::r3i=5.0/auang
+  double precision,parameter::r3f=6.0/auang
 
   ! some global variables
   integer,dimension(:,:),allocatable::idx_3b,idx_2b
@@ -45,10 +45,10 @@ contains
   ! water dipole moment                              !
   !==================================================!
   subroutine dipole(x,dp)
-    real,dimension(:),intent(in)::x
-    real,dimension(3),intent(out)::dp
+    double precision,dimension(:),intent(in)::x
+    double precision,dimension(3),intent(out)::dp
     ! ::::::::::::::::::::
-    real,dimension(1:size(x,1),3)::xn
+    double precision,dimension(1:size(x,1),3)::xn
     integer::natm
 
     natm=size(x)/3
@@ -69,13 +69,13 @@ contains
   !   argument, simply as f(x)                       !
   !==================================================!
   function f(x,xc,im) result(pot)
-    real,dimension(:),intent(in)::x
-    real,dimension(:),optional,intent(in)::xc
+    double precision,dimension(:),intent(in)::x
+    double precision,dimension(:),optional,intent(in)::xc
     integer,optional,intent(in)::im
-    real::pot
+    double precision::pot
     ! ::::::::::::::::::::
-    real,dimension(3,1:size(x)/3)::xn,xnc
-    real::p1,p2,p3,pmb
+    double precision,dimension(3,1:size(x)/3)::xn,xnc
+    double precision::p1,p2,p3,pmb
     integer::natm
 
     natm=size(x)/3
@@ -104,11 +104,11 @@ contains
   ! numerical gradient of the water potential        !
   !==================================================!  
   function grad(x,eps) result(gd)
-    real,dimension(:),intent(in)::x
-    real,intent(in)::eps
+    double precision,dimension(:),intent(in)::x
+    double precision,intent(in)::eps
     !::::::::::::::::::::
-    real,dimension(1:size(x))::xt,gd
-    real::fa,fb,fc,fd
+    double precision,dimension(1:size(x))::xt,gd
+    double precision::fa,fb,fc,fd
     integer::dim,i,iacc,im
 
     dim=size(x)

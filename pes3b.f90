@@ -17,8 +17,8 @@ end subroutine pes_init_3b
 !=========================================================!
 function fpes(x) 
   use pes
-  real,dimension(0:2,0:8),intent(in)::x
-  real::fpes
+  double precision,dimension(0:2,0:8),intent(in)::x
+  double precision::fpes
   ! ::::::::::::::::::::
 
   fpes=pes_x6y3_pot(x)

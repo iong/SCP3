@@ -1,12 +1,12 @@
 module pot_monomer_mod
   implicit none
-  real,dimension(245)::c5z
+  double precision,dimension(245)::c5z
   integer,dimension(245,3)::idx
   integer,dimension(9,3)::idxm
-  real::cmass(9)
-  real::reoh,thetae,b1,roh,alphaoh,deoh,phh1,phh2,ce
-  real::f5z,fbasis,fcore,frest
-  real::xm1,xm2
+  double precision::cmass(9)
+  double precision::reoh,thetae,b1,roh,alphaoh,deoh,phh1,phh2,ce
+  double precision::f5z,fbasis,fcore,frest
+  double precision::xm1,xm2
 
   data idx(:,1)/&
        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2,&
@@ -166,7 +166,7 @@ module pot_monomer_mod
 contains
   subroutine monomer_init()
     !::::::::::::::::::::
-    real,dimension(245)::cbasis,ccore,crest
+    double precision,dimension(245)::cbasis,ccore,crest
 
 !    expansion coefficients for basis correction
 
@@ -427,7 +427,7 @@ contains
       0.0000000000000D+00, 0.0000000000000D+00/
 
 
-    real::xmh,xmhi,xmd,fact,corr,rad
+    double precision::xmh,xmhi,xmd,fact,corr,rad
     integer::i,j
   
 !
