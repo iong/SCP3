@@ -1,6 +1,6 @@
 /*
- *  SCP_scaled_nm.cpp
- *  SCP_Double_Excitations
+ *  SCP3.cpp
+ *  SCP3
  *
  *  Created by Ionuț Georgescu on 2/5/13.
  *  Copyright 2013 UCI Chemistry. All rights reserved.

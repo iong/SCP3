@@ -7,16 +7,6 @@
  *
  */
 
-
-/*
- *  SCP_scaled_nm.cpp
- *  SCP_Double_Excitations
- *
- *  Created by Ionuț Georgescu on 2/5/13.
- *  Copyright 2013 UCI Chemistry. All rights reserved.
- *
- */
-
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
