@@ -18,6 +18,8 @@ class qTIP4Pf : public Potential {
         {
             int nb_h2o = x.n_rows / 9;
             TIP4P_UF(nb_h2o, x.memptr(), &V, Vx.memptr());
+
+            Vx *= -1.0;
         }
 };
 

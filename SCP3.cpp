@@ -324,7 +324,7 @@ int main (int argc, char *  argv[]) {
         }
 
         V -= 0.5 * dot(y, omega%y);
-        Vy = -MUaT * Vr - omega % y;
+        Vy = MUaT * Vr - omega % y;
         sme.addEpot(y, V, Vy, M);
 
         if ( (i+1)%(1<<14)==0) {
@@ -348,10 +348,12 @@ int main (int argc, char *  argv[]) {
                 sprintf(s, "sM_%07d.h5", i+1);
                 save_hdf5(Mout, s);
 
+                /*
                 eigvals = eig_sym(Mout);
                 E0[2] = eigvals[0]*autocm;
 
                 E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
+                */
             }
             //dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
         }
