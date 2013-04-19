@@ -8,8 +8,10 @@
 
 using namespace std;
 
-# include "sobol.hpp"
+#include "sobol.hpp"
+#include "beasley_springer_moro.h"
 
+namespace sobol {
 //****************************************************************************80
 
 int i4_bit_hi1 ( int n )
@@ -28695,4 +28697,15 @@ void timestamp ( )
 
   return;
 # undef TIME_SIZE
+}
+
+    void std_normal(int nb_dims, long long int *seed, double u[])
+    {
+        double *y = new double[nb_dims];
+        
+        i8_sobol (nb_dims, seed, y);
+        beasley_springer_moro(nb_dims, y, u);
+        
+        delete[] y;
+    }
 }
