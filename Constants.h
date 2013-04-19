@@ -12,4 +12,8 @@ extern double bohr;
 extern double autocm;
 extern double Hmass;
 extern double Cmass;
+extern double Omass;
+
+static const double autokcalpmol = 627.509474277194;
+
 

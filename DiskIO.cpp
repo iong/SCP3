@@ -26,7 +26,7 @@ static double NuclearMass(string &species)
         return Cmass;
     }
     else if (species.compare("O") == 0 ) {
-        return Cmass*15.9994/12.0107;
+        return Omass;
     }
     else {
         return -1.0;
