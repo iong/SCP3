@@ -63,6 +63,32 @@ int ScaledMatrixElements::klj_index(int k, int l, int j)
     return klj_fence + kth_plane_offset + jl_pos;
 }
 
+size_t ScaledMatrixElements::getBasisSize()
+{
+    size_t Nstates2 = 1 + Nmodes + Nmodes2*(Nmodes2 + 1)/2;
+
+    return Nstates2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
+}
+
+size_t ScaledMatrixElements::getSubBasisSize(int n)
+{
+    size_t Nstates = 0;
+
+    switch (n) {
+        case 3:
+            Nstates += (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
+        case 2:
+            Nstates += Nmodes2*(Nmodes2 + 1)/2;
+        case 1:
+            Nstates += Nmodes;
+        case 0:
+            Nstates += 1;
+        default:
+            break;
+    }
+
+    return Nstates;
+}
 
 void ScaledMatrixElements::addEpotSingles(mat &M)
 {

@@ -70,6 +70,10 @@ public:
         test_index();
     }
     
+    size_t getBasisSize();
+    size_t getSubBasisSize(int n);
+
+    
     void addEpot(vec &q_, double V_, vec& Vq_, mat &M);
     void test_index();
     void addHODiagonal(mat &M);
