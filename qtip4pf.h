@@ -3,10 +3,12 @@
 
 #include <cstddef>
 
+#include "h2o.h"
+
 namespace h2o {
 
-struct qtip4pf {
-
+class qtip4pf : public Potential  {
+public:
     qtip4pf();
     ~qtip4pf();
 

@@ -1,9 +1,24 @@
+#ifndef __H2O_H__
+#define __H2O_H__
+
+namespace h2o {
+    class Potential {
+    public:
+        Potential() {}
+        
+        virtual const char* name() const = 0;
+        virtual double operator()(size_t nw, const double*) = 0; // O H H O H H
+        virtual double operator()(size_t nw, const double*, double*) = 0; // O H H O H H
+    };
+}
+
+/*
+namespace h2o_i {
 #include <armadillo>
-
+    
 #include "F90.h"
-
-using namespace arma;
-
+    
+    using namespace arma;
 class Potential {
     public:
         Potential() {}
@@ -42,3 +57,7 @@ class WHBB : public Potential {
             whbb_fgrad(nb_atoms, x.memptr(), eps, &V, Vx.memptr());
         }
 };
+}
+ */
+
+#endif // __H2O_H__

@@ -3,10 +3,12 @@
 
 #include <cstddef>
 
+#include "h2o.h"
+
 namespace h2o {
 
-struct ttm3f {
-
+class ttm3f : public Potential {
+public:
     ttm3f();
     ~ttm3f();
 

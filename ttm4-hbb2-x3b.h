@@ -7,10 +7,12 @@
 #include "x3b.h"
 #include "ttm4-es.h"
 
+#include "h2o.h"
+
 namespace h2o {
-
-struct ttm4_hbb2_x3b {
-
+    
+class ttm4_hbb2_x3b : public Potential  {
+public:
     ttm4_hbb2_x3b();
 
     void load(const char*);

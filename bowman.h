@@ -3,10 +3,12 @@
 
 #include <cstddef>
 
+#include "h2o.h"
+
 namespace h2o {
 
-struct bowman {
-
+class bowman : public Potential  {
+public:
     bowman();
     ~bowman();
 
