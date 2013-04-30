@@ -142,6 +142,39 @@ void process_options(int argc,  char *  argv[])
     input_file = argv[0];
 }
 
+void potentialMap(h2o::Potential& pot, vec& x0, mat& MUa, int nb_dim_pts, double grid_size)
+{
+    int nw = x0.n_rows / 9;
+    
+    int Nmodes = MUa.n_cols;
+
+    fcube V(nb_dim_pts, nb_dim_pts, Nmodes*(Nmodes-1));
+
+    for (int ni=0; ni < Nmodes; ni++) {
+        for (int nj=0; nj < Nmodes; nj++) {
+            if (ni == nj) {
+                continue;
+            }
+            
+            vec y(Nmodes);
+            vec r(MUa.n_rows);
+            
+            y.fill(0.0);
+            
+            for (int i=0; i<nb_dim_pts; i++) {
+                y[ni] = (-0.5  + (double)(i)/(double)(nb_dim_pts - 1)) * grid_size;
+                for (int j=0; j<nb_dim_pts; j++) {
+                    y[nj] = (-0.5  + (double)(j)/(double)(nb_dim_pts - 1)) * grid_size;
+                    r = bohr * (MUa * y + x0);
+                    V(j, i, ni*(Nmodes-1) + nj) = pot(nw, r.memptr()) / autokcalpmol;
+                }
+            }
+        }
+    }
+
+    save_hdf5(V, "V.h5");
+}
+
 void SCP3(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa)
 {
     int Nmodes0 = x0.n_rows - 6;
@@ -365,6 +398,7 @@ int main (int argc, char *  argv[]) {
         exit(EXIT_SUCCESS);
     }
 
+        //potentialMap(*pot, x0, MUa, 65, 8.0);
     SCP3(*pot, x0, omega, MUa);
     
     rng_in.close();
