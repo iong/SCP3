@@ -82,60 +82,6 @@ void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
     (dipoleout << endl).flush();
 }
 
-vec TIP4P_charges(size_t N)
-{
-    static const double qM = 1.1128;
-    vec q(N);
-
-    for (int i=0; i<N; ) {
-        q[i++] = -qM;
-        q[i++] = 0.5*qM;
-        q[i++] = 0.5*qM;
-    }
-    
-    return q;
-}
-/*
-mat getHessian(vec& r)
-{
-    int N = r.n_cols;
-
-    vec Vrp(N);
-    mat H(N,N);
-
-    for (int i=0; i<N; i++) {
-        double ri0 = r[i];
-        
-        r[i] = ri0 + s;
-        TIP4P_UF(N, rp.memptr(), &V, H.col(i).memptr());
-
-        r[i] = ri0 - s;
-        TIP4P_UF(N, rp.memptr(), &V, Vrp.memptr());
-
-        H.col(i) = (H.col(i) - Vrp) / 2.0;
-        
-        r[i] = ri0;
-    }
-
-    for (int i=1; i<N; i++) {
-        H.col(i).subvec(0, i-1) = 0.5 * (H.col(i).subvec(0, i-1) 
-                                         + H.row(i).subvec(0, i-1) );
-    }
-    
-    return H;
-}
-
-
-void massScaleHessian(vec& mass, mat& H)
-{
-    vec isqrt_mass = 1.0/sqrt(mass);
-    
-    for (int i=0; i<H.n_cols; i++) {
-        H.col(i) *= isqrt_mass * isqrt_mass[i];
-    }
-}
-*/
-
 
 void process_options(int argc,  char *  argv[])
 {
