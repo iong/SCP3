@@ -252,8 +252,6 @@ double m2_n1_f_m2_l1(int m, int n, int l)
     return (q[n]*(Vq[l] + 2.*(2.*q[m]*(q[m]*Vq[l] + q[l]*Vq[m])*(-1. + sqr(q[m])) + V*q[l]*(-1. + 6.*sqr(q[m])))) + q[l]*Vq[n]*sqr(1. - 2.*sqr(q[m])))/6.;
 }
 
-#include <cstdio>
-
 double m2_n1_f_m1_l1_j1(int m, int n, int l, int j)
 {
     return (4.0*V*q[j]*q[l]*q[m]*q[n] + (q[l]*q[m]*q[n]*Vq[j] + q[j]*(q[m]*q[n]*Vq[l] + q[l]*q[n]*Vq[m] + q[l]*q[m]*Vq[n]))*(-1.0 + 2.0*sqr(q[m])))/(2.*sqrt(2.0));
