@@ -115,7 +115,7 @@ void save_hdf5(mat &M, char *name)
     DSetCreatPropList plist;
     
     hsize_t chunk_size[2];
-    chunk_size[0] = (128*1024 + dims[1] - 1)/ dims[1];
+    chunk_size[0] = min(dims[0], (128*1024 + dims[1] - 1)/ dims[1]);
     chunk_size[1] = dims[1];
     
     plist.setChunk(2, chunk_size);
