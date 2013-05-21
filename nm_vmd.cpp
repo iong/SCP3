@@ -132,13 +132,14 @@ string input_file, continue_from;
  
  int main (int argc, char *  argv[]) {
      int N;
-     mat H, U;
+     mat H, Up, U;
      vec mass, x0, omegasq0;
 
      string fin(argv[1]);
      load_from_vladimir(fin, N, mass, x0, H);
-     omegasq0 = dsyevr(H, &U);
+     omegasq0 = dsyevr(H, &Up);
      
+     U = Up.cols(6, Up.n_cols - 1);
      float nm_arrow_len = 1.0;
      float nm_arrow_radius = 0.1;
      float nm_arrow_tip_radius = 2.0 * nm_arrow_radius;
