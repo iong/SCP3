@@ -25,9 +25,9 @@ static double sqr(double x)
 
 class ScaledMatrixElements {
 protected:
-    double V, *Vq, *q;
+    double V;
     int Nmodes, Nmodes2, Nmodes3;
-    vec &omega;
+    vec omega, Vq, q;
 
     int k_fence, k2_fence, kl_fence, k2l_fence, k3_fence, klj_fence;
 
@@ -56,7 +56,7 @@ protected:
     void addEpotTriples(mat &M);
 
 public:
-    ScaledMatrixElements(vec &omega_, int Nmodes2_ = 0, int Nmodes3_ = 0) :
+    ScaledMatrixElements(const vec &omega_, int Nmodes2_ = 0, int Nmodes3_ = 0) :
     omega(omega_), Nmodes2(Nmodes2_), Nmodes3(Nmodes3_)
     {
         Nmodes = omega.n_rows;
@@ -66,11 +66,13 @@ public:
         k3_fence = kl_fence + (Nmodes2*(Nmodes2-1)) / 2;
         k2l_fence = k3_fence + Nmodes3;
         klj_fence = k2l_fence + Nmodes3*(Nmodes3-1);
-        
-        test_index();
     }
     
-    void addEpot(vec &q_, double V_, vec& Vq_, mat &M);
+    size_t getBasisSize();
+    size_t getSubBasisSize(int n);
+
+    
+    void addEpot(const vec &q_, double V_, const vec& Vq_, mat &M);
     void test_index();
     void addHODiagonal(mat &M);
     mat transitionDipole(vec& charges, mat& MUa, mat& C);

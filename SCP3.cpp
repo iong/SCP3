@@ -11,6 +11,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 
 #include <tr1/random>
@@ -21,9 +22,18 @@
 
 #include "Constants.h"
 #include "DiskIO.h"
-#include "F90.h"
-#include "Potentials.h"
 #include "ScaledMatrixElements.h"
+
+#include "sobol.hpp"
+
+#include "qtip4pf.h"
+#include "ttm3f.h"
+
+#ifdef HAVE_BOWMAN
+#include "bowman.h"
+#endif
+
+
 
 using namespace std;
 using namespace arma;
@@ -35,7 +45,9 @@ static struct option program_options[] = {
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
     { "spectrum", required_argument, NULL, 's'},
-    { "whbb", no_argument, NULL, 'W'},
+    { "potential", no_argument, NULL, 'p'},
+    { "unimode", no_argument, NULL, 'u'},
+    { "VMD", no_argument, NULL, 'V'},
     {NULL, 0, NULL, 0}
 };
 
@@ -48,9 +60,11 @@ static string continue_from_file;
 static unsigned int continue_from;
 static ifstream rng_in;
 
-bool    use_whbb = false;
-Potential* pot;
+static uvec selected_modes;
 
+static bool vmd_normal_modes = true;
+
+string  h2o_potential("qtip4pf");
 
 void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
                    ostream& specout, ostream& dipoleout, ostream& E0out,
@@ -75,65 +89,39 @@ void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
     (dipoleout << endl).flush();
 }
 
-vec TIP4P_charges(size_t N)
-{
-    static const double qM = 1.1128;
-    vec q(N);
 
-    for (int i=0; i<N; ) {
-        q[i++] = -qM;
-        q[i++] = 0.5*qM;
-        q[i++] = 0.5*qM;
-    }
+void parse_mode_description(const string& desc, uvec& selected_modes)
+{
+    istringstream iss(desc);
+    vector<int> t_modes;
     
-    return q;
-}
-/*
-mat getHessian(vec& r)
-{
-    int N = r.n_cols;
-
-    vec Vrp(N);
-    mat H(N,N);
-
-    for (int i=0; i<N; i++) {
-        double ri0 = r[i];
+    int start, stop;
+    while (iss.good()) {
+        if (iss.peek() == ',') {
+            iss.get();
+        }
         
-        r[i] = ri0 + s;
-        TIP4P_UF(N, rp.memptr(), &V, H.col(i).memptr());
-
-        r[i] = ri0 - s;
-        TIP4P_UF(N, rp.memptr(), &V, Vrp.memptr());
-
-        H.col(i) = (H.col(i) - Vrp) / 2.0;
+        iss >> start;
+        stop = start;
         
-        r[i] = ri0;
-    }
-
-    for (int i=1; i<N; i++) {
-        H.col(i).subvec(0, i-1) = 0.5 * (H.col(i).subvec(0, i-1) 
-                                         + H.row(i).subvec(0, i-1) );
+        if (iss.peek() == '-') {
+            iss >> stop;
+        }
+        
+        for (;start <= stop; start++) {
+            t_modes.push_back(start);
+        }
     }
     
-    return H;
+    selected_modes.set_size ( t_modes.size() );
+    copy(t_modes.begin(), t_modes.end(), selected_modes.begin());
 }
-
-
-void massScaleHessian(vec& mass, mat& H)
-{
-    vec isqrt_mass = 1.0/sqrt(mass);
-    
-    for (int i=0; i<H.n_cols; i++) {
-        H.col(i) *= isqrt_mass * isqrt_mass[i];
-    }
-}
-*/
 
 
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:W", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:u:V", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -168,8 +156,14 @@ void process_options(int argc,  char *  argv[])
                 continue_from_file = optarg;
                 continue_from = strtol(strrchr(optarg, '_')+1, NULL, 10);
                 break;
-            case 'W':
-                use_whbb = true;
+            case 'p':
+                h2o_potential = optarg;
+                break;
+            case 'u':
+                parse_mode_description(optarg, selected_modes);
+                break;
+            case 'V':
+                vmd_normal_modes = true;
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;
@@ -189,58 +183,45 @@ void process_options(int argc,  char *  argv[])
     input_file = argv[0];
 }
 
-
-
-
-int main (int argc, char *  argv[]) {
-    int N;
-    mat H, U;
-    vec mass, x0, omegasq0;
-
-    process_options(argc, argv);
-
-    if (use_whbb) {
-        pot = new WHBB(1e-3);
-    }
-    else {
-        pot = new qTIP4Pf();
-    }
-
+void potentialMap(h2o::Potential& pot, vec& x0, mat& MUa, int nb_dim_pts, double grid_size)
+{
+    int nw = x0.n_rows / 9;
     
-        // if (harmonic_approximation) {
-            //load_from_vladimir(input_file, N, mass, x0);
-            //    H = getHessian(x0);
-            //   massScaleHessian(mass, H);
-            //   }
-            //  else {
-        load_from_vladimir(input_file, N, mass, x0, H);
-        //  }
-    
-    eig_sym(omegasq0, U, H);
+    int Nmodes = MUa.n_cols;
 
-    ofstream sout("omega0.dat");
-    sout << sqrt(abs(omegasq0))*autocm << endl;
-    sout.close();
+    fcube V(nb_dim_pts, nb_dim_pts, Nmodes*(Nmodes-1));
 
-    int Nmodes0 = 3*N - 6;
-    if (Nmodes2 == 0) Nmodes2 = 3*N - 6;
-
-    vec omega = sqrt(omegasq0.rows(6, 3*N - 1));
-    vec alpha = sqrt(omega);
-    mat MUa = U.cols(6, 3*N-1);
-
-
-    for (int i=0; i<MUa.n_cols; i++) {
-        MUa.col(i) /= sqrt(mass)*alpha(i);
+    for (int ni=0; ni < Nmodes; ni++) {
+        for (int nj=0; nj < Nmodes; nj++) {
+            if (ni == nj) {
+                continue;
+            }
+            
+            vec y(Nmodes);
+            vec r(MUa.n_rows);
+            
+            y.fill(0.0);
+            
+            for (int i=0; i<nb_dim_pts; i++) {
+                y[ni] = (-0.5  + (double)(i)/(double)(nb_dim_pts - 1)) * grid_size;
+                for (int j=0; j<nb_dim_pts; j++) {
+                    y[nj] = (-0.5  + (double)(j)/(double)(nb_dim_pts - 1)) * grid_size;
+                    r = bohr * (MUa * y + x0);
+                    V(j, i, ni*(Nmodes-1) + nj) = pot(nw, r.memptr()) / autokcalpmol;
+                }
+            }
+        }
     }
-    mat MUaT=MUa.t();
 
-    int Nstates2 = 1 + Nmodes0 + Nmodes2*(Nmodes2 + 1)/2;
-    int Nstates = Nstates2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
+    save_hdf5(V, "V.h5");
+}
 
-    mat M(Nstates, Nstates);
+void SCP3(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa)
+{
+    int Nmodes0 = x0.n_rows - 6;
     ScaledMatrixElements  sme(omega, Nmodes2, Nmodes3);
-
+    
+    mat M(sme.getBasisSize(), sme.getBasisSize());
     
     if (continue_from_file.empty()) {
         M.fill(0.0);
@@ -248,36 +229,24 @@ int main (int argc, char *  argv[]) {
     else {
         load_hdf5(continue_from_file, M);
         M *= -1.0;
+        
         sme.addHODiagonal(M);
         M *= -(double)continue_from;
     }
     
-    vec charge = TIP4P_charges(N);
-
-    if ( !spectrum_file.empty() ) {
-        load_hdf5(spectrum_file, M);
-
-        string tname = "freq" + spectrum_file.substr(1);
-        ofstream specout(tname.c_str());
-        ofstream dipoleout(("dipole" + spectrum_file.substr(1)).c_str());
-
-        dump_spectrum(charge, MUa, M, sme, specout, dipoleout, cout, "C" + spectrum_file.substr(1));
-        exit(EXIT_SUCCESS);
-    }
-
-    vec y(Nmodes0), Vy(Nmodes0), r(3*N), Vr(3*N);
+    int nw = x0.n_rows / 9;
+    
+    vec y(Nmodes0), Vy(Nmodes0), r(9 * nw), Vr(9 * nw);
+    
     double V;
-
-
-    int NO = N/3;
-    (*pot)(x0, V, Vr);
+    r = x0 * bohr;
+    V = pot(nw, r.memptr(), Vr.memptr());
+    V /= autokcalpmol;
+    Vr *= bohr/autokcalpmol;
+    
     cout << "V0 = "<<V<<endl;
-
-    /*
-    ofstream specout("sfreq.dat");
-    ofstream dipoleout("sdipole.dat");
-    */
-
+    
+    
     ofstream E0out_sd, E0out_t;
     
     if (continue_from_file.empty()) {
@@ -293,14 +262,14 @@ int main (int argc, char *  argv[]) {
         sprintf(fname, "E0_triples_%07d.dat", continue_from);
         E0out_t.open(fname);
     }
-
+    
     fixed(E0out_sd);
     E0out_sd.precision(10);
-
+    
     fixed(E0out_t);
     E0out_t.precision(10);
-
-       
+    
+    
     for (int i=0; i<NSobol; i++) {
         if (rng_in.is_open()) {
             for (int j=0; j<Nmodes0; j++) {
@@ -308,41 +277,45 @@ int main (int argc, char *  argv[]) {
             }
         }
         else {
-            sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
+            sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
         }
         
         if (i+1 <= continue_from) continue;
-
+        
         y /=  sqrt(2.0);
-        r = MUa*y + x0;
-        (*pot)(r, V, Vr);
-
+        r = bohr *(MUa*y + x0);
+        V = pot(nw, r.memptr(), Vr.memptr());
+        V /= autokcalpmol;
+        Vr *= bohr/autokcalpmol;
+        
         if (isnan(V)) {
             cerr << "V=NaN at i=" << i << endl;
             i--;
             continue;
         }
-
+        
         V -= 0.5 * dot(y, omega%y);
-        Vy = MUaT * Vr - omega % y;
-        sme.addEpot(y, V, Vy, M);
 
+        Vy = MUa.t() * Vr - omega % y;
+        sme.addEpot(y, V, Vy, M);
+        
         if ( (i+1)%(1<<14)==0) {
             cout << i+1 << endl;
             mat Mout = M / (i+1);
             sme.addHODiagonal(Mout);
-
+            
             vec eigvals = eig_sym(Mout.submat(0,0, Nmodes0, Nmodes0));
             double E0[3];
-
+            
             E0[0] = eigvals[0]*autocm;
-
+            
+            int Nstates2 = sme.getSubBasisSize(2);
             eigvals = eig_sym(Mout.submat(0, 0, Nstates2-1, Nstates2-1));
             E0[1] = eigvals[0]*autocm;
-
+            
             E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" ";
             E0out_sd << E0[1] - E0[0] << endl;
-
+            
             if ( (i+1)%(1<<17)==0) {
                 char s[128];
                 sprintf(s, "sM_%07d.h5", i+1);
@@ -351,20 +324,253 @@ int main (int argc, char *  argv[]) {
                 /*
                 eigvals = eig_sym(Mout);
                 E0[2] = eigvals[0]*autocm;
-
+                
                 E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
                 */
             }
-            //dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
+                //dump_spectrum(TIP4P_charges, MUa, Mout, sme, specout, dipoleout, E0out);
         }
     }
     E0out_sd.close();
     E0out_t.close();
-    /*
-    specout.close();
-    dipoleout.close();
-    */
-    rng_in.close();
-
+    
     M /= NSobol;
+}
+
+void SCP3_a(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa, uvec& modes)
+{
+    if (Nmodes2 > modes.n_rows || Nmodes3 > modes.n_rows) {
+        cerr << "Number of double or triple excitations exceed number of modes."
+        << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    int Nmodes0 = x0.n_rows - 6;
+
+    ScaledMatrixElements  sme(omega(modes), Nmodes2, Nmodes3);
+    int Nstates = sme.getBasisSize();
+    
+    mat M(Nstates, Nstates);
+    M.fill(0.0);
+
+    int nw = x0.n_rows / 9;
+    
+    vec y(Nmodes0), Vy(Nmodes0), r(9 * nw), Vr(9 * nw);
+    
+    double V;
+    r = x0 * bohr;
+    V = pot(nw, r.memptr(), Vr.memptr());
+    V /= autokcalpmol;
+    Vr *= bohr/autokcalpmol;
+    
+    double E0[3];
+    for (int i=0; i<NSobol; i++) {
+        if (rng_in.is_open()) {
+            for (int j=0; j<Nmodes0; j++) {
+                rng_in >> y[j];
+            }
+        }
+        else {
+            sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
+        }
+        
+        if (i+1 <= continue_from) continue;
+        
+        y /=  sqrt(2.0);
+        r = bohr *(MUa*y + x0);
+        V = pot(nw, r.memptr(), Vr.memptr());
+        V /= autokcalpmol;
+        Vr *= bohr/autokcalpmol;
+        
+        if (isnan(V)) {
+            cerr << "V=NaN at i=" << i << endl;
+            i--;
+            continue;
+        }
+        
+        V -= 0.5 * dot(y, omega%y);
+        Vy = MUa.t() * Vr - omega % y;
+        sme.addEpot(y(modes), V, Vy(modes), M);
+
+        
+        if ( (i+1)%(1<<14)==0) {
+            mat Mout = M / (i+1);
+            sme.addHODiagonal(Mout);
+            Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+            
+
+            
+            int Nstates1 = sme.getSubBasisSize(1);
+            vec eigvals = eig_sym(Mout.submat(0,0, Nstates1-1, Nstates1-1));
+            E0[0] = eigvals[0]*autocm;
+            
+            int Nstates2 = sme.getSubBasisSize(2);
+            eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
+            E0[1] = eigvals[0]*autocm;
+            
+            eigvals = eig_sym(Mout);
+            E0[2] = eigvals[0]*autocm;
+            
+            //cout << i+1 <<" "<< Mout(0,0)*autocm <<" "<< E0[0] <<" "<< E0[1] <<" " << E0[2] << endl;
+        }
+    }
+    M /= NSobol;
+    sme.addHODiagonal(M);
+    M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+    cout << E0[2] - M(0,0)*autocm << endl;
+    cout << endl << M*autocm << endl;
+}
+
+
+void OHHOHH(vec& mass, vec& r, mat& H)
+{  
+    int iO = 0;
+    int iH = 3;
+    
+    uvec p(mass.n_rows);
+    
+    for (int i=0; i<mass.n_rows;) {
+        if (mass[i] == Omass) {
+            for (int j=0; j<3; j++) {
+                p[iO + j] = i + j;
+            }
+            
+            iO += 9;
+            i += 3;
+        }
+        else if (mass[i] == Hmass) {
+            for (int j=0; j<3; j++) {
+                p[iH + j] = i + j;
+            }
+
+            iH +=  3;
+            iH += 3 * (iH%9 == 0);
+            i += 3;
+        }
+        else {
+            cerr << "Uknown mass at i = "<< i << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    vec r_tmp(r);
+    for (int i=0; i<p.n_rows; i++) {
+        r[i] = r_tmp[p[i]];
+    }
+    
+    mat H_tmp = H.cols(p);
+    H = H_tmp.rows(p);
+}
+
+
+void display_normal_modes(string& fin, vec& x0, mat U)
+{
+    float nm_arrow_len = 1.0;
+    float nm_arrow_radius = 0.1;
+    float nm_arrow_tip_radius = 2.0 * nm_arrow_radius;
+    float nm_arrow_tip_len = 1.5 * nm_arrow_tip_radius;
+    
+        //x0 *= bohr;
+    ofstream fout("nm.vmd");
+    for (int i=0; i<U.n_cols; i++) {
+        fout << "display projection orthographic\n"
+        << "mol new \"" + fin + "\" type xyz\n"
+        << "mol rename " << i << " \"mode " << i << "\"\n"
+        << "mol off " << i << endl;
+        
+        for (int j=0; j < U.n_rows / 3; j++) {
+            vec x1 = x0(span(3*j, 3*j+2));
+            vec x2 = x1 + nm_arrow_len * U(span(3*j, 3*j+2), i);
+            vec x3 = x2 + nm_arrow_tip_len * U(span(3*j, 3*j+2), i);
+            
+            fout<<"draw cylinder ";
+            fout<<" {"<< x1(0) <<" "<< x1(1) <<" "<< x1(2) <<"}";
+            fout<<" {"<< x2(0) <<" "<< x2(1) <<" "<< x2(2) <<"}";
+            fout<<" radius " << nm_arrow_radius <<" filled yes" << endl;
+            
+            fout<<"draw cone ";
+            fout<<" {"<< x2(0) <<" "<< x2(1) <<" "<< x2(2) <<"}";
+            fout<<" {"<< x3(0) <<" "<< x3(1) <<" "<< x3(2) <<"}";
+            fout<<" radius " << 2*nm_arrow_radius << endl;
+        }
+    }
+    fout.close();
+}
+
+
+int main (int argc, char *  argv[]) {
+    process_options(argc, argv);
+
+    int N;
+    mat H;
+    vec mass, x0;
+        // if (harmonic_approximation) {
+            //load_from_vladimir(input_file, N, mass, x0);
+            //    H = getHessian(x0);
+            //   massScaleHessian(mass, H);
+            //   }
+            //  else {
+
+    load_from_vladimir(input_file, N, mass, x0, H);
+        //  }
+    
+    OHHOHH(mass, x0, H);
+    
+    vec omegasq0;
+    mat U;
+    eig_sym(omegasq0, U, H);
+
+    ofstream sout("omega0.dat");
+    sout << sqrt(abs(omegasq0))*autocm << endl;
+    sout.close();
+
+    if (Nmodes2 == 0) Nmodes2 = 3*N - 6;
+
+    vec omega = sqrt(omegasq0.rows(6, 3*N - 1));
+    vec alpha = sqrt(omega);
+    mat MUa = U.cols(6, 3*N-1);
+
+
+    for (int i=0; i<MUa.n_cols; i++) {
+        MUa.col(i) /= sqrt(mass)*alpha(i);
+    }
+    mat MUaT=MUa.t();
+
+    h2o::Potential *pot;
+    if (h2o_potential == "whbb") {
+#ifdef HAVE_BOWMAN
+        pot = new h2o::bowman();
+#else
+        cerr << "Support for Bowman's WHBB was not included." << endl;
+        exit(EXIT_FAILURE);
+#endif
+    }
+    else if (h2o_potential == "qtip4pf") {
+        pot = new h2o::qtip4pf();
+    }
+    else {
+        cerr << "Unknown H2O potential: " << h2o_potential << endl;
+        exit(EXIT_FAILURE);
+    }
+
+        
+    if ( !spectrum_file.empty() ) {
+        mat M;
+        load_hdf5(spectrum_file, M);
+
+        exit(EXIT_SUCCESS);
+    }
+
+    if (vmd_normal_modes) {
+        display_normal_modes(input_file, x0, U.cols(6, 3*N-6) );
+    }
+        //potentialMap(*pot, x0, MUa, 65, 8.0);
+    if (selected_modes.is_empty() ) {
+        SCP3(*pot, x0, omega, MUa);
+    }
+    else{
+        SCP3_a(*pot, x0, omega, MUa, selected_modes);
+    }
+    
+    rng_in.close();
 }

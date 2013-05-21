@@ -19,7 +19,15 @@
 
 #include "Constants.h"
 #include "DiskIO.h"
-#include "F90.h"
+
+#include "sobol.hpp"
+
+#include "qtip4pf.h"
+#include "ttm3f.h"
+
+#ifdef HAVE_BOWMAN
+#include "bowman.h"
+#endif
 
 using namespace std;
 using namespace arma;
@@ -29,6 +37,7 @@ static struct option program_options[] = {
     { "skip", required_argument, NULL, 'S'} ,
     { "rng-file", required_argument, NULL, 'r'} ,
     { "hydrogen-mass", required_argument, NULL, 'H'} ,
+    { "potential", required_argument, NULL, 'p'},
     {NULL, 0, NULL, 0}
 };
 
@@ -37,10 +46,12 @@ static string input_file;
 
 static ifstream rng_in;
 
+string  h2o_potential("qtip4pf");
+
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "N:S:r:H:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "N:S:r:H:p:", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -65,6 +76,9 @@ void process_options(int argc,  char *  argv[])
             case 'H':
                 Hmass *= atof(optarg);
                 break;
+            case 'p':
+                h2o_potential = optarg;
+                break;
             default:
                 cerr << "Unknown option: " << ch << endl;
                 exit(EXIT_FAILURE);
@@ -85,25 +99,27 @@ void process_options(int argc,  char *  argv[])
 
 
 
-mat getHessian(vec& r, double s)
+void getHessian(h2o::Potential& pot, vec& r_au, double s, mat& H)
 {
-    int N = r.n_rows;
+    int N = r_au.n_rows;
     int Nw = N/9;
 
     vec Vrp(N), Vrm(N);
-    mat H(N,N);
+    H.set_size(N,N);
     
+    vec r(r_au * bohr);
+
     for (int i=0; i<N; i++) {
         double ri0 = r[i];
         double V;
         
-        r[i] = ri0 + s;
-        TIP4P_UF(Nw, r.memptr(), &V, Vrp.memptr());
+        r[i] = ri0 + s * bohr;
+        V = pot(Nw, r.memptr(), Vrp.memptr());
         
-        r[i] = ri0 - s;
-        TIP4P_UF(Nw, r.memptr(), &V, Vrm.memptr());
+        r[i] = ri0 - s * bohr;
+        V = pot(Nw, r.memptr(), Vrm.memptr());
         
-        H.col(i) = (Vrm - Vrp) / (2.0*s);
+        H.col(i) = (Vrp - Vrm) / (2.0*s*autokcalpmol);
         
         r[i] = ri0;
     }
@@ -112,8 +128,6 @@ mat getHessian(vec& r, double s)
         H.col(i).subvec(0, i-1) = 0.5 * (H.col(i).subvec(0, i-1)
                                          + H.row(i).subvec(0, i-1).t() );
     }
-    
-    return H;
 }
 
 
@@ -154,7 +168,28 @@ int main (int argc, char *  argv[]) {
 
     int N = x0.n_rows / 3;
 
-    mat H = getHessian(x0, 0.01);
+    h2o::Potential *pot;
+    if (h2o_potential == "whbb") {
+#ifdef HAVE_BOWMAN
+        pot = new h2o::bowman();
+#else
+        cerr << "Support for Bowman's WHBB was not included." << endl;
+        exit(EXIT_FAILURE);
+#endif
+    }
+    else if (h2o_potential == "qtip4pf") {
+        pot = new h2o::qtip4pf();
+    }
+    else if (h2o_potential == "ttm3f") {
+        pot = new h2o::ttm3f();
+    }
+    else {
+        cerr << "Unknown H2O potential: " << h2o_potential << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    mat H;
+    getHessian(*pot, x0, 0.01, H);
     massScaleHessian(mass, H);
 
     //  }
@@ -172,7 +207,6 @@ int main (int argc, char *  argv[]) {
     for (int i=0; i<MUa.n_cols; i++) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
-    mat MUaT=MUa.t();
     
     double V, V0, V_avg;
     vec y(Nmodes0), Vy(Nmodes0), Vy_avg(Nmodes0), r(3*N), Vr(3*N), Vr0(3*N);
@@ -181,8 +215,11 @@ int main (int argc, char *  argv[]) {
     Vy_avg.fill(0.0);
     
     
-    int NO = N/3;
-    TIP4P_UF(NO, x0.memptr(), &V0, Vr0.memptr());
+    int nw = N/3;
+    r = bohr * x0;
+    V0 = (*pot)(nw, r.memptr(), Vr.memptr() ) / autokcalpmol;
+    Vr *= bohr/autokcalpmol;
+    
     
     sobol_skip = 2*NSobol;
     for (int i=0; i<NSobol; i++) {
@@ -192,12 +229,15 @@ int main (int argc, char *  argv[]) {
             }
         }
         else {
-            sobol_stdnormal_c(y.n_rows, &sobol_skip, y.memptr());
+            sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
         }
         
         y /=  sqrt(2.0);
         r = MUa*y + x0;
-        TIP4P_UF(NO, r.memptr(), &V, Vr.memptr());
+
+        r *= bohr;        
+        V = (*pot)(nw, r.memptr(), Vr.memptr()) / autokcalpmol;
+        Vr *= bohr/autokcalpmol;
         
         if (isnan(V)) {
             cerr << "V=NaN at i=" << i << endl;
@@ -206,7 +246,7 @@ int main (int argc, char *  argv[]) {
         }
         
         V -= 0.5 * dot(y, omega%y);
-        Vy = -MUaT * Vr - omega % y;
+        Vy = -MUa.t() * Vr - omega % y;
         
         V_avg += V;
         Vy_avg += Vy;

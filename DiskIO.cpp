@@ -10,6 +10,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <algorithm>
+
 #include <H5Cpp.h>
 
 #include "Constants.h"
@@ -26,7 +28,7 @@ static double NuclearMass(string &species)
         return Cmass;
     }
     else if (species.compare("O") == 0 ) {
-        return Cmass*15.9994/12.0107;
+        return Omass;
     }
     else {
         return -1.0;
@@ -113,7 +115,7 @@ void save_hdf5(mat &M, char *name)
     DSetCreatPropList plist;
     
     hsize_t chunk_size[2];
-    chunk_size[0] = (128*1024 + dims[1] - 1)/ dims[1];
+    chunk_size[0] = min(dims[0], (128*1024 + dims[1] - 1)/ dims[1]);
     chunk_size[1] = dims[1];
     
     plist.setChunk(2, chunk_size);
@@ -129,6 +131,43 @@ void save_hdf5(mat &M, char *name)
     fout.close();
 }
 
+/** Save in column major mode **/
+
+void save_hdf5(fcube &C, char *name)
+{
+    H5File fout(name, H5F_ACC_TRUNC);
+    
+    hsize_t dims[3];
+    dims[0] = C.n_slices;
+    dims[1] = C.n_cols;
+    dims[2] = C.n_rows;
+    DataSpace dspace(3, dims);
+    
+    DSetCreatPropList plist;
+    
+    hsize_t chunk_size[3];
+    chunk_size[0] = (128*1024 + dims[1]*dims[2] - 1)/ (dims[1]*dims[2]);
+    chunk_size[1] = dims[1];
+    chunk_size[2] = dims[2];
+    
+    chunk_size[0] = min((hsize_t)C.n_slices, max((hsize_t)1, chunk_size[0]));
+    
+    if (chunk_size[0] < 1) {
+        chunk_size[0] = 1;
+    }
+    
+    plist.setChunk(3, chunk_size);
+    plist.setDeflate(6);
+    
+    FloatType dtype(PredType::NATIVE_FLOAT);
+    DataSet dset = fout.createDataSet("M", dtype, dspace, plist);
+    
+    FloatType mem_dtype(PredType::NATIVE_FLOAT);
+    dset.write(C.memptr(), mem_dtype);
+    
+    dset.close();
+    fout.close();
+}
 
 void load_hdf5(string& name, mat &M)
 {

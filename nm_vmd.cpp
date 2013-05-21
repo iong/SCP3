@@ -15,11 +15,9 @@
 #include <cstring>
 #include <armadillo>
 #include <string>
-#include <boost/program_options.hpp>
 
 using namespace std;
 using namespace arma;
-namespace po = boost::program_options;
 
 static const double bohr=0.52917721092;
 static const double autocm=2.194746313e5;
@@ -28,47 +26,6 @@ static const double qM = 1.1128;
 unsigned int NSobol, continue_skip=0, Nmodes=0;
 string input_file, continue_from;
 
-po::variables_map process_options(int argc,  char *  argv[])
-{
-    
-    po::options_description cmd_line_opts("Start Parameters");
-    cmd_line_opts.add_options()
-    ("help", "Help message")
-    ("NSobol,N", po::value<unsigned int>(&NSobol)->default_value(100000), "Length of the Sobol sequence")
-    ("continue,c", po::value<string>(), "Name (in format M_%06d.dat) of the file to continue from.")
-    ("input-file,f",po::value<string>(), "Input file name from Vladimir")
-    ("modes,m", po::value<unsigned int>(&Nmodes)->default_value(0), "Number of modes to include from highest to lowest, inclusively.")
-    ("spectrum,s", po::value<string>(), "Spectrum for Hamiltonian saved in M_%06d.dat");
-     
-     po::positional_options_description pos_opts;
-     pos_opts.add("input-file", 1);
-     
-     po::variables_map vm;
-     
-     try {
-         po::store(po::command_line_parser(argc, argv)
-                   .options(cmd_line_opts).positional(pos_opts)
-                   .run(), vm);
-         po::notify(vm);
-     }
-     catch (po::error_with_option_name &e) {
-         cerr << e.what() << endl;
-         cerr << "Finished.\n";
-         exit(EXIT_FAILURE);
-     }
-     
-     input_file = vm["input-file"].as<string>();
-     if (vm.count("continue")) {
-         continue_from = vm["continue"].as<string>();
-         int i = continue_from.find_last_of('_')+1;
-         int j = continue_from.find('.', i);
-         
-         istringstream ss(continue_from.substr(i, j-i + 1));
-         ss >> continue_skip;
-     }
-     return vm;
-}
-     
      
  double NuclearMass(string &species)
 {
@@ -175,28 +132,28 @@ po::variables_map process_options(int argc,  char *  argv[])
  
  int main (int argc, char *  argv[]) {
      int N;
-     mat H, U;
+     mat H, Up, U;
      vec mass, x0, omegasq0;
 
      string fin(argv[1]);
      load_from_vladimir(fin, N, mass, x0, H);
-     omegasq0 = dsyevr(H, &U);
+     omegasq0 = dsyevr(H, &Up);
      
+     U = Up.cols(6, Up.n_cols - 1);
      float nm_arrow_len = 1.0;
      float nm_arrow_radius = 0.1;
      float nm_arrow_tip_radius = 2.0 * nm_arrow_radius;
      float nm_arrow_tip_len = 1.5 * nm_arrow_tip_radius;
      
      x0 *= bohr;
-     for (int i=0; i<3*N; i++) {
-         char s[32];
-         sprintf(s, "nm%04d.vmd", i);
-         string fout_name = fin.substr(0, fin.length()-4) + s;
-         ofstream fout(s);//fout_name.c_str());
-
-         fout << "display projection orthographic" << endl;
-         fout << "mol new \"" + fin + "\" type xyz" << endl;
-         for (int j=0; j<N; j++) {
+     ofstream fout("nm.vmd");
+     for (int i=0; i<U.n_cols; i++) {
+         fout << "display projection orthographic\n"
+             << "mol new \"" + fin + "\" type xyz\n"
+             << "mol rename " << i << " \"mode " << i << "\"\n"
+             << "mol off " << i << endl;
+         
+         for (int j=0; j < U.n_rows / 3; j++) {
              vec x1 = x0(span(3*j, 3*j+2));
              vec x2 = x1 + nm_arrow_len * U(span(3*j, 3*j+2), i);
              vec x3 = x2 + nm_arrow_tip_len * U(span(3*j, 3*j+2), i);
@@ -211,6 +168,6 @@ po::variables_map process_options(int argc,  char *  argv[])
              fout<<" {"<< x3(0) <<" "<< x3(1) <<" "<< x3(2) <<"}";
              fout<<" radius " << 2*nm_arrow_radius << endl;
          }
-         fout.close();
      }
+     fout.close();
  }

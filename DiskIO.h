@@ -26,6 +26,8 @@ load_xyz(string &name, vec &mass, vec& x0);
 extern void
 save_hdf5(mat &M, char *name);
 
+void save_hdf5(fcube &C, char *name);
+
 extern void
 load_hdf5(string& name, mat &M);
 
