@@ -11,6 +11,7 @@
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <string>
 
 #include <tr1/random>
@@ -46,6 +47,7 @@ static struct option program_options[] = {
     { "spectrum", required_argument, NULL, 's'},
     { "potential", no_argument, NULL, 'p'},
     { "unimode", no_argument, NULL, 'u'},
+    { "VMD", no_argument, NULL, 'V'},
     {NULL, 0, NULL, 0}
 };
 
@@ -59,6 +61,8 @@ static unsigned int continue_from;
 static ifstream rng_in;
 
 static uvec selected_modes;
+
+static bool vmd_normal_modes = true;
 
 string  h2o_potential("qtip4pf");
 
@@ -159,6 +163,7 @@ void process_options(int argc,  char *  argv[])
                 parse_mode_description(optarg, selected_modes);
                 break;
             case 'V':
+                vmd_normal_modes = true;
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;
@@ -455,6 +460,41 @@ void OHHOHH(vec& mass, vec& r, mat& H)
 }
 
 
+void display_normal_modes(string& fin, vec& x0, mat U)
+{
+    float nm_arrow_len = 1.0;
+    float nm_arrow_radius = 0.1;
+    float nm_arrow_tip_radius = 2.0 * nm_arrow_radius;
+    float nm_arrow_tip_len = 1.5 * nm_arrow_tip_radius;
+    
+        //x0 *= bohr;
+    ofstream fout("nm.vmd");
+    for (int i=0; i<U.n_cols; i++) {
+        fout << "display projection orthographic\n"
+        << "mol new \"" + fin + "\" type xyz\n"
+        << "mol rename " << i << " \"mode " << i << "\"\n"
+        << "mol off " << i << endl;
+        
+        for (int j=0; j < U.n_rows / 3; j++) {
+            vec x1 = x0(span(3*j, 3*j+2));
+            vec x2 = x1 + nm_arrow_len * U(span(3*j, 3*j+2), i);
+            vec x3 = x2 + nm_arrow_tip_len * U(span(3*j, 3*j+2), i);
+            
+            fout<<"draw cylinder ";
+            fout<<" {"<< x1(0) <<" "<< x1(1) <<" "<< x1(2) <<"}";
+            fout<<" {"<< x2(0) <<" "<< x2(1) <<" "<< x2(2) <<"}";
+            fout<<" radius " << nm_arrow_radius <<" filled yes" << endl;
+            
+            fout<<"draw cone ";
+            fout<<" {"<< x2(0) <<" "<< x2(1) <<" "<< x2(2) <<"}";
+            fout<<" {"<< x3(0) <<" "<< x3(1) <<" "<< x3(2) <<"}";
+            fout<<" radius " << 2*nm_arrow_radius << endl;
+        }
+    }
+    fout.close();
+}
+
+
 int main (int argc, char *  argv[]) {
     process_options(argc, argv);
 
@@ -518,6 +558,9 @@ int main (int argc, char *  argv[]) {
         exit(EXIT_SUCCESS);
     }
 
+    if (vmd_normal_modes) {
+        display_normal_modes(input_file, x0, U.cols(6, 3*N-6) );
+    }
         //potentialMap(*pot, x0, MUa, 65, 8.0);
     if (selected_modes.is_empty() ) {
         SCP3(*pot, x0, omega, MUa);
