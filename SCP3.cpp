@@ -45,6 +45,7 @@ static struct option program_options[] = {
     { "triples", required_argument, NULL, '3'},
     { "spectrum", required_argument, NULL, 's'},
     { "potential", no_argument, NULL, 'p'},
+    { "unimode", no_argument, NULL, 'u'},
     {NULL, 0, NULL, 0}
 };
 
@@ -56,6 +57,8 @@ static string spectrum_file;
 static string continue_from_file;
 static unsigned int continue_from;
 static ifstream rng_in;
+
+static uvec selected_modes;
 
 string  h2o_potential("qtip4pf");
 
@@ -83,10 +86,38 @@ void dump_spectrum(vec &charges, mat &MU, mat &H, ScaledMatrixElements& me,
 }
 
 
+void parse_mode_description(const string& desc, uvec& selected_modes)
+{
+    istringstream iss(desc);
+    vector<int> t_modes;
+    
+    int start, stop;
+    while (iss.good()) {
+        if (iss.peek() == ',') {
+            iss.get();
+        }
+        
+        iss >> start;
+        stop = start;
+        
+        if (iss.peek() == '-') {
+            iss >> stop;
+        }
+        
+        for (;start <= stop; start++) {
+            t_modes.push_back(start);
+        }
+    }
+    
+    selected_modes.set_size ( t_modes.size() );
+    copy(t_modes.begin(), t_modes.end(), selected_modes.begin());
+}
+
+
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:u:V", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -123,6 +154,11 @@ void process_options(int argc,  char *  argv[])
                 break;
             case 'p':
                 h2o_potential = optarg;
+                break;
+            case 'u':
+                parse_mode_description(optarg, selected_modes);
+                break;
+            case 'V':
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;
@@ -293,6 +329,90 @@ void SCP3(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa)
     M /= NSobol;
 }
 
+void SCP3_a(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa, uvec& modes)
+{
+    if (Nmodes2 > modes.n_rows || Nmodes3 > modes.n_rows) {
+        cerr << "Number of double or triple excitations exceed number of modes."
+        << endl;
+        exit(EXIT_FAILURE);
+    }
+    
+    int Nmodes0 = x0.n_rows - 6;
+
+    ScaledMatrixElements  sme(omega(modes), Nmodes2, Nmodes3);
+    int Nstates = sme.getBasisSize();
+    
+    mat M(Nstates, Nstates);
+    M.fill(0.0);
+
+    int nw = x0.n_rows / 9;
+    
+    vec y(Nmodes0), Vy(Nmodes0), r(9 * nw), Vr(9 * nw);
+    
+    double V;
+    r = x0 * bohr;
+    V = pot(nw, r.memptr(), Vr.memptr());
+    V /= autokcalpmol;
+    Vr *= bohr/autokcalpmol;
+    
+    double E0[3];
+    for (int i=0; i<NSobol; i++) {
+        if (rng_in.is_open()) {
+            for (int j=0; j<Nmodes0; j++) {
+                rng_in >> y[j];
+            }
+        }
+        else {
+            sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
+        }
+        
+        if (i+1 <= continue_from) continue;
+        
+        y /=  sqrt(2.0);
+        r = bohr *(MUa*y + x0);
+        V = pot(nw, r.memptr(), Vr.memptr());
+        V /= autokcalpmol;
+        Vr *= bohr/autokcalpmol;
+        
+        if (isnan(V)) {
+            cerr << "V=NaN at i=" << i << endl;
+            i--;
+            continue;
+        }
+        
+        V -= 0.5 * dot(y, omega%y);
+        Vy = MUa.t() * Vr - omega % y;
+        sme.addEpot(y(modes), V, Vy(modes), M);
+
+        
+        if ( (i+1)%(1<<14)==0) {
+            mat Mout = M / (i+1);
+            sme.addHODiagonal(Mout);
+            Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+            
+
+            
+            int Nstates1 = sme.getSubBasisSize(1);
+            vec eigvals = eig_sym(Mout.submat(0,0, Nstates1-1, Nstates1-1));
+            E0[0] = eigvals[0]*autocm;
+            
+            int Nstates2 = sme.getSubBasisSize(2);
+            eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
+            E0[1] = eigvals[0]*autocm;
+            
+            eigvals = eig_sym(Mout);
+            E0[2] = eigvals[0]*autocm;
+            
+            //cout << i+1 <<" "<< Mout(0,0)*autocm <<" "<< E0[0] <<" "<< E0[1] <<" " << E0[2] << endl;
+        }
+    }
+    M /= NSobol;
+    sme.addHODiagonal(M);
+    M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+    cout << E0[2] - M(0,0)*autocm << endl;
+    cout << endl << M*autocm << endl;
+}
+
 
 void OHHOHH(vec& mass, vec& r, mat& H)
 {  
@@ -399,7 +519,12 @@ int main (int argc, char *  argv[]) {
     }
 
         //potentialMap(*pot, x0, MUa, 65, 8.0);
-    SCP3(*pot, x0, omega, MUa);
+    if (selected_modes.is_empty() ) {
+        SCP3(*pot, x0, omega, MUa);
+    }
+    else{
+        SCP3_a(*pot, x0, omega, MUa, selected_modes);
+    }
     
     rng_in.close();
 }

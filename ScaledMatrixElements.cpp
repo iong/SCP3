@@ -697,11 +697,11 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
     }
 }
 
-void ScaledMatrixElements::addEpot(vec &q_, double V_, vec& Vq_, mat &M)
+void ScaledMatrixElements::addEpot(const vec &q_, double V_, const vec& Vq_, mat &M)
 {
-    q = q_.memptr();
+    q = q_;
     V = V_;
-    Vq = Vq_.memptr();
+    Vq = Vq_;
     
     M(0,0) += V;
     
