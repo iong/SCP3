@@ -45,9 +45,10 @@ static struct option program_options[] = {
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
     { "spectrum", required_argument, NULL, 's'},
-    { "potential", no_argument, NULL, 'p'},
-    { "unimode", no_argument, NULL, 'u'},
+    { "potential", required_argument, NULL, 'p'},
+    { "select-modes", required_argument, NULL, 'm'},
     { "VMD", no_argument, NULL, 'V'},
+    { "freeze-deselected", no_argument, NULL, 'f'},
     {NULL, 0, NULL, 0}
 };
 
@@ -62,7 +63,8 @@ static ifstream rng_in;
 
 static uvec selected_modes;
 
-static bool vmd_normal_modes = true;
+static bool vmd_normal_modes = false;
+static bool freeze_deselected = false;
 
 string  h2o_potential("qtip4pf");
 
@@ -105,6 +107,7 @@ void parse_mode_description(const string& desc, uvec& selected_modes)
         stop = start;
         
         if (iss.peek() == '-') {
+            iss.get();
             iss >> stop;
         }
         
@@ -121,7 +124,7 @@ void parse_mode_description(const string& desc, uvec& selected_modes)
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:u:V", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:m:Vf", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -159,12 +162,16 @@ void process_options(int argc,  char *  argv[])
             case 'p':
                 h2o_potential = optarg;
                 break;
-            case 'u':
+            case 'm':
                 parse_mode_description(optarg, selected_modes);
                 break;
             case 'V':
                 vmd_normal_modes = true;
                 break;
+            case 'f':
+                freeze_deselected = true;
+                break;
+
             default:
                 cerr << "Unknown option: " << ch << endl;
                 exit(EXIT_FAILURE);
@@ -337,7 +344,7 @@ void SCP3(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa)
     M /= NSobol;
 }
 
-void SCP3_a(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa, uvec& modes)
+void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
 {
     if (Nmodes2 > modes.n_rows || Nmodes3 > modes.n_rows) {
         cerr << "Number of double or triple excitations exceed number of modes."
@@ -345,7 +352,9 @@ void SCP3_a(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa, uvec& modes)
         exit(EXIT_FAILURE);
     }
     
-    int Nmodes0 = x0.n_rows - 6;
+    int Nmodes0 = omega.n_rows;
+    
+    cout << MUa.n_cols <<", "<< modes.t() << endl;
 
     ScaledMatrixElements  sme(omega(modes), Nmodes2, Nmodes3);
     int Nstates = sme.getBasisSize();
@@ -411,14 +420,21 @@ void SCP3_a(h2o::Potential& pot, vec& x0, vec& omega, mat& MUa, uvec& modes)
             eigvals = eig_sym(Mout);
             E0[2] = eigvals[0]*autocm;
             
-            //cout << i+1 <<" "<< Mout(0,0)*autocm <<" "<< E0[0] <<" "<< E0[1] <<" " << E0[2] << endl;
+            cout << i+1 <<" "<< Mout(0,0)*autocm <<" "<< E0[0] <<" "<< E0[1] <<" " << E0[2] << endl;
+            
+            if ( (i+1)%(1<<17)==0) {
+                char s[128];
+                sprintf(s, "sM_%07d.h5", i+1);
+                save_hdf5(Mout, s);
+            }
         }
     }
     M /= NSobol;
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
-    cout << E0[2] - M(0,0)*autocm << endl;
-    cout << endl << M*autocm << endl;
+    
+        //cout << E0[2] - M(0,0)*autocm << endl;
+        //cout << endl << M*autocm << endl;
 }
 
 
@@ -534,7 +550,6 @@ int main (int argc, char *  argv[]) {
     for (int i=0; i<MUa.n_cols; i++) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
-    mat MUaT=MUa.t();
 
     h2o::Potential *pot;
     if (h2o_potential == "whbb") {
@@ -566,9 +581,14 @@ int main (int argc, char *  argv[]) {
     }
         //potentialMap(*pot, x0, MUa, 65, 8.0);
     if (selected_modes.is_empty() ) {
-        SCP3(*pot, x0, omega, MUa);
+        selected_modes = linspace<uvec>(0, MUa.n_cols - 1, MUa.n_cols);
     }
-    else{
+     
+    if (freeze_deselected) {
+        SCP3_a(*pot, x0, omega(selected_modes), MUa.cols(selected_modes),
+               linspace<uvec>(0, selected_modes.n_rows - 1, selected_modes.n_rows));
+    }
+    else {
         SCP3_a(*pot, x0, omega, MUa, selected_modes);
     }
     
