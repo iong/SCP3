@@ -53,7 +53,9 @@ static struct option program_options[] = {
 };
 
 static unsigned int  Nmodes2=0, Nmodes3=0;
-static int64_t NSobol=1<<20, sobol_skip=1<<30;
+static int64_t NSobol=1<<20;
+long long int sobol_skip=1<<30;
+
 static string input_file;
 static string spectrum_file;
 
