@@ -373,6 +373,15 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     V = pot(nw, r.memptr(), Vr.memptr());
     V /= autokcalpmol;
     Vr *= bohr/autokcalpmol;
+
+
+    ofstream E0out_sd("E0_sd.dat"), E0out_t("E0_t.dat");
+
+    fixed(E0out_sd);
+    E0out_sd.precision(10);
+    
+    fixed(E0out_t);
+    E0out_t.precision(10);
     
     double E0[3];
     for (int i=0; i<NSobol; i++) {
@@ -419,18 +428,24 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
             eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
             E0[1] = eigvals[0]*autocm;
             
-            eigvals = eig_sym(Mout);
-            E0[2] = eigvals[0]*autocm;
-            
-            cout << i+1 <<" "<< Mout(0,0)*autocm <<" "<< E0[0] <<" "<< E0[1] <<" " << E0[2] << endl;
+            E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" "
+                << E0[1] - E0[0] << endl;
             
             if ( (i+1)%(1<<17)==0) {
                 char s[128];
                 sprintf(s, "sM_%07d.h5", i+1);
                 save_hdf5(Mout, s);
+
+                eigvals = eig_sym(Mout);
+                E0[2] = eigvals[0]*autocm;
+                
+                E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
             }
         }
     }
+    E0out_sd.close();
+    E0out_t.close();
+
     M /= NSobol;
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
