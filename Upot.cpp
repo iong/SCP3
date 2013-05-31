@@ -149,6 +149,13 @@ void print_header(ostream& os)
     os <<"Hmass\tV0\tEkin=sum(omega)/4\t<V>\t<V>+Ekin\n";
 }
 
+void PrintHA(double V0, vec& omega)
+{
+    cout << "V0 = " << V0 * autocm << " cm^-1\n"
+        << "E0 = " << (V0 + 0.5*sum(omega)) * autocm << " cm^-1\n"
+    << omega.t() << endl;
+}
+
 
 int main (int argc, char *  argv[]) {
     vec mass, x0, omegasq0;
@@ -192,10 +199,16 @@ int main (int argc, char *  argv[]) {
     getHessian(*pot, x0, 0.01, H);
     massScaleHessian(mass, H);
 
-    //  }
     
     mat U;
     eig_sym(omegasq0, U, H);
+    
+    int nw = N/3;
+    vec r = x0 * bohr;
+    double V0 = (*pot)(nw, x0.memptr())  / autokcalpmol;
+    PrintHA(V0, omegasq0);
+    
+    exit(EXIT_SUCCESS);
     
     int Nmodes0 = 3*N - 6;
     
@@ -208,18 +221,12 @@ int main (int argc, char *  argv[]) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
     
-    double V, V0, V_avg;
-    vec y(Nmodes0), Vy(Nmodes0), Vy_avg(Nmodes0), r(3*N), Vr(3*N), Vr0(3*N);
+    double V, V_avg;
+    vec y(Nmodes0), Vy(Nmodes0), Vy_avg(Nmodes0), Vr(3*N), Vr0(3*N);
     
     V_avg = 0.0;
     Vy_avg.fill(0.0);
-    
-    
-    int nw = N/3;
-    r = bohr * x0;
-    V0 = (*pot)(nw, r.memptr(), Vr.memptr() ) / autokcalpmol;
-    Vr *= bohr/autokcalpmol;
-    
+
     
     sobol_skip = 2*NSobol;
     for (int i=0; i<NSobol; i++) {
