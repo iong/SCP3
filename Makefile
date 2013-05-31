@@ -62,7 +62,7 @@ TestSimplexIterator: TestSimplexIterator.cpp
 SelectEW: SelectEW.o DiskIO.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
-Upot: Upot.o DiskIO.o
+Upot: Upot.o Constants.o DiskIO.o  $(X2O_OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
 clean:
