@@ -485,6 +485,8 @@ int main (int argc, char *  argv[]) {
     h2o::Potential *pot;
     if (h2o_potential == "whbb") {
 #ifdef HAVE_BOWMAN
+        h2o::fortran::pes2b_init();
+        h2o::fortran::pes3b_init();
         pot = new h2o::bowman();
 #else
         cerr << "Support for Bowman's WHBB was not included." << endl;
