@@ -14,8 +14,6 @@
 #include <iterator>
 #include <string>
 
-#include <tr1/random>
-
 #include <getopt.h>
 
 #include <armadillo>
@@ -467,9 +465,11 @@ int main (int argc, char *  argv[]) {
     mat U;
     eig_sym(omegasq0, U, H);
 
-    ofstream sout("omega0.dat");
-    sout << sqrt(abs(omegasq0))*autocm << endl;
-    sout.close();
+    if (proc_id == 0) {
+        ofstream sout("omega0.dat");
+        sout << sqrt(abs(omegasq0))*autocm << endl;
+        sout.close();
+    }
 
     if (Nmodes2 == 0) Nmodes2 = 3*N - 6;
 
