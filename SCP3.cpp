@@ -49,6 +49,7 @@ static struct option program_options[] = {
     { "select-modes", required_argument, NULL, 'm'},
     { "VMD", no_argument, NULL, 'V'},
     { "freeze-deselected", no_argument, NULL, 'f'},
+    { "distributed", required_argument, NULL, 'd'},
     {NULL, 0, NULL, 0}
 };
 
@@ -60,13 +61,16 @@ static string input_file;
 static string spectrum_file;
 
 static string continue_from_file;
-static unsigned int continue_from;
+static int continue_from = 0;
 static ifstream rng_in;
 
 static uvec selected_modes;
 
 static bool vmd_normal_modes = false;
 static bool freeze_deselected = false;
+
+static int proc_id = 0;
+static int nb_proc = 1;
 
 string  h2o_potential("qtip4pf");
 
@@ -126,7 +130,7 @@ void parse_mode_description(const string& desc, uvec& selected_modes)
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:m:Vf", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:m:Vfd:", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -173,7 +177,10 @@ void process_options(int argc,  char *  argv[])
             case 'f':
                 freeze_deselected = true;
                 break;
-
+            case 'd':
+                proc_id = atoi(optarg);
+                nb_proc = atoi(strrchr(optarg, '/') + 1);
+                break;
             default:
                 cerr << "Unknown option: " << ch << endl;
                 exit(EXIT_FAILURE);
@@ -254,8 +261,20 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     V /= autokcalpmol;
     Vr *= bohr/autokcalpmol;
 
+    char proc_id_str[16];
+    snprintf(proc_id_str, 16, "%03d", proc_id);
+    
+    ofstream E0out_sd, E0out_t;
+    if (nb_proc > 1) {
+        char s[32];
+        sprintf(s, "E0_sd-%03d.dat", proc_id);
+        E0out_sd.open(s);
+    }
+    else {
+        E0out_sd.open("E0_sd.dat");
+        E0out_t .open("E0_t.dat" );
+    }
 
-    ofstream E0out_sd("E0_sd.dat"), E0out_t("E0_t.dat");
 
     fixed(E0out_sd);
     E0out_sd.precision(10);
@@ -264,7 +283,16 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     E0out_t.precision(10);
     
     double E0[3];
-    for (int i=0; i<NSobol; i++) {
+    
+    int seq_len = NSobol / nb_proc;
+    int seq_start = seq_len * proc_id;
+    int seq_stop = seq_start + seq_len;
+    
+    if (continue_from > 0) {
+        seq_start = continue_from;
+    }
+    
+    for (int i = 0; i < seq_stop; i++) {
         if (rng_in.is_open()) {
             for (int j=0; j<Nmodes0; j++) {
                 rng_in >> y[j];
@@ -274,7 +302,7 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
             sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
         }
         
-        if (i+1 <= continue_from) continue;
+        if (i+1 <= seq_start) continue;
         
         y /=  sqrt(2.0);
         r = bohr *(MUa*y + x0);
@@ -294,7 +322,7 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
 
         
         if ( (i+1)%(1<<14)==0) {
-            mat Mout = M / (i+1);
+            mat Mout = M / (i+1 - seq_start);
             sme.addHODiagonal(Mout);
             Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
             
@@ -311,7 +339,7 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
             E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" "
                 << E0[1] - E0[0] << endl;
             
-            if ( (i+1)%(1<<17)==0) {
+            if ( (i+1)%(1<<17)==0 && nb_proc == 1) {
                 char s[128];
                 sprintf(s, "sM_%07d.h5", i+1);
                 save_hdf5(Mout, s);
@@ -326,9 +354,15 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     E0out_sd.close();
     E0out_t.close();
 
-    M /= NSobol;
+    M /= seq_len;
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+    
+    if (nb_proc > 1) {
+        char s[128];
+        sprintf(s, "sM_%07d.h5", seq_stop);
+        save_hdf5(M, s);
+    }
     
         //cout << E0[2] - M(0,0)*autocm << endl;
         //cout << endl << M*autocm << endl;
