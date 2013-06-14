@@ -286,10 +286,6 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     int seq_start = seq_len * proc_id;
     int seq_stop = seq_start + seq_len;
     
-    if (continue_from > 0) {
-        seq_start = continue_from;
-    }
-    
     for (int i = 0; i < seq_stop; i++) {
         if (rng_in.is_open()) {
             for (int j=0; j<Nmodes0; j++) {
@@ -300,7 +296,7 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
             sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
         }
         
-        if (i+1 <= seq_start) continue;
+        if (i+1 <= (continue_from ? continue_from : seq_start) ) continue;
         
         y /=  sqrt(2.0);
         r = bohr *(MUa*y + x0);
