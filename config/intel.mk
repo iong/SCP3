@@ -10,8 +10,8 @@ ifdef TARGET
 endif
 
 
-COPT ?= -fast
-FOPT ?= -fast
+COPT ?= -O3 -no-prec-div -xHost
+FOPT ?= -O3 -no-prec-div -xHost
 
 CDBG ?= -O0 -g 
 FDBG ?= -fpe0 -traceback -check all -ftrapuv -warn unused
