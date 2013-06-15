@@ -48,6 +48,7 @@ static struct option program_options[] = {
     { "VMD", no_argument, NULL, 'V'},
     { "freeze-deselected", no_argument, NULL, 'f'},
     { "distributed", required_argument, NULL, 'd'},
+    { "no-gradient", no_argument, NULL, 'G'},
     {NULL, 0, NULL, 0}
 };
 
@@ -66,6 +67,7 @@ static uvec selected_modes;
 
 static bool vmd_normal_modes = false;
 static bool freeze_deselected = false;
+static bool use_gradient = true;
 
 static int proc_id = 0;
 static int nb_proc = 1;
@@ -128,7 +130,7 @@ void parse_mode_description(const string& desc, uvec& selected_modes)
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:m:Vfd:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:2:3:c:s:r:p:m:Vfd:G", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -178,6 +180,9 @@ void process_options(int argc,  char *  argv[])
             case 'd':
                 proc_id = atoi(optarg);
                 nb_proc = atoi(strrchr(optarg, '/') + 1);
+                break;
+            case 'G':
+                use_gradient = false;
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;
@@ -255,12 +260,8 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     
     double V;
     r = x0 * bohr;
-    V = pot(nw, r.memptr(), Vr.memptr());
+    V = pot(nw, r.memptr());
     V /= autokcalpmol;
-    Vr *= bohr/autokcalpmol;
-
-    char proc_id_str[16];
-    snprintf(proc_id_str, 16, "%03d", proc_id);
     
     ofstream E0out_sd, E0out_t;
     if (nb_proc > 1) {
@@ -299,56 +300,67 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
         if (i+1 <= (continue_from ? continue_from : seq_start) ) continue;
         
         y /=  sqrt(2.0);
-        r = bohr *(MUa*y + x0);
-        V = pot(nw, r.memptr(), Vr.memptr());
-        V /= autokcalpmol;
-        Vr *= bohr/autokcalpmol;
-        
-        if (isnan(V)) {
-            cerr << "V=NaN at i=" << i << endl;
-            i--;
-            continue;
-        }
-        
-        V -= 0.5 * dot(y, omega%y);
-        Vy = MUa.t() * Vr - omega % y;
-        sme.addEpot(y(modes), V, Vy(modes), M);
-
-        
-        if ( (i+1)%(1<<14)==0) {
-            mat Mout = M / (i+1 - seq_start);
-            sme.addHODiagonal(Mout);
-            Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+        for (float ysign = 1.0; ysign > -2.0; ysign -= 2.0) {
+            y *= ysign;
+            r = bohr *(x0 + MUa*y);
             
-
             
-            int Nstates1 = sme.getSubBasisSize(1);
-            vec eigvals = eig_sym(Mout.submat(0,0, Nstates1-1, Nstates1-1));
-            E0[0] = eigvals[0]*autocm;
-            
-            int Nstates2 = sme.getSubBasisSize(2);
-            eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
-            E0[1] = eigvals[0]*autocm;
-            
-            E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" "
-                << E0[1] - E0[0] << endl;
-            
-            if ( (i+1)%(1<<17)==0 && nb_proc == 1) {
-                char s[128];
-                sprintf(s, "sM_%07d.h5", i+1);
-                save_hdf5(Mout, s);
-
-                eigvals = eig_sym(Mout);
-                E0[2] = eigvals[0]*autocm;
+            if (use_gradient) {
+                V = pot(nw, r.memptr(), Vr.memptr());
+                V /= autokcalpmol;
+                Vr *= bohr/autokcalpmol;
                 
-                E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
+                V -= 0.5 * dot(y, omega%y);
+                Vy = MUa.t() * Vr - omega % y;
+                sme.addEpot(y(modes), V, Vy(modes), M);
+            }
+            else {
+                V = pot(nw, r.memptr());
+                V /= autokcalpmol;
+                
+                V -= 0.5 * dot(y, omega%y);
+                sme.addEpot(y(modes), V, M);
+            }
+            
+            if (isnan(V)) {
+                cerr << "V=NaN encountered at i=" << i << endl;
+            }
+            
+            if ( (i+1)%(1<<14)==0 && ysign < 0) {
+                mat Mout = M / (2*(i+1 - seq_start));
+                sme.addHODiagonal(Mout);
+                Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
+                
+                
+                
+                int Nstates1 = sme.getSubBasisSize(1);
+                vec eigvals = eig_sym(Mout.submat(0,0, Nstates1-1, Nstates1-1));
+                E0[0] = eigvals[0]*autocm;
+                
+                int Nstates2 = sme.getSubBasisSize(2);
+                eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
+                E0[1] = eigvals[0]*autocm;
+                
+                E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" "
+                << E0[1] - E0[0] << endl;
+                
+                if ( (i+1)%(1<<17)==0 && nb_proc == 1) {
+                    char s[128];
+                    sprintf(s, "sM_%07d.h5", i+1);
+                    save_hdf5(Mout, s);
+                    
+                    eigvals = eig_sym(Mout);
+                    E0[2] = eigvals[0]*autocm;
+                    
+                    E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
+                }
             }
         }
     }
     E0out_sd.close();
     E0out_t.close();
-
-    M /= seq_len;
+    
+    M /= 2 * seq_len;
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
     

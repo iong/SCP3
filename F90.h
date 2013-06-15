@@ -11,6 +11,11 @@
 extern "C" {
     void sobol_stdnormal_c(int64_t d, int64_t *skip, void *x);
     void TIP4P_UF(int N, double *r, double *U, double *UX);
+    
+    void dsyrk_(char *UPLO, char *TRANS, int *N, int *K,
+                double *ALPHA, double *A, int *LDA,
+                double *BETA, double *C, int *LDC);
+    
     void dsyevr_(char *, char *, char *,  int *,  double *,  int *,  double *,
                  double* ,  int *IL,  int *IU, double *ABSTOL,  int *M,
                  double *W, double *Z, int *LDZ, int *ISUPPZ, double *WORK,
