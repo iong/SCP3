@@ -11,7 +11,6 @@
 #include <algorithm>
 
 #include "F90.h"
-#include "HarmonicOscillatorBasis.h"
 #include "ScaledMatrixElements.h"
 #include "SimplexIterator.h"
 
@@ -858,69 +857,3 @@ mat ScaledMatrixElements::transitionDipole(vec& charges, mat& MUa, mat& C)
     return mu;
 }
 
-vec ScaledMatrixElements::get_bra(const vec& q)
-{
-    int m, n, p;
-    
-    int R = 0;
-    
-    vec bra(getBasisSize());
-    
-    bra[R++] = 1.0;
-    
-    
-    
-    for (m=0; m<Nmodes; m++) {
-        bra[R++] = ho_basis[1] (q[m]);
-    }
-    
-    
-    for (m=0; m<Nmodes2; m++) {
-        bra[R++] = ho_basis[2] (q[m]);
-    }
-    
-    
-    for (m=0; m<Nmodes2; m++) {
-        double bra_m = ho_basis[1](q[m]);
-        
-        for (n=m+1; n<Nmodes2; n++) {
-            bra[R++] = bra_m * ho_basis[1] (q[n]);
-        }
-    }
-    
-    
-    for (m=0; m<Nmodes3; m++) {
-        bra[R++] = ho_basis[3] (q[m]);
-    }
-    
-    
-    for (m=0; m<Nmodes3; m++) {
-        double bra_m  = ho_basis[1](q[m]);
-        double bra_m2 = ho_basis[2](q[m]);
-        
-        for (n=m+1; n<Nmodes3; n++) {
-            bra[R++] = bra_m2 * ho_basis[1](q[n]);
-            bra[R++] = bra_m  * ho_basis[2](q[n]);
-        }
-    }
-    
-    
-    for (m=0; m<Nmodes3; m++) {
-        double bra_m = ho_basis[1]( q[m] );
-        
-        for (n=m+1; n<Nmodes3; n++) {
-            double bra_mn = bra_m * ho_basis[1]( q[n] );
-            
-            for (p=n+1; p<Nmodes3; p++) {
-                bra[R++] = bra_mn * ho_basis[1]( q[p] );
-            }
-        }
-    }
-    
-    if ( R != bra.n_rows) {
-        cerr << "R != M.n_rows";
-        exit(EXIT_FAILURE);
-    }
-    
-    return bra;
-}
