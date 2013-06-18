@@ -73,7 +73,6 @@ public:
     size_t getBasisSize();
     size_t getSubBasisSize(int n);
 
-    void addEpot(const vec &q, double V, mat &M);
     void addEpot(const vec &q_, double V_, const vec& Vq_, mat &M);
     void test_index();
     void addHODiagonal(mat &M);
