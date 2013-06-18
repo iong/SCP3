@@ -54,7 +54,9 @@ protected:
     void addEpotSingles(mat &M);
     void addEpotDoubles(mat &M);
     void addEpotTriples(mat &M);
-
+    
+    vec get_bra(const vec& q);
+    
 public:
     ScaledMatrixElements(const vec &omega_, int Nmodes2_ = 0, int Nmodes3_ = 0) :
     omega(omega_), Nmodes2(Nmodes2_), Nmodes3(Nmodes3_)
@@ -71,7 +73,7 @@ public:
     size_t getBasisSize();
     size_t getSubBasisSize(int n);
 
-    
+    void addEpot(const vec &q, double V, mat &M);
     void addEpot(const vec &q_, double V_, const vec& Vq_, mat &M);
     void test_index();
     void addHODiagonal(mat &M);
