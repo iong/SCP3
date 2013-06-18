@@ -49,7 +49,7 @@ all: SCP3
 
 sobol_stdnormal.o : sobol.o
 
-SCP3: SCP3.o ScaledMatrixElements.o HarmonicOscillatorBasis.o \
+SCP3: SCP3.o ScaledMatrixElements.o \
 	DiskIO.o sobol.o Constants.o beasley_springer_moro.o \
 	$(X2O_OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
