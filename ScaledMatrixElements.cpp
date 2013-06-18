@@ -924,20 +924,3 @@ vec ScaledMatrixElements::get_bra(const vec& q)
     
     return bra;
 }
-
-
-static void dsyrk(char UPLO, char TRANS, double alpha, mat& A, double beta, mat& C)
-{
-    int N = A.n_rows;
-    int K = A.n_cols;
-    
-    dsyrk_(&UPLO, &TRANS, &N, &K, &alpha, A.memptr(), &N, &beta, C.memptr(), &N);
-}
-
-
-void ScaledMatrixElements::addEpot(const vec &q, double V, mat &M)
-{
-    vec bra = get_bra(q);
-    
-    dsyrk('U', 'N', V, bra, 1.0, M);
-}
