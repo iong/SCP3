@@ -16,6 +16,11 @@ extern "C" {
                 double *ALPHA, double *A, int *LDA,
                 double *BETA, double *C, int *LDC);
     
+    void dsyr2k_(char *UPLO, char *TRANS, int *N, int *K,
+                double *ALPHA, double *A, int *LDA,
+                double *B, int *LDB,
+                double *BETA, double *C, int *LDC);
+    
     void dsyevr_(char *, char *, char *,  int *,  double *,  int *,  double *,
                  double* ,  int *IL,  int *IU, double *ABSTOL,  int *M,
                  double *W, double *Z, int *LDZ, int *ISUPPZ, double *WORK,

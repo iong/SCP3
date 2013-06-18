@@ -935,9 +935,36 @@ static void dsyrk(char UPLO, char TRANS, double alpha, mat& A, double beta, mat&
 }
 
 
+static void dsyr2k(char UPLO, char TRANS, double alpha, mat& A, mat& B,double beta, mat& C)
+{
+    int N = A.n_rows;
+    int K = A.n_cols;
+    
+    dsyr2k_(&UPLO, &TRANS, &N, &K, &alpha, A.memptr(), &N, B.memptr(), &N,
+            &beta, C.memptr(), &N);
+}
+
 void ScaledMatrixElements::addEpot(const vec &q, double V, mat &M)
 {
     vec bra = get_bra(q);
     
     dsyrk('U', 'N', V, bra, 1.0, M);
 }
+
+void ScaledMatrixElements::addEpot(const mat &q, const vec& V, mat &M)
+{
+    mat bra(getBasisSize(), q.n_cols);
+    mat ket(getBasisSize(), q.n_cols);
+    
+    for (int i=0; i<q.n_cols; i++) {
+        bra.col(i) = get_bra(q.col(i));
+    }
+
+    
+    for (int i=0; i<q.n_cols; i++) {
+        ket.col(i) = bra.col(i) * V[i];
+    }
+    
+    dsyr2k('U', 'N', 0.5, bra, ket, 1.0, M);
+}
+

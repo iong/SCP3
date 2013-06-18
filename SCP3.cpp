@@ -46,6 +46,7 @@ static struct option program_options[] = {
     { "select-modes", required_argument, NULL, 'm'},
     { "distributed", required_argument, NULL, 'd'},
     { "no-gradient", no_argument, NULL, 'G'},
+    { "block-width", required_argument, NULL, 'B'},
     {NULL, 0, NULL, 0}
 };
 
@@ -64,8 +65,9 @@ static bool use_gradient = true;
 static int proc_id = 0;
 static int nb_proc = 1;
 
-string  h2o_potential("qtip4pf");
+static int block_width = 1;
 
+string  h2o_potential("qtip4pf");
 
 
 void parse_mode_description(const string& desc, uvec& selected_modes)
@@ -141,6 +143,9 @@ void process_options(int argc,  char *  argv[])
             case 'G':
                 use_gradient = false;
                 break;
+            case 'B':
+                block_width = atoi(optarg);
+                break;
             default:
                 cerr << "Unknown option: " << ch << endl;
                 exit(EXIT_FAILURE);
@@ -169,23 +174,12 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     }
     
     int Nmodes0 = omega.n_rows;
-    
-    cout << MUa.n_cols <<", "<< modes.t() << endl;
 
     ScaledMatrixElements  sme(omega(modes), Nmodes2, Nmodes3);
     int Nstates = sme.getBasisSize();
     
     mat M(Nstates, Nstates);
     M.fill(0.0);
-
-    int nw = x0.n_rows / 9;
-    
-    vec y(Nmodes0), Vy(Nmodes0), r(9 * nw), Vr(9 * nw);
-    
-    double V;
-    r = x0 * bohr;
-    V = pot(nw, r.memptr());
-    V /= autokcalpmol;
     
     ofstream E0out_sd, E0out_t;
     if (nb_proc > 1) {
@@ -206,11 +200,18 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     E0out_t.precision(10);
     
     double E0[3];
-    
+ 
     int seq_len = NSobol / nb_proc;
     int seq_start = seq_len * proc_id;
     int seq_stop = seq_start + seq_len;
+
+    int nw = x0.n_rows / 9;
     
+    vec bV(block_width), y(Nmodes0), Vy(Nmodes0), r(9 * nw), Vr(9 * nw);
+    mat by(Nmodes0, block_width); 
+
+    int block_index = 0;
+
     for (int i = 0; i < seq_stop; i++) {
         if (rng_in.is_open()) {
             for (int j=0; j<Nmodes0; j++) {
@@ -244,10 +245,17 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
             else {
                 V = pot(nw, r.memptr()) / autokcalpmol;
                 
-                V -= 0.5 * dot(y, omega%y);
-                sme.addEpot(y(modes), V, M);
+                bV[block_index] = V - 0.5 * dot(y, omega%y);
+                by.col(block_index) = y;
+
+                block_index++;
             }
             
+            if (block_index == block_width) {				
+                sme.addEpot(by.rows(modes), bV, M);
+                block_index = 0;
+            }
+
             if (isnan(V)) {
                 cerr << "V=NaN encountered at i=" << i << endl;
             }
