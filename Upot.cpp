@@ -27,6 +27,7 @@
 
 #ifdef HAVE_BOWMAN
 #include "bowman.h"
+#include "bowman-fortran.h"
 #endif
 
 using namespace std;
@@ -41,7 +42,8 @@ static struct option program_options[] = {
     {NULL, 0, NULL, 0}
 };
 
-static int64_t NSobol=1<<20, sobol_skip=1<<20;
+static int64_t NSobol=1<<20;
+static long long int sobol_skip=1<<20;
 static string input_file;
 
 static ifstream rng_in;
@@ -119,7 +121,7 @@ void getHessian(h2o::Potential& pot, vec& r_au, double s, mat& H)
         r[i] = ri0 - s * bohr;
         V = pot(Nw, r.memptr(), Vrm.memptr());
         
-        H.col(i) = (Vrp - Vrm) / (2.0*s*autokcalpmol);
+        H.col(i) = (Vrp - Vrm) * bohr / (2.0*s*autokcalpmol);
         
         r[i] = ri0;
     }
@@ -149,13 +151,52 @@ void print_header(ostream& os)
     os <<"Hmass\tV0\tEkin=sum(omega)/4\t<V>\t<V>+Ekin\n";
 }
 
+
 void PrintHA(double V0, vec& omega)
 {
-    cout << "V0 = " << V0 * autocm << " cm^-1\n"
-        << "E0 = " << (V0 + 0.5*sum(omega)) * autocm << " cm^-1\n"
-    << omega.t() << endl;
+    cout.precision(10);
+    cout << "V0 = " << V0 * autocm << " cm^-1"
+        << "\t\t= " << V0 * autokcalpmol << " kcal/mol\n"
+        << "E0 = " << (V0 + 0.5*sum(omega)) * autocm << " cm^-1"
+        << "\t\t= " << (V0 + 0.5*sum(omega)) * autokcalpmol << " kcal/mol\n"
+        << "omega = " << omega.t()*autokcalpmol << endl;
 }
 
+
+void OHHOHH(vec& mass, vec& r)
+{  
+    int iO = 0;
+    int iH = 3;
+    
+    uvec p(mass.n_rows);
+    
+    for (int i=0; i<mass.n_rows;) {
+        if (mass[i] == Omass) {
+            for (int j=0; j<3; j++) {
+                p[iO + j] = i + j;
+            }
+            
+            iO += 9;
+            i += 3;
+        }
+        else if (mass[i] == Hmass) {
+            for (int j=0; j<3; j++) {
+                p[iH + j] = i + j;
+            }
+
+            iH +=  3;
+            iH += 3 * (iH%9 == 0);
+            i += 3;
+        }
+        else {
+            cerr << "Uknown mass at i = "<< i << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    vec r_tmp(r);
+    r = r_tmp(p);
+}
 
 int main (int argc, char *  argv[]) {
     vec mass, x0, omegasq0;
@@ -171,6 +212,7 @@ int main (int argc, char *  argv[]) {
     //load_from_vladimir(input_file, N, mass, x0, H);
     
     load_xyz(input_file, mass, x0);
+    OHHOHH(mass, x0);
     x0 /= bohr;
 
     int N = x0.n_rows / 3;
@@ -178,7 +220,10 @@ int main (int argc, char *  argv[]) {
     h2o::Potential *pot;
     if (h2o_potential == "whbb") {
 #ifdef HAVE_BOWMAN
+        h2o::fortran::pes2b_init();
+        h2o::fortran::pes3b_init();
         pot = new h2o::bowman();
+
 #else
         cerr << "Support for Bowman's WHBB was not included." << endl;
         exit(EXIT_FAILURE);
@@ -194,87 +239,24 @@ int main (int argc, char *  argv[]) {
         cerr << "Unknown H2O potential: " << h2o_potential << endl;
         exit(EXIT_FAILURE);
     }
-    
+   /* 
     mat H;
-    getHessian(*pot, x0, 0.01, H);
+    getHessian(*pot, x0, 1e-3, H);
     massScaleHessian(mass, H);
 
     
     mat U;
     eig_sym(omegasq0, U, H);
-    
+    vec omega = sqrt(omegasq0.rows(6, 3*N - 1));
+
+    cout << "Equilibrium test: " << omegasq0(span(0,5)).t() << endl;
+    */ 
     int nw = N/3;
     vec r = x0 * bohr;
-    double V0 = (*pot)(nw, x0.memptr())  / autokcalpmol;
-    PrintHA(V0, omegasq0);
+    double V0 = (*pot)(nw, r.memptr())  / autokcalpmol;
+    //PrintHA(V0, omega);
+    cout << "V0 = " << V0 * autocm << " cm^-1\n";
     
     exit(EXIT_SUCCESS);
     
-    int Nmodes0 = 3*N - 6;
-    
-    vec omega = sqrt(omegasq0.rows(6, 3*N - 1));
-    vec alpha = sqrt(omega);
-    mat MUa = U.cols(6, 3*N-1);
-    
-    
-    for (int i=0; i<MUa.n_cols; i++) {
-        MUa.col(i) /= sqrt(mass)*alpha(i);
-    }
-    
-    double V, V_avg;
-    vec y(Nmodes0), Vy(Nmodes0), Vy_avg(Nmodes0), Vr(3*N), Vr0(3*N);
-    
-    V_avg = 0.0;
-    Vy_avg.fill(0.0);
-
-    
-    sobol_skip = 2*NSobol;
-    for (int i=0; i<NSobol; i++) {
-        if (rng_in.is_open()) {
-            for (int j=0; j<Nmodes0; j++) {
-                rng_in >> y[j];
-            }
-        }
-        else {
-            sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
-        }
-        
-        y /=  sqrt(2.0);
-        r = MUa*y + x0;
-
-        r *= bohr;        
-        V = (*pot)(nw, r.memptr(), Vr.memptr()) / autokcalpmol;
-        Vr *= bohr/autokcalpmol;
-        
-        if (isnan(V)) {
-            cerr << "V=NaN at i=" << i << endl;
-            i--;
-            continue;
-        }
-        
-        V -= 0.5 * dot(y, omega%y);
-        Vy = -MUa.t() * Vr - omega % y;
-        
-        V_avg += V;
-        Vy_avg += Vy;
-    }
-    rng_in.close();
-    
-    V_avg /= NSobol;
-    Vy_avg /= NSobol;
-    
-    /*
-    cout << "V0 = "<< V0*autocm <<" cm^-1\tsum(omega)/4 ="<< 0.25*sum(omega)*autocm <<" cm^-1\n"
-    <<"V0 + sum(omega)/4 =" << (V0 + 0.25*sum(omega))*autocm <<" cm^-1\n"
-    <<"<V> = " << V_avg*autocm<<" cm^-1\n"
-    <<"<V> - sum(omega)/4 - V0 =" << (V_avg - 0.25*sum(omega) - V0)*autocm <<" cm^-1\n"
-    <<"<V> + sum(omega)/4 = " << (V_avg + 0.25*sum(omega))*autocm <<" cm^-1\n";
-    */
-    
-    V0 *= autocm;
-    omega *= autocm;
-    V_avg *= autocm;
-    
-    cout  << Hmass/1837.15137 <<" "<< V0 <<" "<< sum(omega)/4.0 <<" "<< V_avg
-        <<" "<< V_avg + sum(omega)/4.0 <<endl;
 }
