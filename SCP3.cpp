@@ -257,6 +257,9 @@ void OHHOHH(vec& mass, vec& r, mat& H)
     
     mat H_tmp = H.cols(p);
     H = H_tmp.rows(p);
+
+    vec mass2 = mass(p);
+    mass = mass2;
 }
 
 
