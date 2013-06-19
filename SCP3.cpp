@@ -28,6 +28,7 @@
 #include "ttm3f.h"
 
 #ifdef HAVE_BOWMAN
+#include "bowman-fortran.h"
 #include "bowman.h"
 #endif
 
