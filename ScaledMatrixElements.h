@@ -55,7 +55,7 @@ protected:
     void addEpotDoubles(mat &M);
     void addEpotTriples(mat &M);
     
-    vec get_bra(const vec& q);
+    void get_bra(const vec& q, double * bra);
     
 public:
     ScaledMatrixElements(const vec &omega_, int Nmodes2_ = 0, int Nmodes3_ = 0) :

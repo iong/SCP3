@@ -858,17 +858,14 @@ mat ScaledMatrixElements::transitionDipole(vec& charges, mat& MUa, mat& C)
     return mu;
 }
 
-vec ScaledMatrixElements::get_bra(const vec& q)
+void ScaledMatrixElements::get_bra(const vec& q, double *bra)
 {
     int m, n, p;
     
     int R = 0;
     
-    vec bra(getBasisSize());
-    
     bra[R++] = 1.0;
-    
-    
+
     
     for (m=0; m<Nmodes; m++) {
         bra[R++] = ho_basis[1] (q[m]);
@@ -917,12 +914,10 @@ vec ScaledMatrixElements::get_bra(const vec& q)
         }
     }
     
-    if ( R != bra.n_rows) {
-        cerr << "R != M.n_rows";
+    if ( R != getBasisSize()) {
+        cerr << "R != basis size";
         exit(EXIT_FAILURE);
     }
-    
-    return bra;
 }
 
 
@@ -946,7 +941,9 @@ static void dsyr2k(char UPLO, char TRANS, double alpha, mat& A, mat& B,double be
 
 void ScaledMatrixElements::addEpot(const vec &q, double V, mat &M)
 {
-    vec bra = get_bra(q);
+    vec bra(getBasisSize());
+
+    get_bra(q, bra.memptr());
     
     dsyrk('U', 'N', V, bra, 1.0, M);
 }
@@ -956,13 +953,18 @@ void ScaledMatrixElements::addEpot(const mat &q, const vec& V, mat &M)
     mat bra(getBasisSize(), q.n_cols);
     mat ket(getBasisSize(), q.n_cols);
     
-    for (int i=0; i<q.n_cols; i++) {
-        bra.col(i) = get_bra(q.col(i));
-    }
+#pragma omp parallel
+    {
+#pragma omp for schedule(static) nowait
+        for (int i=0; i<q.n_cols; i++) {
+             get_bra(q.unsafe_col(i), bra.colptr(i));
+        }
 
     
-    for (int i=0; i<q.n_cols; i++) {
-        ket.col(i) = bra.col(i) * V[i];
+#pragma omp for schedule(static)
+        for (int i=0; i<q.n_cols; i++) {
+            ket.col(i) = bra.col(i) * V[i];
+        }
     }
     
     dsyr2k('U', 'N', 0.5, bra, ket, 1.0, M);
