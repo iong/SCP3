@@ -281,11 +281,12 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
                     char s[128];
                     sprintf(s, "sM_%07d.h5", i+1);
                     save_hdf5(Mout, s);
-                    
+                   /* 
                     eigvals = eig_sym(Mout);
                     E0[2] = eigvals[0]*autocm;
                     
                     E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
+                    */
                 }
             }
         }
