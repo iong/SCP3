@@ -483,6 +483,15 @@ static double c5z[245];
 
 namespace ps {
 
+void pot_nasa_init()
+{
+    for (size_t i = 0; i < 245; ++i)
+        c5z[i] = f5z*c5zA[i] + fbasis*cbasis[i] + fcore*ccore[i]
+            + frest*crest[i];
+    c5z_ready = true;
+}
+
+
 double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
 {
     double ROH1[3], ROH2[3], RHH[3], dROH1(0), dROH2(0), dRHH(0);
@@ -504,12 +513,7 @@ double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
     const double costh =
         (ROH1[0]*ROH2[0] + ROH1[1]*ROH2[1] + ROH1[2]*ROH2[2])/(dROH1*dROH2);
 
-    if (!c5z_ready) {
-        for (size_t i = 0; i < 245; ++i)
-            c5z[i] = f5z*c5zA[i] + fbasis*cbasis[i]
-                   + fcore*ccore[i] + frest*crest[i];
-        c5z_ready = true;
-    }
+    assert (c5z_ready);
 
     const double deoh = f5z*deohA;
     const double phh1 = f5z*phh1A*std::exp(phh2);

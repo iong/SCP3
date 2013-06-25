@@ -30,6 +30,7 @@
 #ifdef HAVE_BOWMAN
 #include "bowman-fortran.h"
 #include "bowman.h"
+#include "ps.h"
 #endif
 
 
@@ -166,7 +167,31 @@ void process_options(int argc,  char *  argv[])
 }
 
 
-void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
+h2o::Potential *getPotential(const string& name)
+{
+    h2o::Potential *pot;
+    if (name == "whbb") {
+#ifdef HAVE_BOWMAN
+        pot = new h2o::bowman();
+#else
+        cerr << "Support for Bowman's WHBB was not included." << endl;
+        exit(EXIT_FAILURE);
+#endif
+    }
+    else if (name == "qtip4pf") {
+        pot = new h2o::qtip4pf();
+    }
+    else {
+        cerr << "Unknown H2O potential: " << h2o_potential << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    return pot;
+}
+
+
+
+void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
 {
     if (Nmodes2 > modes.n_rows || Nmodes3 > modes.n_rows) {
         cerr << "Number of double or triple excitations exceed number of modes."
@@ -381,32 +406,19 @@ int main (int argc, char *  argv[]) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
 
-    h2o::Potential *pot;
-    if (h2o_potential == "whbb") {
 #ifdef HAVE_BOWMAN
+    if (h2o_potential == "whbb") {
+        ps::pot_nasa_init();
         h2o::fortran::pes2b_init();
         h2o::fortran::pes3b_init();
-        pot = new h2o::bowman();
-#else
-        cerr << "Support for Bowman's WHBB was not included." << endl;
-        exit(EXIT_FAILURE);
+    }
 #endif
-    }
-    else if (h2o_potential == "qtip4pf") {
-        pot = new h2o::qtip4pf();
-    }
-    else {
-        cerr << "Unknown H2O potential: " << h2o_potential << endl;
-        exit(EXIT_FAILURE);
-    }
-
 
     if (selected_modes.is_empty() ) {
         selected_modes = linspace<uvec>(0, MUa.n_cols - 1, MUa.n_cols);
     }
-     
 
-    SCP3_a(*pot, x0, omega, MUa, selected_modes);
+    SCP3_a(h2o_potential, x0, omega, MUa, selected_modes);
     
     rng_in.close();
 }
