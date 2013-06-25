@@ -10,7 +10,7 @@ ifdef TARGET
 endif
 
 
-COPT ?= -O3 -no-prec-div -xHost
+COPT ?= -O3 -no-prec-div -xHost -DNDEBUG
 FOPT ?= -O3 -no-prec-div -xHost
 
 CDBG ?= -O0 -g 

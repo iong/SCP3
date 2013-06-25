@@ -8,7 +8,7 @@ ifdef TARGET
     TARGET_FLAGS := -march=$(TARGET)
 endif
 
-COPT ?= -O3 -ffast-math
+COPT ?= -O3 -ffast-math -DNDEBUG
 FOPT ?= $(COPT)
 
 CDBG ?= -O0 -g -Wall
