@@ -8,10 +8,10 @@ ifdef TARGET
     TARGET_FLAGS := -march=$(TARGET)
 endif
 
-COPT ?= -O3 -ffast-math -DNDEBUG
+COPT ?= -O3 -ffast-math -DNDEBUG -march=native
 FOPT ?= $(COPT)
 
-CDBG ?= -O0 -g -Wall
+CDBG ?= -O0 -g -Wall -march=native
 FDBG ?= -fbounds-check -ffpe-trap=invalid,zero,overflow,denormal \
 	-finit-real=SNAN -finit-integer=-1
 

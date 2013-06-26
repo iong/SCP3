@@ -14,6 +14,8 @@
 
 #include <cmath>
 #include <cstdlib>
+
+#define ARMA_HAVE_POSIX_MEMALIGN
 #include <armadillo>
 
 #include <x86intrin.h>
