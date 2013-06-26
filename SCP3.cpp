@@ -262,7 +262,7 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
             }
             
             if ( (i+1)%(1<<14)==0 && ysign < 0) {
-                mat Mout = M / (2*(i+1 - seq_start));
+                mat Mout = M / (2.0*(i+1 - seq_start));
                 sme.addHODiagonal(Mout);
                 Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
 
@@ -294,7 +294,7 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
     E0out_sd.close();
     E0out_t.close();
     
-    M /= 2 * seq_len;
+    M /= 2.0*seq_len;
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
     

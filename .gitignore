@@ -3,3 +3,4 @@ build/
 !*.xcodeproj/project.pbxproj
 .DS_Store
 *.swp
+.dropbox

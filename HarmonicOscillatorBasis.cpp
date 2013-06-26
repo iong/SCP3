@@ -13,11 +13,6 @@ using namespace std;
 
 #include "HarmonicOscillatorBasis.h"
 
-#define Power(x, y)     (pow((double)(x), (double)(y)))
-#define Sqrt(x)         (sqrt((double)(x)))
-
-static const double    pi_one_4th = 1.0 / sqrt(sqrt(M_PI));
-
 static double 
 ho_0(double y)
 {
@@ -28,21 +23,21 @@ ho_0(double y)
 static double 
 ho_1(double y)
 {
-	return 2.0 * y / sqrt(2.0);
+	return sqrt(2.0) * y;
 }
 
 
 static double 
 ho_2(double y)
 {
-	return (-1.0 + 2.0 * y*y) / sqrt(2.0);
+	return (2.0 * y*y - 1.0) / sqrt(2.0);
 }
 
 
 static double 
 ho_3(double y)
 {
-	return (y * (-3.0 + 2.0 * y*y) ) / sqrt(3.0);
+	return (2.0 * y*y - 3.0) * y / sqrt(3.0);
 }
 
 

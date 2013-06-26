@@ -26,6 +26,7 @@ int ScaledMatrixElements::k2_index(int k)
     return k2_fence + k;
 }
 
+
 /**
  1 + 2*Nmodes + (Nmodes - 1 + Nmodes - k)*k/2 + l - k - 1
  */
@@ -34,15 +35,18 @@ int ScaledMatrixElements::kl_index(int k, int l)
     return kl_fence + k*Nmodes2 - ((k + 2) * (k + 1))/2 + l;
 }
 
+
 int ScaledMatrixElements::k3_index(int k)
 {
     return k3_fence + k;
 }
 
+
 int ScaledMatrixElements::k2l_index(int k,int l)
 {
     return k2l_fence + 2*Nmodes3*k + 2*l - (k+2)*(k + 1);
 }
+
 
 /**
  \f[
@@ -65,12 +69,14 @@ int ScaledMatrixElements::klj_index(int k, int l, int j)
     return klj_fence + kth_plane_offset + jl_pos;
 }
 
+
 size_t ScaledMatrixElements::getBasisSize()
 {
     size_t Nstates2 = 1 + Nmodes + Nmodes2*(Nmodes2 + 1)/2;
 
     return Nstates2 + (Nmodes3 * (1 + Nmodes3) * (2 + Nmodes3))/6;
 }
+
 
 size_t ScaledMatrixElements::getSubBasisSize(int n)
 {
@@ -91,6 +97,7 @@ size_t ScaledMatrixElements::getSubBasisSize(int n)
 
     return Nstates;
 }
+
 
 void ScaledMatrixElements::addEpotSingles(mat &M)
 {
@@ -864,7 +871,7 @@ void ScaledMatrixElements::get_bra(const vec& q, double *bra)
     
     int R = 0;
     
-    bra[R++] = 1.0;
+    bra[R++] = ho_basis[0] (q[m]);
 
     
     for (m=0; m<Nmodes; m++) {
