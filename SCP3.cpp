@@ -30,6 +30,7 @@
 #ifdef HAVE_BOWMAN
 #include "bowman-fortran.h"
 #include "bowman.h"
+#include "ps.h"
 #endif
 
 
@@ -166,7 +167,31 @@ void process_options(int argc,  char *  argv[])
 }
 
 
-void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
+h2o::Potential *getPotential(const string& name)
+{
+    h2o::Potential *pot;
+    if (name == "whbb") {
+#ifdef HAVE_BOWMAN
+        pot = new h2o::bowman();
+#else
+        cerr << "Support for Bowman's WHBB was not included." << endl;
+        exit(EXIT_FAILURE);
+#endif
+    }
+    else if (name == "qtip4pf") {
+        pot = new h2o::qtip4pf();
+    }
+    else {
+        cerr << "Unknown H2O potential: " << h2o_potential << endl;
+        exit(EXIT_FAILURE);
+    }
+
+    return pot;
+}
+
+
+
+void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
 {
     if (Nmodes2 > modes.n_rows || Nmodes3 > modes.n_rows) {
         cerr << "Number of double or triple excitations exceed number of modes."
@@ -208,61 +233,70 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
 
     int nw = x0.n_rows / 9;
     
-    vec bV(block_width), y(Nmodes0), Vy(Nmodes0), r(9 * nw), Vr(9 * nw);
-    mat by(Nmodes0, block_width); 
+    vec bV(block_width);
+    mat by(Nmodes0, block_width), bVy(Nmodes0, block_width); 
 
-    int block_index = 0;
+    if (seq_start % block_width != 0) {
+        cerr << "seq_start must me a multiple of block_width!\n";
+        exit(EXIT_FAILURE);
+    }
 
-    for (int i = 0; i < seq_stop; i++) {
+    for (int i = 0; i < seq_stop; i += block_width) {
         if (rng_in.is_open()) {
-            for (int j=0; j<Nmodes0; j++) {
-                rng_in >> y[j];
+            for (int j=0; j < block_width; j++) {
+                for (int k=0; k<Nmodes0; k++) {
+                    rng_in >> by(k, j);
+                }
             }
         }
         else {
-            sobol::std_normal(y.n_rows, &sobol_skip, y.memptr());
+            for (int j=0; j < block_width; j++) {
+                sobol::std_normal(by.n_rows, &sobol_skip, by.colptr(j));
+            }
         }
-        
+
         if (i < seq_start ) continue;
-        
-        y /=  sqrt(2.0);
 
-        for (double ysign = 1.0; ysign > -2.0; ysign -= 2.0) {
-            double V;
+        by /=  sqrt(2.0);
 
-            y *= ysign;
-            r = bohr *(x0 + MUa*y);
-            
-            
-            if (use_gradient) {
-                V = pot(nw, r.memptr(), Vr.memptr());
-                V /= autokcalpmol;
-                Vr *= bohr/autokcalpmol;
+#pragma omp parallel
+        {
+            h2o::Potential *pot = getPotential(h2o_potential);
+
+#pragma omp for schedule(static)
+            for (int j = 0; j < block_width; j++) {
+                double V;
+
+                vec r = bohr *(x0 + MUa*by.col(j));
                 
-                V -= 0.5 * dot(y, omega%y);
-                Vy = MUa.t() * Vr - omega % y;
-                sme.addEpot(y(modes), V, Vy(modes), M);
-            }
-            else {
-                V = pot(nw, r.memptr()) / autokcalpmol;
-                
-                bV[block_index] = V - 0.5 * dot(y, omega%y);
-                by.col(block_index) = y;
+                if (use_gradient) {
+                    vec Vr(r.n_rows);
 
-                block_index++;
-            }
-            
-            if (block_index == block_width) {				
-                sme.addEpot(by.rows(modes), bV, M);
-                block_index = 0;
+                    V = (*pot)(nw, r.memptr(), Vr.memptr()) / autokcalpmol;
+                    Vr *= bohr/autokcalpmol;
+                    
+                    bVy.col(j) = MUa.t() * Vr - omega % by.col(j);
+                }
+                else {
+                    V = (*pot)(nw, r.memptr()) / autokcalpmol;
+                }
+
+                bV[j] = V - 0.5 * dot(by.col(j), omega % by.col(j));
+
             }
 
-            if (isnan(V)) {
-                cerr << "V=NaN encountered at i=" << i << endl;
-            }
+            delete pot;
+        }
             
-            if ( (i+1)%(1<<14)==0 && ysign < 0) {
-                mat Mout = M / (2.0*(i+1 - seq_start));
+        if (use_gradient) {
+            sme.addEpot(by.rows(modes), bV, bVy.rows(modes), M);
+        }
+        else {
+            sme.addEpot(by.rows(modes), bV, M);
+        }
+
+            if ( (i+1)%(1<<14)==0) {
+                mat Mout = M / (i+1 - seq_start);
                 sme.addHODiagonal(Mout);
                 Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
 
@@ -289,12 +323,11 @@ void SCP3_a(h2o::Potential& pot, const vec& x0, const vec& omega, const mat& MUa
                     */
                 }
             }
-        }
     }
     E0out_sd.close();
     E0out_t.close();
     
-    M /= 2.0*seq_len;
+    M /= seq_len;
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
     
@@ -381,32 +414,19 @@ int main (int argc, char *  argv[]) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
 
-    h2o::Potential *pot;
-    if (h2o_potential == "whbb") {
 #ifdef HAVE_BOWMAN
+    if (h2o_potential == "whbb") {
+        ps::pot_nasa_init();
         h2o::fortran::pes2b_init();
         h2o::fortran::pes3b_init();
-        pot = new h2o::bowman();
-#else
-        cerr << "Support for Bowman's WHBB was not included." << endl;
-        exit(EXIT_FAILURE);
+    }
 #endif
-    }
-    else if (h2o_potential == "qtip4pf") {
-        pot = new h2o::qtip4pf();
-    }
-    else {
-        cerr << "Unknown H2O potential: " << h2o_potential << endl;
-        exit(EXIT_FAILURE);
-    }
-
 
     if (selected_modes.is_empty() ) {
         selected_modes = linspace<uvec>(0, MUa.n_cols - 1, MUa.n_cols);
     }
-     
 
-    SCP3_a(*pot, x0, omega, MUa, selected_modes);
+    SCP3_a(h2o_potential, x0, omega, MUa, selected_modes);
     
     rng_in.close();
 }

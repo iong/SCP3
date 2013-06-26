@@ -13,21 +13,28 @@
 
 
 #include <cmath>
+#include <cstdlib>
+
+#define ARMA_HAVE_POSIX_MEMALIGN
 #include <armadillo>
+
+#include <x86intrin.h>
 
 using namespace std;
 using namespace arma;
 
-static double sqr(double x)
+const int BLOCK_LENGTH = 512;
+
+static double square(double x)
 {
     return x*x;
 }
 
 class ScaledMatrixElements {
 protected:
-    double V;
     int Nmodes, Nmodes2, Nmodes3;
-    vec omega, Vq, q;
+    vec omega, V;
+    mat q, Vq;
 
     int k_fence, k2_fence, kl_fence, k2l_fence, k3_fence, klj_fence;
 
@@ -62,6 +69,7 @@ public:
     omega(omega_), Nmodes2(Nmodes2_), Nmodes3(Nmodes3_)
     {
         Nmodes = omega.n_rows;
+
         k_fence = 1;
         k2_fence = k_fence + Nmodes;
         kl_fence = k2_fence + Nmodes2;
@@ -69,13 +77,13 @@ public:
         k2l_fence = k3_fence + Nmodes3;
         klj_fence = k2l_fence + Nmodes3*(Nmodes3-1);
     }
-    
+
+
     size_t getBasisSize();
     size_t getSubBasisSize(int n);
 
-    void addEpot(const vec &q, double V, mat &M);
     void addEpot(const mat &q, const vec& V, mat &M);
-    void addEpot(const vec &q_, double V_, const vec& Vq_, mat &M);
+    void addEpot(const mat &q_, const vec& V_, const mat& Vq_, mat &M);
     void test_index();
     void addHODiagonal(mat &M);
     mat transitionDipole(vec& charges, mat& MUa, mat& C);

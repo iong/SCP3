@@ -706,13 +706,15 @@ void ScaledMatrixElements::addEpotTriples(mat &M)
     }
 }
 
-void ScaledMatrixElements::addEpot(const vec &q_, double V_, const vec& Vq_, mat &M)
+void ScaledMatrixElements::addEpot(const mat &q_, const vec& V_, const mat& Vq_, mat &M)
 {
-    q = q_;
+
+    q  = q_.t();
+    Vq = Vq_.t();
+
     V = V_;
-    Vq = Vq_;
-    
-    M(0,0) += V;
+
+    M(0,0) += sum(V);
     
 #pragma omp parallel
     {
@@ -944,15 +946,6 @@ static void dsyr2k(char UPLO, char TRANS, double alpha, mat& A, mat& B,double be
     
     dsyr2k_(&UPLO, &TRANS, &N, &K, &alpha, A.memptr(), &N, B.memptr(), &N,
             &beta, C.memptr(), &N);
-}
-
-void ScaledMatrixElements::addEpot(const vec &q, double V, mat &M)
-{
-    vec bra(getBasisSize());
-
-    get_bra(q, bra.memptr());
-    
-    dsyrk('U', 'N', V, bra, 1.0, M);
 }
 
 void ScaledMatrixElements::addEpot(const mat &q, const vec& V, mat &M)
