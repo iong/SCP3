@@ -295,8 +295,8 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
             sme.addEpot(by.rows(modes), bV, M);
         }
 
-            if ( (i+1)%(1<<14)==0) {
-                mat Mout = M / (i+1 - seq_start);
+            if ( (i+block_width)%(1<<14)==0) {
+                mat Mout = M / (i+block_width - seq_start);
                 sme.addHODiagonal(Mout);
                 Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
 
@@ -308,12 +308,12 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
                 eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
                 E0[1] = eigvals[0]*autocm;
                 
-                E0out_sd << i+1 << " " << E0[0] <<" "<< E0[1] <<" "
+                E0out_sd << i+block_width << " " << E0[0] <<" "<< E0[1] <<" "
                 << E0[1] - E0[0] << endl;
                 
-                if ( (i+1)%(1<<17)==0 && nb_proc == 1) {
+                if ( (i+block_width)%(1<<17)==0 && nb_proc == 1) {
                     char s[128];
-                    sprintf(s, "sM_%07d.h5", i+1);
+                    sprintf(s, "sM_%07d.h5", i+block_width);
                     save_hdf5(Mout, s);
                    /* 
                     eigvals = eig_sym(Mout);
