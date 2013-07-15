@@ -24,7 +24,6 @@ $(foreach x,CFLAGS CXXFLAGS,$(eval $(x) += $(COPT) ) )
 	FFLAGS    += $(FOPT)
 endif
 $(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(TARGET_FLAGS) ) )
-$(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(OPENMP_FLAGS) ) )
 
 
 LIBS :=$(BLAS_LIBRARIES) -lhdf5_cpp -lhdf5 -lz
@@ -47,12 +46,21 @@ all: SCP3
 %.o: %.f90
 	$(FC) -c $(FFLAGS) -o $@ $<
 
+%.o: %.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(cxxflags-$*) -o $@ $<
+
+%.o: %.c
+	$(CXX) -c $(CPPFLAGS) $(CCFLAGS) $(ccflags-$*) -o $@ $<
+
 sobol_stdnormal.o : sobol.o
+
+cxxflags-SCP3 := $(OPENMP_FLAGS)
+cxxflags-ScaledMatrixElements := $(OPENMP_FLAGS)
 
 SCP3: SCP3.o ScaledMatrixElements.o HarmonicOscillatorBasis.o \
 	DiskIO.o sobol.o Constants.o beasley_springer_moro.o \
 	$(X2O_OBJ)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(CXXFLAGS) $(OPENMP_FLAGS) $^ $(LDFLAGS) $(LIBS)
 
 TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
 		ScaledMatrixElements.o
