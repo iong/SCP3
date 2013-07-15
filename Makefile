@@ -37,7 +37,7 @@ X2O_OBJ =  ps.o qtip4pf.o \
 ifdef WHBB
 	X2O_OBJ += bowman-bits.o bowman.o bowman-fortran.o ttm4-hbb2-x3b.o x3b.o
 	LDFLAGS += -L$(SRCDIR)/bowman
-	LIBS += -lpes3bifc_omp -lpes2bifc_omp -lifcore -limf -lsvml -Bstatic -lnetcdf -Bdynamic
+	LIBS += -lpes3bifc_omp -lpes2bifc_omp -lifcore -limf -lsvml -Bstatic -lnetcdf -Bdynamic -ldl
 	CPPFLAGS += -DHAVE_BOWMAN
 endif
 
