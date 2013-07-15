@@ -16,6 +16,8 @@
 
 #include <getopt.h>
 
+#include <omp.h>
+
 #include <armadillo>
 
 #include "Constants.h"
@@ -261,6 +263,8 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
 
 #pragma omp parallel
         {
+            omp_set_nested(false);
+
             h2o::Potential *pot = getPotential(h2o_potential);
 
 #pragma omp for schedule(static)
