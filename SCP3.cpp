@@ -387,6 +387,7 @@ int main (int argc, char *  argv[]) {
         ps::pot_nasa_init();
         h2o::fortran::pes2b_init();
         h2o::fortran::pes3b_init();
+        h2o::x3b_bits::load("x3b.nc");
     }
 #endif
 
