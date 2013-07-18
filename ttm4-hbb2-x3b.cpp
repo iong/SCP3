@@ -56,18 +56,6 @@ ttm4_hbb2_x3b::~ttm4_hbb2_x3b()
 
 //----------------------------------------------------------------------------//
 
-void ttm4_hbb2_x3b::load(const char* filename)
-{
-#pragma omp critical {
-    m_x3b.load(filename);
-}
-    m_name = "TTM4+HBB2+X3B (";
-    m_name += filename;
-    m_name += ")";
-}
-
-//----------------------------------------------------------------------------//
-
 double ttm4_hbb2_x3b::operator()
     (size_t nw, const double* RESTRICT crd)
 {
