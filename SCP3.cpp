@@ -64,10 +64,10 @@ static uvec selected_modes;
 
 static bool use_gradient = true;
 
-static int proc_id = 0;
-static int nb_proc = 1;
+static int segment_id = 0;
+static int nb_segments = 1;
 
-static int block_width = 1;
+static int block_width = 1024;
 
 string  h2o_potential("qtip4pf");
 
@@ -139,8 +139,8 @@ void process_options(int argc,  char *  argv[])
                 parse_mode_description(optarg, selected_modes);
                 break;
             case 'd':
-                proc_id = atoi(optarg);
-                nb_proc = atoi(strrchr(optarg, '/') + 1);
+                segment_id = atoi(optarg);
+                nb_segments = atoi(strrchr(optarg, '/') + 1);
                 break;
             case 'G':
                 use_gradient = false;
@@ -208,9 +208,9 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
     M.fill(0.0);
     
     ofstream E0out_sd, E0out_t;
-    if (nb_proc > 1) {
+    if (nb_segments > 1) {
         char s[32];
-        sprintf(s, "E0_sd-%03d.dat", proc_id);
+        sprintf(s, "E0_sd-%03d.dat", segment_id);
         E0out_sd.open(s);
     }
     else {
@@ -227,8 +227,8 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
     
     double E0[3];
  
-    int seq_len = NSobol / nb_proc;
-    int seq_start = seq_len * proc_id;
+    int seq_len = NSobol / nb_segments;
+    int seq_start = seq_len * segment_id;
     int seq_stop = seq_start + seq_len;
 
     int nw = x0.n_rows / 9;
@@ -288,41 +288,42 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
             delete pot;
         }
             
+/*
         if (use_gradient) {
             sme.addEpot(by.rows(modes), bV, bVy.rows(modes), M);
         }
         else {
             sme.addEpot(by.rows(modes), bV, M);
         }
+*/
+        if ( (i+block_width)%(1<<14)==0) {
+            mat Mout = M / (i+block_width - seq_start);
+            sme.addHODiagonal(Mout);
+            Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
 
-            if ( (i+block_width)%(1<<14)==0) {
-                mat Mout = M / (i+block_width - seq_start);
-                sme.addHODiagonal(Mout);
-                Mout.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
-
-                int Nstates1 = sme.getSubBasisSize(1);
-                vec eigvals = eig_sym(Mout.submat(0,0, Nstates1-1, Nstates1-1));
-                E0[0] = eigvals[0]*autocm;
+            int Nstates1 = sme.getSubBasisSize(1);
+            vec eigvals = eig_sym(Mout.submat(0,0, Nstates1-1, Nstates1-1));
+            E0[0] = eigvals[0]*autocm;
+            
+            int Nstates2 = sme.getSubBasisSize(2);
+            eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
+            E0[1] = eigvals[0]*autocm;
+            
+            E0out_sd << i+block_width << " " << E0[0] <<" "<< E0[1] <<" "
+            << E0[1] - E0[0] << endl;
+            
+            if ( (i+block_width)%(1<<17)==0 && nb_segments == 1) {
+                char s[128];
+                sprintf(s, "sM_%07d.h5", i+block_width);
+                save_hdf5(Mout, s);
+               /* 
+                eigvals = eig_sym(Mout);
+                E0[2] = eigvals[0]*autocm;
                 
-                int Nstates2 = sme.getSubBasisSize(2);
-                eigvals = eig_sym(Mout.submat(0,0, Nstates2-1, Nstates2-1));
-                E0[1] = eigvals[0]*autocm;
-                
-                E0out_sd << i+block_width << " " << E0[0] <<" "<< E0[1] <<" "
-                << E0[1] - E0[0] << endl;
-                
-                if ( (i+block_width)%(1<<17)==0 && nb_proc == 1) {
-                    char s[128];
-                    sprintf(s, "sM_%07d.h5", i+block_width);
-                    save_hdf5(Mout, s);
-                   /* 
-                    eigvals = eig_sym(Mout);
-                    E0[2] = eigvals[0]*autocm;
-                    
-                    E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
-                    */
-                }
+                E0out_t << i+1 <<" "<< E0[2] <<" "<< E0[2] - E0[0] <<endl;
+                */
             }
+        }
     }
     E0out_sd.close();
     E0out_t.close();
@@ -331,7 +332,7 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
     sme.addHODiagonal(M);
     M.diag() += 0.5 * (sum(omega) - sum(omega(modes)));
     
-    if (nb_proc > 1) {
+    if (nb_segments > 1) {
         char s[128];
         sprintf(s, "sM_%07d.h5", seq_stop);
         save_hdf5(M, s);
@@ -397,7 +398,7 @@ int main (int argc, char *  argv[]) {
     mat U;
     eig_sym(omegasq0, U, H);
 
-    if (proc_id == 0) {
+    if (segment_id == 0) {
         ofstream sout("omega0.dat");
         sout << sqrt(abs(omegasq0))*autocm << endl;
         sout.close();
