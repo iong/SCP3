@@ -873,7 +873,7 @@ void ScaledMatrixElements::get_bra(const vec& q, double *bra)
     
     int R = 0;
     
-    bra[R++] = ho_basis[0] (q[m]);
+    bra[R++] = 1.0;
 
     
     for (m=0; m<Nmodes; m++) {
