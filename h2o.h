@@ -10,6 +10,8 @@ using namespace std;
 #include "qtip4pf.h"
 
 #ifdef HAVE_BOWMAN
+#include "ps.h"
+#include "bowman-fortran.h"
 #include "bowman.h"
 #include "ttm4-hbb2-x3b.h"
 #endif
