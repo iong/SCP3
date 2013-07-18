@@ -510,29 +510,29 @@ double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
     dROH2 = std::sqrt(dROH2);
     dRHH = std::sqrt(dRHH);
 
-    const double costh =
+    double costh =
         (ROH1[0]*ROH2[0] + ROH1[1]*ROH2[1] + ROH1[2]*ROH2[2])/(dROH1*dROH2);
 
     assert (c5z_ready);
 
-    const double deoh = f5z*deohA;
-    const double phh1 = f5z*phh1A*std::exp(phh2);
+    double deoh = f5z*deohA;
+    double phh1 = f5z*phh1A*std::exp(phh2);
 
-    const double costhe = -.24780227221366464506;
+    double costhe = -.24780227221366464506;
 
-    const double exp1 = std::exp(-alphaoh*(dROH1 - roh));
-    const double exp2 = std::exp(-alphaoh*(dROH2 - roh));
+    double exp1 = std::exp(-alphaoh*(dROH1 - roh));
+    double exp2 = std::exp(-alphaoh*(dROH2 - roh));
 
-    const double Va = deoh*(exp1*(exp1 - 2.0) + exp2*(exp2 - 2.0));
-    const double Vb = phh1*std::exp(-phh2*dRHH);
+    double Va = deoh*(exp1*(exp1 - 2.0) + exp2*(exp2 - 2.0));
+    double Vb = phh1*std::exp(-phh2*dRHH);
 
-    const double dVa1= 2.0*alphaoh*deoh*exp1*(1.0 - exp1)/dROH1;
-    const double dVa2= 2.0*alphaoh*deoh*exp2*(1.0 - exp2)/dROH2;
-    const double dVb = -phh2*Vb/dRHH;
+    double dVa1= 2.0*alphaoh*deoh*exp1*(1.0 - exp1)/dROH1;
+    double dVa2= 2.0*alphaoh*deoh*exp2*(1.0 - exp2)/dROH2;
+    double dVb = -phh2*Vb/dRHH;
 
-    const double x1 = (dROH1 - reoh)/reoh;
-    const double x2 = (dROH2 - reoh)/reoh;
-    const double x3 = costh - costhe;
+    double x1 = (dROH1 - reoh)/reoh;
+    double x2 = (dROH2 - reoh)/reoh;
+    double x3 = costh - costhe;
 
     double fmat[3][16];
 
@@ -547,15 +547,15 @@ double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
         fmat[2][j] = fmat[2][j - 1]*x3;
     }
 
-    const double efac = std::exp(-b1*(std::pow((dROH1 - reoh), 2)
+    double efac = std::exp(-b1*(std::pow((dROH1 - reoh), 2)
                                     + std::pow((dROH2 - reoh), 2)));
 
     double sum0(0), sum1(0), sum2(0), sum3(0);
 
     for (size_t j = 1; j < 245; ++j) {
-        const size_t inI = idx1[j];
-        const size_t inJ = idx2[j];
-        const size_t inK = idx3[j];
+        size_t inI = idx1[j];
+        size_t inJ = idx2[j];
+        size_t inK = idx3[j];
 
         sum0 += c5z[j]*(fmat[0][inI]*fmat[1][inJ]
                       + fmat[0][inJ]*fmat[1][inI])*fmat[2][inK];
@@ -571,7 +571,7 @@ double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
     }
 
     // energy
-    const double Vc = 2*c5z[0] + efac*sum0;
+    double Vc = 2*c5z[0] + efac*sum0;
     double e1 = Va + Vb + Vc;
 
     e1 += 0.44739574026257; // correction
@@ -580,13 +580,13 @@ double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
     if (dr) {
         // derivatives
 
-        const double dVcdr1 =
+        double dVcdr1 =
             (-2*b1*efac*(dROH1 - reoh)*sum0 + efac*sum1/reoh)/dROH1;
 
-        const double dVcdr2 =
+        double dVcdr2 =
             (-2*b1*efac*(dROH2 - reoh)*sum0 + efac*sum2/reoh)/dROH2;
 
-        const double dVcdcth = efac*sum3;
+        double dVcdcth = efac*sum3;
 
         for (size_t i = 0; i < 3; ++i) {
             // H1
@@ -613,8 +613,8 @@ void dms_nasa
      const double* RESTRICT rr,
      double* RESTRICT q3, double* RESTRICT dq3, bool ttm3)
 {
-    const double ath0 = 1.82400520401572996557;
-    const double costhe = -0.24780227221366464506;
+    double ath0 = 1.82400520401572996557;
+    double costhe = -0.24780227221366464506;
 
     double ROH1[3], ROH2[3], RHH[3], dROH1(0), dROH2(0), dRHH(0);
 
@@ -632,15 +632,15 @@ void dms_nasa
     dROH2 = std::sqrt(dROH2);
     dRHH = std::sqrt(dRHH);
 
-    const double costh =
+    double costh =
         (ROH1[0]*ROH2[0] + ROH1[1]*ROH2[1] + ROH1[2]*ROH2[2])/(dROH1*dROH2);
 
-    const double efac = std::exp(-b1D*(std::pow((dROH1 - reoh), 2)
+    double efac = std::exp(-b1D*(std::pow((dROH1 - reoh), 2)
                                      + std::pow((dROH2 - reoh), 2)));
 
-    const double x1 = (dROH1 - reoh)/reoh;
-    const double x2 = (dROH2 - reoh)/reoh;
-    const double x3 = costh - costhe;
+    double x1 = (dROH1 - reoh)/reoh;
+    double x2 = (dROH2 - reoh)/reoh;
+    double x3 = costh - costhe;
 
     double fmat[3][16];
 
@@ -669,9 +669,9 @@ void dms_nasa
     double dp2dcabc(0);
 
     for (size_t j = 1; j < 84; ++j) {
-        const size_t inI = idxD0[j];
-        const size_t inJ = idxD1[j];
-        const size_t inK = idxD2[j];
+        size_t inI = idxD0[j];
+        size_t inJ = idxD1[j];
+        size_t inK = idxD2[j];
 
         p1 += coefD[j]*fmat[0][inI]*fmat[1][inJ]*fmat[2][inK];
         p2 += coefD[j]*fmat[0][inJ]*fmat[1][inI]*fmat[2][inK];
@@ -693,26 +693,26 @@ void dms_nasa
             coefD[j]*(inK - 1)*fmat[0][inJ]*fmat[1][inI]*fmat[2][inK - 1];
     }
 
-    const double xx = 0.529177249;
-    const double xx2 = xx*xx;
+    double xx = 0.529177249;
+    double xx2 = xx*xx;
 
     dp1dr1 /= reoh/xx;
     dp1dr2 /= reoh/xx;
     dp2dr1 /= reoh/xx;
     dp2dr2 /= reoh/xx;
 
-    const double pc0 =
+    double pc0 =
         a*(std::pow(dROH1, b) + std::pow(dROH2, b))*(c0 + pl1*c1 + pl2*c2);
 
-    const double dpc0dr1 =
+    double dpc0dr1 =
         a*b*std::pow(dROH1, b - 1)*(c0 + pl1*c1 + pl2*c2)*xx2;
-    const double dpc0dr2 =
+    double dpc0dr2 =
         a*b*std::pow(dROH2, b - 1)*(c0 + pl1*c1 + pl2*c2)*xx2;
     double dpc0dcabc =
         a*(std::pow(dROH1, b) + std::pow(dROH2, b))*(c1 + 0.5*(6.0*pl1)*c2)*xx;
 
-    const double defacdr1 = -2.0*b1D*(dROH1 - reoh)*efac*xx;
-    const double defacdr2 = -2.0*b1D*(dROH2 - reoh)*efac*xx;
+    double defacdr1 = -2.0*b1D*(dROH1 - reoh)*efac*xx;
+    double defacdr2 = -2.0*b1D*(dROH2 - reoh)*efac*xx;
 
     dp1dr1 = dp1dr1*efac + p1*defacdr1 + dpc0dr1;
     dp1dr2 = dp1dr2*efac + p1*defacdr2 + dpc0dr2;
@@ -749,10 +749,10 @@ void dms_nasa
         for (size_t i = 0; i < 3; ++i)
             sum0 += std::pow((AxB[i]), 2);
 
-        const double dAxB = std::sqrt(sum0);
+        double dAxB = std::sqrt(sum0);
 
-        const double sinth = dAxB/(dROH1*dROH2);
-        const double ang = std::atan2(sinth, costh);
+        double sinth = dAxB/(dROH1*dROH2);
+        double ang = std::atan2(sinth, costh);
 
         p1 = dms_param1*(dROH1 - dms_param2) + dms_param3*(ang - ath0);
         p2 = dms_param1*(dROH2 - dms_param2) + dms_param3*(ang - ath0);
@@ -771,14 +771,14 @@ void dms_nasa
     if (dq3 == 0)
         return;
 
-    const double f1q1r13 = (dp1dr1 - (dp1dcabc*costh/dROH1))/dROH1;
-    const double f1q1r23 = dp1dcabc/(dROH1*dROH2);
-    const double f2q1r23 = (dp1dr2 - (dp1dcabc*costh/dROH2))/dROH2;
-    const double f2q1r13 = dp1dcabc/(dROH2*dROH1);
-    const double f1q2r13 = (dp2dr1 - (dp2dcabc*costh/dROH1))/dROH1;
-    const double f1q2r23 = dp2dcabc/(dROH1*dROH2);
-    const double f2q2r23 = (dp2dr2 - (dp2dcabc*costh/dROH2))/dROH2;
-    const double f2q2r13 = dp2dcabc/(dROH2*dROH1);
+    double f1q1r13 = (dp1dr1 - (dp1dcabc*costh/dROH1))/dROH1;
+    double f1q1r23 = dp1dcabc/(dROH1*dROH2);
+    double f2q1r23 = (dp1dr2 - (dp1dcabc*costh/dROH2))/dROH2;
+    double f2q1r13 = dp1dcabc/(dROH2*dROH1);
+    double f1q2r13 = (dp2dr1 - (dp2dcabc*costh/dROH1))/dROH1;
+    double f1q2r23 = dp2dcabc/(dROH1*dROH2);
+    double f2q2r23 = (dp2dr2 - (dp2dcabc*costh/dROH2))/dROH2;
+    double f2q2r13 = dp2dcabc/(dROH2*dROH1);
 
     // first index is atom w.r.t. to which the derivative is
     // second index is the charge being differentiated

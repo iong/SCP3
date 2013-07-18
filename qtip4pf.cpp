@@ -72,30 +72,30 @@ double monomer(const double* RESTRICT w, double* RESTRICT grad)
     r1 = std::sqrt(r1);
     r2 = std::sqrt(r2);
 
-    const double x1 = alpha_r*(r1 - rOHeq);
-    const double x2 = alpha_r*(r2 - rOHeq);
+    double x1 = alpha_r*(r1 - rOHeq);
+    double x2 = alpha_r*(r2 - rOHeq);
 
-    const double V1 = x1*x1*(1.0 - x1*(1.0 - (7.0/12.0)*x1))*D_r;
-    const double V2 = x2*x2*(1.0 - x2*(1.0 - (7.0/12.0)*x2))*D_r;
+    double V1 = x1*x1*(1.0 - x1*(1.0 - (7.0/12.0)*x1))*D_r;
+    double V2 = x2*x2*(1.0 - x2*(1.0 - (7.0/12.0)*x2))*D_r;
 
-    const double r12 = 1.0/r1/r2;
-    const double xi = d12*r12;
-    const double theta = std::acos(xi);
-    const double d_theta = theta - aHOHeq*M_PI/180.0;
+    double r12 = 1.0/r1/r2;
+    double xi = d12*r12;
+    double theta = std::acos(xi);
+    double d_theta = theta - aHOHeq*M_PI/180.0;
 
     if (grad) {
-        const double dV1 = alpha_r*D_r*x1*(2.0 - x1*(3.0 - (7.0/3.0)*x1))/r1;
-        const double dV2 = alpha_r*D_r*x2*(2.0 - x2*(3.0 - (7.0/3.0)*x2))/r2;
+        double dV1 = alpha_r*D_r*x1*(2.0 - x1*(3.0 - (7.0/3.0)*x1))/r1;
+        double dV2 = alpha_r*D_r*x2*(2.0 - x2*(3.0 - (7.0/3.0)*x2))/r2;
 
-        const double factor = - k_theta*d_theta/std::sqrt(1.0 - xi*xi);
+        double factor = - k_theta*d_theta/std::sqrt(1.0 - xi*xi);
 
-        const double t0 = factor*r12;
-        const double t1 = dV1 - factor*xi/r1/r1;
-        const double t2 = dV2 - factor*xi/r2/r2;
+        double t0 = factor*r12;
+        double t1 = dV1 - factor*xi/r1/r1;
+        double t2 = dV2 - factor*xi/r2/r2;
 
         for (size_t i = 0; i < 3; ++i) {
-            const double dA1 = t0*d2[i] + t1*d1[i];
-            const double dA2 = t0*d1[i] + t2*d2[i];
+            double dA1 = t0*d2[i] + t1*d1[i];
+            double dA2 = t0*d1[i] + t2*d2[i];
 
             grad[i] = -(dA1 + dA2);
             grad[i + 3] = dA1;
@@ -163,8 +163,8 @@ double qtip4pf::operator()(size_t nw, const double* RESTRICT crd)
     // compute M-sites and 1-body terms
     double Eint(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         compute_M_site_crd(crd + i9, crd + i9 + 3, crd + i9 + 6, msite + i3);
         Eint += monomer(crd + i9, 0);
@@ -173,23 +173,23 @@ double qtip4pf::operator()(size_t nw, const double* RESTRICT crd)
     // vdW and electrostatics
     double Evdw(0), Eelec(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         // Hydrogens - M-sites
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             for (size_t l = 1; l < 3; ++l) {
-                const size_t j3l = j3 + l;
-                const size_t jh = 3*j3l;
+                size_t j3l = j3 + l;
+                size_t jh = 3*j3l;
 
                 double Rsq(0);
                 for (size_t k = 0; k < 3; ++k) {
-                    const double dx = msite[i3 + k] - crd[jh + k];
+                    double dx = msite[i3 + k] - crd[jh + k];
                     Rsq += dx*dx;
                 }
 
@@ -200,19 +200,19 @@ double qtip4pf::operator()(size_t nw, const double* RESTRICT crd)
         // M-sites, Oxygens and Hydrogen - Hydrogen
 
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
-            const size_t j9 = 3*j3;
+            size_t j3 = 3*j;
+            size_t j9 = 3*j3;
 
             // H-H
             for (size_t a = 1; a < 3; ++a) {
-                const size_t i3a = i3 + a;
+                size_t i3a = i3 + a;
 
                 for (size_t b = 1; b < 3; ++b) {
-                    const size_t j3b = j3 + b;
+                    size_t j3b = j3 + b;
 
                     double Rsq(0);
                     for (size_t k = 0; k < 3; ++k) {
-                        const double dx = crd[3*i3a + k] - crd[3*j3b + k];
+                        double dx = crd[3*i3a + k] - crd[3*j3b + k];
                         Rsq += dx*dx;
                     }
 
@@ -223,20 +223,20 @@ double qtip4pf::operator()(size_t nw, const double* RESTRICT crd)
             // O-O distance
             double Rsq(0);
             for (size_t k = 0; k < 3; ++k) {
-                const double dx = crd[i9 + k] - crd[j9 + k];
+                double dx = crd[i9 + k] - crd[j9 + k];
                 Rsq += dx*dx;
             }
 
             Rsq = sigma*sigma/Rsq;
 
-            const double dR6 = Rsq*Rsq*Rsq;
+            double dR6 = Rsq*Rsq*Rsq;
 
             Evdw += 4*epsilon*dR6*(dR6 - 1.0);
 
             // M-M distance
             Rsq = 0.0;
             for (size_t k = 0; k < 3; ++k) {
-                const double dx = msite[i3 + k] - msite[j3 + k];
+                double dx = msite[i3 + k] - msite[j3 + k];
                 Rsq += dx*dx;
             }
 
@@ -265,8 +265,8 @@ double qtip4pf::operator()
     // compute M-sites and 1-body terms
     double Eint(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         compute_M_site_crd(crd + i9, crd + i9 + 3, crd + i9 + 6, msite + i3);
         Eint += monomer(crd + i9, grad + i9);
@@ -277,19 +277,19 @@ double qtip4pf::operator()
     // vdW and electrostatics
     double Evdw(0), Eelec(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         // Hydrogens - M-sites
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             for (size_t l = 1; l < 3; ++l) {
-                const size_t j3l = j3 + l;
-                const size_t jh = 3*j3l;
+                size_t j3l = j3 + l;
+                size_t jh = 3*j3l;
 
                 double dR[3], Rsq(0);
                 for (size_t k = 0; k < 3; ++k) {
@@ -297,9 +297,9 @@ double qtip4pf::operator()
                     Rsq += dR[k]*dR[k];
                 }
 
-                const double r1 = 1.0/std::sqrt(Rsq);
-                const double E1 = qH*qM*r1;
-                const double g1 = E1*r1*r1;
+                double r1 = 1.0/std::sqrt(Rsq);
+                double E1 = qH*qM*r1;
+                double g1 = E1*r1*r1;
 
                 Eelec += E1;
 
@@ -313,15 +313,15 @@ double qtip4pf::operator()
         // M-sites, Oxygens and Hydrogen - Hydrogen
 
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
-            const size_t j9 = 3*j3;
+            size_t j3 = 3*j;
+            size_t j9 = 3*j3;
 
             // H-H
             for (size_t a = 1; a < 3; ++a) {
-                const size_t i3a = i3 + a;
+                size_t i3a = i3 + a;
 
                 for (size_t b = 1; b < 3; ++b) {
-                    const size_t j3b = j3 + b;
+                    size_t j3b = j3 + b;
 
                     double dR[3], Rsq(0);
                     for (size_t k = 0; k < 3; ++k) {
@@ -329,9 +329,9 @@ double qtip4pf::operator()
                         Rsq += dR[k]*dR[k];
                     }
 
-                    const double r1 = 1.0/std::sqrt(Rsq);
-                    const double E1 = qH*qH*r1;
-                    const double g1 = E1*r1*r1;
+                    double r1 = 1.0/std::sqrt(Rsq);
+                    double E1 = qH*qH*r1;
+                    double g1 = E1*r1*r1;
 
                     Eelec += E1;
 
@@ -349,11 +349,11 @@ double qtip4pf::operator()
                 Rsq += dR[k]*dR[k];
             }
 
-            const double sRsq = sigma*sigma/Rsq;
-            const double dR6 = sRsq*sRsq*sRsq;
+            double sRsq = sigma*sigma/Rsq;
+            double dR6 = sRsq*sRsq*sRsq;
 
             Evdw += 4*epsilon*dR6*(dR6 - 1.0);
-            const double g_vdw = 24*epsilon*dR6*(2*dR6 - 1.0)/Rsq;
+            double g_vdw = 24*epsilon*dR6*(2*dR6 - 1.0)/Rsq;
 
             for (size_t k = 0; k < 3; ++k) {
                 grad[i9 + k] -= g_vdw*dR[k];
@@ -367,9 +367,9 @@ double qtip4pf::operator()
                 Rsq += dR[k]*dR[k];
             }
 
-            const double r1 = 1.0/std::sqrt(Rsq);
-            const double E1 = qM*qM*r1;
-            const double g1 = E1*r1*r1;
+            double r1 = 1.0/std::sqrt(Rsq);
+            double E1 = qM*qM*r1;
+            double g1 = E1*r1*r1;
 
             Eelec += E1;
 
@@ -383,8 +383,8 @@ double qtip4pf::operator()
     // distribute M-site gradients
 
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         for (size_t k = 0; k < 3; ++k) {
             grad[i9 + 0 + k] += gammaM*dM[i3 + k]; // O
@@ -414,8 +414,8 @@ const double* qtip4pf::dip(size_t nw, const double* crd)
 
     // permanent dipoles
     for (size_t n = 0; n < m_nw; ++n) {
-        const size_t n3 = 3*n;
-        const size_t n9 = 3*n3;
+        size_t n3 = 3*n;
+        size_t n9 = 3*n3;
 
         dip[n3 + 0] += qM*msite[n3 + 0] + qH*crd[n9 + 3] + qH*crd[n9 + 6];
         dip[n3 + 1] += qM*msite[n3 + 1] + qH*crd[n9 + 4] + qH*crd[n9 + 7];

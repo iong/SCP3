@@ -124,8 +124,8 @@ void ttm4_es::operator()
 
     // setup pointers (??? many)
 
-    const size_t natom = 4*nw; // O H H M
-    const size_t natom3 = 3*natom;
+    size_t natom = 4*nw; // O H H M
+    size_t natom3 = 3*natom;
 
     double* xyz    = m_mem;           // 12*nw
     double* charge = xyz + natom3;    //  4*nw
@@ -144,9 +144,9 @@ void ttm4_es::operator()
     // compute M-sites and charges
 
     for (size_t n = 0; n < nw; ++n) {
-        const size_t n4 = 4*n;
-        const size_t n9 = 9*n;
-        const size_t n12 = 12*n;
+        size_t n4 = 4*n;
+        size_t n9 = 9*n;
+        size_t n12 = 12*n;
 
         std::copy(crd + n9, crd + n9 + 9, xyz + n12);
         compute_M_site_crd(crd + n9, crd + n9 + 3, crd + n9 + 6,
@@ -161,7 +161,7 @@ void ttm4_es::operator()
                          crd + n9, q3, 0, false);
 
         // TTM2.1-F assignment
-        const double tmp = gamma2/gamma1;
+        double tmp = gamma2/gamma1;
 
         charge[n4 + 0] = 0.0;                                     // O
         charge[n4 + 1] = CHARGECON*(q3[1] + tmp*(q3[1] + q3[2])); // H1
@@ -195,10 +195,10 @@ void ttm4_es::operator()
     }
 
     for (size_t i = 0; i < natom; ++i) {
-        const size_t i3 = 3*i;
+        size_t i3 = 3*i;
 
         for (size_t j = i + 1; j < natom; ++j) {
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             double Rij[3], Rsq(0);
             for (size_t k = 0; k < 3; ++k) {
@@ -208,7 +208,7 @@ void ttm4_es::operator()
 
             // charge-charge
 
-            const bool ij_from_same_water = (i/4 == j/4);
+            bool ij_from_same_water = (i/4 == j/4);
 
             if (!ij_from_same_water) {
                 double ts0, ts1;
@@ -225,7 +225,7 @@ void ttm4_es::operator()
 
             // dipole-dipole tensor
 
-            const double aDD = ij_from_same_water ? aDD_intra : aDD_inter;
+            double aDD = ij_from_same_water ? aDD_intra : aDD_inter;
 
             double ts1, ts2;
             ttm4::smear2(std::sqrt(Rsq), AA[i%4]*AA[j%4], aDD, ts1, ts2);
@@ -242,7 +242,7 @@ void ttm4_es::operator()
             dd3[2][0] = dd3[0][2];
             dd3[2][1] = dd3[1][2];
 
-            const double aiaj = polar_sqrt[i%4]*polar_sqrt[j%4];
+            double aiaj = polar_sqrt[i%4]*polar_sqrt[j%4];
             for (size_t k = 0; k < 3; ++k)
                 for (size_t l = 0; l < 3; ++l)
                     ddt[natom3*(i3 + k) + j3 + l] = -aiaj*dd3[k][l];
@@ -287,7 +287,7 @@ void ttm4_es::operator()
     // solve L^T*x = y
 
     for (size_t i = natom3; i > 0; --i) {
-        const size_t i1 = i - 1;
+        size_t i1 = i - 1;
         double sum = dipole[i1];
         for (size_t k = i; k < natom3; ++k)
             sum -= ddt[k*natom3 + i1]*dipole[k];
@@ -324,9 +324,9 @@ void ttm4_es::operator()
 
         for (size_t n = 0; n < nw; ++n) {
 
-            const size_t io  = 9*n + 0;
-            const size_t ih1 = 9*n + 3;
-            const size_t ih2 = 9*n + 6;
+            size_t io  = 9*n + 0;
+            size_t ih1 = 9*n + 3;
+            size_t ih2 = 9*n + 6;
 
             // O H H
             for (size_t k = 0; k < 9; ++k)
@@ -364,13 +364,13 @@ void ttm4_es::operator()
     std::fill(grd4, grd4 + natom3, 0.0);
 
     for (size_t i = 0; i < natom; ++i) {
-        const size_t i3 = 3*i;
+        size_t i3 = 3*i;
 
         for (size_t j = 0; j < natom; ++j) {
-            const size_t j3 = 3*j;
-            const double qj = charge[j];
+            size_t j3 = 3*j;
+            double qj = charge[j];
 
-            const bool skip_ij = (i/4 == j/4);
+            bool skip_ij = (i/4 == j/4);
 
             if (skip_ij)
                 continue; // skip this (i, j) pair
@@ -386,7 +386,7 @@ void ttm4_es::operator()
             ttm4::smear2(std::sqrt(Rsq), AA[i%4]*AA[j%4], aCD, ts1, ts2);
 
             for (size_t k = 0; k < 3; ++k) {
-                const double derij =
+                double derij =
                     qj*(3*ts2*diR*Rij[k] - ts1*dipole[i3 + k]);
 
                 grd4[i3 + k] += derij;
@@ -400,9 +400,9 @@ void ttm4_es::operator()
     // dipole-dipole interactions
 
     for (size_t i = 0; i < natom; ++i) {
-        const size_t i3 = 3*i;
+        size_t i3 = 3*i;
         for (size_t j = i + 1; j < natom; ++j) {
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             double Rij[3], Rsq(0), diR(0), djR(0), didj(0);
             for (size_t k = 0; k < 3; ++k) {
@@ -413,14 +413,14 @@ void ttm4_es::operator()
                 didj += dipole[i3 + k]*dipole[j3 + k];
             }
 
-            const bool ij_from_same_water = (i/4 == j/4);
-            const double aDD = ij_from_same_water ? aDD_intra : aDD_inter;
+            bool ij_from_same_water = (i/4 == j/4);
+            double aDD = ij_from_same_water ? aDD_intra : aDD_inter;
 
             double ts1, ts2, ts3;
             ttm4::smear3(std::sqrt(Rsq), AA[i%4]*AA[j%4], aDD, ts1, ts2, ts3);
 
             for (size_t k = 0; k < 3; ++k) {
-                const double derij =
+                double derij =
                    - 3*ts2*(didj*Rij[k] + djR*dipole[i3 + k]
                                         + diR*dipole[j3 + k])
                    + 15*ts3*diR*djR*Rij[k];
@@ -435,9 +435,9 @@ void ttm4_es::operator()
 
     for (size_t n = 0; n < nw; ++n) {
 
-        const size_t io  = 9*n + 0;
-        const size_t ih1 = 9*n + 3;
-        const size_t ih2 = 9*n + 6;
+        size_t io  = 9*n + 0;
+        size_t ih1 = 9*n + 3;
+        size_t ih2 = 9*n + 6;
         // O H H
 
         for (size_t k = 0; k < 9; ++k)

@@ -38,7 +38,7 @@ double U_CC_HH
 {
     double r2(0);
     for (size_t k = 0; k < 3; ++k) {
-        const double dx = H1[k] - H2[k];
+        double dx = H1[k] - H2[k];
         r2 += dx*dx;
     }
 
@@ -168,7 +168,7 @@ void grad_CD // charge-dipole gradients helper
     ttm3f_bits::smear12(std::sqrt(Rsq), AA, ts1, ts2);
 
     for (size_t k = 0; k < 3; ++k) {
-        const double derij = Q*(3*ts2*diR*Rij[k] - ts1*dip[k]);
+        double derij = Q*(3*ts2*diR*Rij[k] - ts1*dip[k]);
 
         dD[k] += derij;
         dC[k] -= derij;
@@ -242,16 +242,16 @@ void U_coul_CC_CD_DD_2w
         xTb += TEb[k]*x[k];
     }
 
-    const double tmp0 = polarM*ts1;
-    const double tmp1 = 1.0 - tmp0*tmp0;
-    const double tmp2 = polarM/tmp1;
-    const double tmp3 = 3*polarM*polarM*ts2*(2*ts1 - 3*ts2*r2);
-    const double tmp4 = tmp3/(tmp1 + r2*tmp3);
+    double tmp0 = polarM*ts1;
+    double tmp1 = 1.0 - tmp0*tmp0;
+    double tmp2 = polarM/tmp1;
+    double tmp3 = 3*polarM*polarM*ts2*(2*ts1 - 3*ts2*r2);
+    double tmp4 = tmp3/(tmp1 + r2*tmp3);
 
     Eind = 0.0;
     for (size_t k = 0; k < 3; ++k) {
-        const double dip_a = tmp2*(Efq_a[k] + TEb[k] - x[k]*tmp4*(xEa + xTb));
-        const double dip_b = tmp2*(Efq_b[k] + TEa[k] - x[k]*tmp4*(xEb + xTa));
+        double dip_a = tmp2*(Efq_a[k] + TEb[k] - x[k]*tmp4*(xEa + xTb));
+        double dip_b = tmp2*(Efq_b[k] + TEa[k] - x[k]*tmp4*(xEb + xTa));
 
         Eind -= dip_a*Efq_a[k] + dip_b*Efq_b[k];
     }
@@ -281,14 +281,14 @@ void U_coul_CD_DD
 
     // compute electric field at the M-sites
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
+        size_t i3 = 3*i;
 
         // hydrogens
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             Efq_HM(OHH + 3*(j3 + 1), Q[j3 + 1], M + i3, Efq + i3);
             Efq_HM(OHH + 3*(j3 + 2), Q[j3 + 2], M + i3, Efq + i3);
@@ -296,7 +296,7 @@ void U_coul_CD_DD
 
         // M-sites
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             double dr[3], r2(0);
             for (size_t k = 0; k < 3; ++k) {
@@ -345,8 +345,8 @@ void U_coul_CD_DD
         dip_prev[i] = dip[i];
     }
 
-    const double dmix = 0.7;
-    const double stath = DEBYE/CHARGECON/(std::sqrt(double(nw)));
+    double dmix = 0.7;
+    double stath = DEBYE/CHARGECON/(std::sqrt(double(nw)));
 
 #ifndef NDEBUG
     bool converged = false;
@@ -364,7 +364,7 @@ void U_coul_CD_DD
             dip[i] = polarM*(Efq[i] + Efd[i]);
             dip[i] = dmix*dip[i] + (1.0 - dmix)*dip_prev[i];
 
-            const double delta = dip[i] - dip_prev[i];
+            double delta = dip[i] - dip_prev[i];
             deltadip += delta*delta;
         }
 
@@ -404,7 +404,7 @@ void U_coul_CD_DD_3w
     const double* RESTRICT Qc, // (c)   charges : M q1 q2
     double& RESTRICT Eind)
 {
-    const size_t nw = 3;
+    size_t nw = 3;
 
     double OHH[9*nw];
     double   M[3*nw];
@@ -501,11 +501,11 @@ void U_coul_CC_CD_DD_2w
         xTb += TEb[k]*x[k];
     }
 
-    const double tmp0 = polarM*ts1;
-    const double tmp1 = 1.0 - tmp0*tmp0;
-    const double tmp2 = polarM/tmp1;
-    const double tmp3 = 3*polarM*polarM*ts2*(2*ts1 - 3*ts2*r2);
-    const double tmp4 = tmp3/(tmp1 + r2*tmp3);
+    double tmp0 = polarM*ts1;
+    double tmp1 = 1.0 - tmp0*tmp0;
+    double tmp2 = polarM/tmp1;
+    double tmp3 = 3*polarM*polarM*ts2*(2*ts1 - 3*ts2*r2);
+    double tmp4 = tmp3/(tmp1 + r2*tmp3);
 
     Eind = 0.0;
 
@@ -525,12 +525,12 @@ void U_coul_CC_CD_DD_2w
     using ttm3f_bits::gamma2;
 
     for (size_t k = 0; k < 3; ++k) {
-        const double dMa = Qa[0]*Efq[3*0 + k];
+        double dMa = Qa[0]*Efq[3*0 + k];
         dEelec_a[0 + k] = - gamma1*dMa; // Oa
         dEelec_a[3 + k] = - (Qa[1]*Efq[3*1 + k] + gamma2*dMa); // Ha1
         dEelec_a[6 + k] = - (Qa[2]*Efq[3*2 + k] + gamma2*dMa); // Ha2
 
-        const double dMb = Qb[0]*Efq[3*3 + k];
+        double dMb = Qb[0]*Efq[3*3 + k];
         dEelec_b[0 + k] = - gamma1*dMb; // Ob
         dEelec_b[3 + k] = - (Qb[1]*Efq[3*4 + k] + gamma2*dMb); // Hb1
         dEelec_b[6 + k] = - (Qb[2]*Efq[3*5 + k] + gamma2*dMb); // Hb2
@@ -592,12 +592,12 @@ void U_coul_CC_CD_DD_2w
         }
 
         for (size_t k = 0; k < 3; ++k) {
-            const double der_a = Qb[0]*(3*ts2*daR*x[k] - ts1*dip_a[k]);
+            double der_a = Qb[0]*(3*ts2*daR*x[k] - ts1*dip_a[k]);
 
             dEind_a[k] += der_a;
             dEind_b[k] -= der_a;
 
-            const double der_b = Qa[0]*(3*ts2*dbR*x[k] - ts1*dip_b[k]);
+            double der_b = Qa[0]*(3*ts2*dbR*x[k] - ts1*dip_b[k]);
 
             dEind_b[k] += der_b;
             dEind_a[k] -= der_b;
@@ -608,7 +608,7 @@ void U_coul_CC_CD_DD_2w
 
         // dipole-dipole
         for (size_t k = 0; k < 3; ++k) {
-            const double der =
+            double der =
                    - 3*ts2*(dadb*x[k] + dbR*dip_a[k] + daR*dip_b[k])
                    + 15*ts3*daR*dbR*x[k];
 
@@ -620,12 +620,12 @@ void U_coul_CC_CD_DD_2w
     // re-position M-site gradient
 
     for (size_t k = 0; k < 3; ++k) {
-        const double dMa = dEind_a[0 + k];
+        double dMa = dEind_a[0 + k];
         dEind_a[0 + k] = gamma1*dMa; // Oa
         dEind_a[3 + k] += gamma2*dMa; // Ha1
         dEind_a[6 + k] += gamma2*dMa; // Ha2
 
-        const double dMb = dEind_b[0 + k];
+        double dMb = dEind_b[0 + k];
         dEind_b[0 + k] = gamma1*dMb; // Ob
         dEind_b[3 + k] += gamma2*dMb; // Hb1
         dEind_b[6 + k] += gamma2*dMb; // Hb2
@@ -686,14 +686,14 @@ void U_coul_CD_DD
 
     // compute electric field at the M-sites
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
+        size_t i3 = 3*i;
 
         // hydrogens
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             Efq_HM(OHH + 3*(j3 + 1), Q[j3 + 1], M + i3, Efq + i3);
             Efq_HM(OHH + 3*(j3 + 2), Q[j3 + 2], M + i3, Efq + i3);
@@ -701,7 +701,7 @@ void U_coul_CD_DD
 
         // M-sites
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             double dr[3], r2(0);
             for (size_t k = 0; k < 3; ++k) {
@@ -750,8 +750,8 @@ void U_coul_CD_DD
         dip_prev[i] = dip[i];
     }
 
-    const double dmix = 0.7;
-    const double stath = DEBYE/CHARGECON/(std::sqrt(double(nw)));
+    double dmix = 0.7;
+    double stath = DEBYE/CHARGECON/(std::sqrt(double(nw)));
 
 #ifndef NDEBUG
     bool converged = false;
@@ -769,7 +769,7 @@ void U_coul_CD_DD
             dip[i] = polarM*(Efq[i] + Efd[i]);
             dip[i] = dmix*dip[i] + (1.0 - dmix)*dip_prev[i];
 
-            const double delta = dip[i] - dip_prev[i];
+            double delta = dip[i] - dip_prev[i];
             deltadip += delta*delta;
         }
 
@@ -798,18 +798,18 @@ void U_coul_CD_DD
 
     // external loop over M-sites
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
+        size_t i3 = 3*i;
 
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            const size_t j3 = 3*j;
+            size_t j3 = 3*j;
 
             // charge-dipole: hydrogens
             for (size_t l = 1; l < 3; ++l) {
-                const size_t j3l = j3 + l;
-                const size_t jh = 3*j3l;
+                size_t j3l = j3 + l;
+                size_t jh = 3*j3l;
 
                 grad_CD(OHH + jh, Q[j3l],
                         M + i3, dip + i3,
@@ -829,7 +829,7 @@ void U_coul_CD_DD
             smear123(std::sqrt(Rsq), AA_MM, ts1, ts2, ts3);
 
             for (size_t k = 0; k < 3; ++k) {
-                const double derij =
+                double derij =
                     Q[j3]*(3*ts2*diR*Rij[k] - ts1*dip[i3 + k]);
 
                 dM[i3 + k] += derij;
@@ -848,7 +848,7 @@ void U_coul_CD_DD
                 }
 
                 for (size_t k = 0; k < 3; ++k) {
-                    const double derij =
+                    double derij =
                        - 3*ts2*(didj*Rij[k] + djR*dip[i3 + k]
                                             + diR*dip[j3 + k])
                        + 15*ts3*diR*djR*Rij[k];
@@ -866,8 +866,8 @@ void U_coul_CD_DD
     using ttm3f_bits::gamma2;
 
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         for (size_t k = 0; k < 3; ++k) {
             dOHH[i9 + 0 + k] += gamma1*dM[i3 + k]; // O
@@ -881,10 +881,10 @@ void U_coul_CD_DD
 #define GRDQ(i,j,k) grdq[k + 3*(j + 3*(i + 3*n))]
 
     for (size_t n = 0; n < nw; ++n) {
-        const size_t n3 = 3*n;
-        const size_t io  = 9*n + 0;
-        const size_t ih1 = 9*n + 3;
-        const size_t ih2 = 9*n + 6;
+        size_t n3 = 3*n;
+        size_t io  = 9*n + 0;
+        size_t ih1 = 9*n + 3;
+        size_t ih2 = 9*n + 6;
 
         for (size_t k = 0; k < 3; ++k) {
             dOHH[ih1 + k] += GRDQ(0, 0, k)*phi[n3 + 1]  // phi(h1)

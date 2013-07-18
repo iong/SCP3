@@ -88,21 +88,21 @@ double pes2b(const double* RESTRICT wa,
         x2[5 + 6*k] = wb[6 + k]/auang; // Hb2
     }
 
-    const double E = aukcal*h2o::fortran::pes2b(x2);
+    double E = aukcal*h2o::fortran::pes2b(x2);
 
     // finite differences
 
-    const double factor = aukcal/auang/EPS/2;
+    double factor = aukcal/auang/EPS/2;
 
     double dX[18];
     for (size_t n = 0; n < 18; ++n) {
-        const double x0 = x2[n];
+        double x0 = x2[n];
 
         x2[n] = x0 + EPS;
-        const double Ep = h2o::fortran::pes2b(x2);
+        double Ep = h2o::fortran::pes2b(x2);
 
         x2[n] = x0 - EPS;
-        const double Em = h2o::fortran::pes2b(x2);
+        double Em = h2o::fortran::pes2b(x2);
 
         dX[n] = factor*(Ep - Em);
         x2[n] = x0;
@@ -145,21 +145,21 @@ double pes3b(const double* RESTRICT wa,
         x3[24 + k] = wc[0 + k]/auang; // Oc
     }
 
-    const double E = aukcal*h2o::fortran::pes3b(x3);
+    double E = aukcal*h2o::fortran::pes3b(x3);
 
     // finite differences
 
-    const double factor = aukcal/auang/EPS/2;
+    double factor = aukcal/auang/EPS/2;
 
     double dX[27];
     for (size_t n = 0; n < 27; ++n) {
-        const double x0 = x3[n];
+        double x0 = x3[n];
 
         x3[n] = x0 + EPS;
-        const double Ep = h2o::fortran::pes3b(x3);
+        double Ep = h2o::fortran::pes3b(x3);
 
         x3[n] = x0 - EPS;
-        const double Em = h2o::fortran::pes3b(x3);
+        double Em = h2o::fortran::pes3b(x3);
 
         dX[n] = factor*(Ep - Em);
         x3[n] = x0;
