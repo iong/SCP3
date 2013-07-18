@@ -3,11 +3,11 @@
 
 #include <cstddef>
 
-#include "h2o.h"
+#include "PES.h"
 
 namespace h2o {
 
-class ttm3f : public Potential {
+class ttm3f : public PES {
 public:
     ttm3f();
     ~ttm3f();

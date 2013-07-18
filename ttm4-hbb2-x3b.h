@@ -7,13 +7,14 @@
 #include "x3b.h"
 #include "ttm4-es.h"
 
-#include "h2o.h"
+#include "PES.h"
 
 namespace h2o {
     
-class ttm4_hbb2_x3b : public Potential  {
+class ttm4_hbb2_x3b : public PES  {
 public:
     ttm4_hbb2_x3b();
+    virtual ~ttm4_hbb2_x3b();
 
     void load(const char*);
 
