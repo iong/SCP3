@@ -32,6 +32,12 @@ static double square(double x)
     return x*x;
 }
 
+#if defined(__GNUG__)
+#define __assume_aligned(x, n) \
+        {}
+//(x) = __builtin_assume_aligned( (x), (n))
+#endif
+
 class ScaledMatrixElements {
 protected:
     int Nmodes, Nmodes2, Nmodes3;

@@ -1,7 +1,6 @@
 double f_k1(int k)
 {
     double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
-    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += Vqk[i];
