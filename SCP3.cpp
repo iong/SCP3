@@ -24,6 +24,7 @@
 
 #include "Constants.h"
 #include "DiskIO.h"
+#include "Hessian.h"
 #include "ScaledMatrixElements.h"
 
 #include "sobol.hpp"
@@ -323,61 +324,6 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
         save_hdf5(M, s);
     }
 }
-
-
-uvec OHHOHH(vec& mass, vec& r)
-{
-    int iO = 0;
-    int iH = 3;
-    
-    uvec p(mass.n_rows);
-    
-    for (int i=0; i<mass.n_rows;) {
-        if (mass[i] == Omass) {
-            for (int j=0; j<3; j++) {
-                p[iO + j] = i + j;
-            }
-            
-            iO += 9;
-            i += 3;
-        }
-        else if (mass[i] == Hmass) {
-            for (int j=0; j<3; j++) {
-                p[iH + j] = i + j;
-            }
-            
-            iH +=  3;
-            iH += 3 * (iH%9 == 0);
-            i += 3;
-        }
-        else {
-            cerr << "Uknown mass at i = "<< i << endl;
-            exit(EXIT_FAILURE);
-        }
-    }
-    
-    vec r_tmp(r);
-    for (int i=0; i<p.n_rows; i++) {
-        r[i] = r_tmp[p[i]];
-    }
-
-    vec mass2 = mass(p);
-    mass = mass2;
-    
-    return p;
-}
-
-
-uvec OHHOHH(vec& mass, vec& r, mat& H)
-{  
-    uvec p = OHHOHH(mass, r);
-    
-    mat H_tmp = H.cols(p);
-    H = H_tmp.rows(p);
-    
-    return p;
-}
-
 
 int main (int argc, char *  argv[]) {
     process_options(argc, argv);
