@@ -55,6 +55,7 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
         for (int i=0; i < NSobol; i++) {
             long long current_skip = sobol_skip + i;
             sobol::std_normal(y.n_rows, &current_skip, y.memptr());
+            //cout << omp_get_thread_num() <<" "<< current_skip << endl;
             
             y %= sqrt(d);
             
@@ -90,11 +91,13 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
     mat U;
     vec omega, omegasq, d, UX;
 
+    int nmax_threads = omp_get_max_threads();
     omp_set_num_threads(1);
-            h2o::PES *pot = getPES();
-            getHessian(*pot, q, 1e-3, Ks);
-            delete pot;
-    omp_set_num_threads(omp_get_max_threads());
+    h2o::PES *pot = getPES();
+    getHessian(*pot, q, 1e-3, Ks);
+    delete pot;
+    omp_set_num_threads(nmax_threads);
+    cout << nmax_threads << " done with hessian\n";
 
     
     massScaleHessian(mass, Ks);
@@ -161,6 +164,8 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
             F += 0.25 * sum(omega);
         }
         free_energy_out << F << endl;
+
+        cout << "iter: " << niter << endl;
     }
     omega_out << endl;
     save_for_vladimir("coord.xyz", F, q, Ks);
