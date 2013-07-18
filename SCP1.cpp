@@ -6,6 +6,8 @@
 //
 //
 
+#include <omp.h>
+
 #include "DiskIO.h"
 #include "Hessian.h"
 #include "SCP1.h"
@@ -38,6 +40,8 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
 
 #pragma omp parallel
     {
+        omp_set_nested(false);
+
         h2o::PES *pot = getPES();
         double Upot_private;
         vec UX_private, UX_(dim), y(dim), dq(dim);
@@ -86,9 +90,12 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
     mat U;
     vec omega, omegasq, d, UX;
 
-    h2o::PES *pot = getPES();
-    getHessian(*pot, q, 1e-3, Ks);
-    delete pot;
+    omp_set_num_threads(1);
+            h2o::PES *pot = getPES();
+            getHessian(*pot, q, 1e-3, Ks);
+            delete pot;
+    omp_set_num_threads(omp_get_max_threads());
+
     
     massScaleHessian(mass, Ks);
     regtransrot(transrotBasis(q, mass), Ks);    
