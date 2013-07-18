@@ -18,7 +18,9 @@
 #define ARMA_HAVE_POSIX_MEMALIGN
 #include <armadillo>
 
+#ifdef __FMA4__
 #include <x86intrin.h>
+#endif
 
 using namespace std;
 using namespace arma;
