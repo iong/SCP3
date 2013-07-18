@@ -68,14 +68,14 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
         }
         delete pot;
 
-        MPI_Reduce(&Upot_private, &Upot, 1,
-                MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Allreduce(&Upot_private, &Upot, 1,
+                MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-        MPI_Reduce(UX_private.memptr(), UX.memptr(), UX.n_elem,
-                MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Allreduce(UX_private.memptr(), UX.memptr(), UX.n_elem,
+                MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 
-        MPI_Reduce(UX_q_private.memptr(), UX_q.memptr(), UX_q.n_elem,
-                MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_Allreduce(UX_q_private.memptr(), UX_q.memptr(), UX_q.n_elem,
+                MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
     }
     
     Upot /= NSobol;
