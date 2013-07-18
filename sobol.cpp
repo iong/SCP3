@@ -457,6 +457,8 @@ void i4_sobol ( int dim_num, int *seed, float quasi[ ] )
   static int seed_save = - 1;
   int seed_temp;
   static int v[DIM_MAX2][LOG_MAX];
+#pragma omp threadprivate(atmost, dim_num_save, initialized, lastq, maxcol, recipd, seed_save, v)
+
 
   if ( !initialized || dim_num != dim_num_save )
   {
@@ -14421,6 +14423,7 @@ void i8_sobol ( int dim_num, long long int *seed, double quasi[ ] )
   static long long int seed_save = - 1;
   long long int seed_temp;
   static long long int v[DIM_MAX2][LOG_MAX];
+#pragma omp threadprivate(dim_num_save, initialized, lastq, maxcol, recipd, seed_save, v)
 
   if ( !initialized || dim_num != dim_num_save )
   {
@@ -28684,7 +28687,8 @@ void timestamp ( )
 # define TIME_SIZE 40
 
   static char time_buffer[TIME_SIZE];
-  const struct tm *tm;
+#pragma omp threadprivate(time_buffer)
+    struct tm *tm;
   size_t len;
   time_t now;
 
