@@ -10,9 +10,11 @@ endif
 include $(SRCDIR)/config/$(COMPILER).mk
 include $(SRCDIR)/config/blas.mk
 
+ifdef MPI
 CC:=mpicc
 CXX:=mpic++
 FC:=mpif90
+endif
 
 vpath %.cpp $(SRCDIR)
 vpath %.h $(SRCDIR)
