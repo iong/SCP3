@@ -21,6 +21,9 @@ extern void
 load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H);
 
 extern void
+save_for_vladimir(const string &name, double F, vec& x0, mat& H);
+
+extern void
 load_xyz(string &name, vec &mass, vec& x0);
 
 extern void

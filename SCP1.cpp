@@ -6,6 +6,7 @@
 //
 //
 
+#include "DiskIO.h"
 #include "Hessian.h"
 #include "SCP1.h"
 #include "sobol.hpp"
@@ -155,6 +156,7 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
         free_energy_out << F << endl;
     }
     omega_out << endl;
+    save_for_vladimir("coord.xyz", F, q, Ks);
     
     omega.shed_rows(0, 5);
     

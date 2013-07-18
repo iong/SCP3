@@ -100,6 +100,31 @@ load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
     fin.close();
 }
 
+void
+save_for_vladimir(const string &name, double F, vec& x0, mat& H)
+{
+    int N = x0.n_rows / 3;
+    ofstream fout(name.c_str());
+    
+    fout << N << endl
+        << "Free energy = " << F << endl;
+    
+    for (int i=0; i<x0.n_rows; i += 9) {
+        fout << "O " << x0.subvec(9*i  , 9*i+2).t()*bohr;
+        fout << "H " << x0.subvec(9*i+3, 9*i+5).t()*bohr;
+        fout << "H " << x0.subvec(9*i+6, 9*i+8).t()*bohr;
+    }
+    
+    for (int i=0; i < H.n_cols; i++) {
+        for (int j=0; j <= i; j++) {
+            fout << H(j, i) << endl;
+        }
+    }
+    
+    fout.close();
+}
+
+
 
 
 /** Save in column major mode **/
