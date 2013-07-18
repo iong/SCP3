@@ -19,6 +19,7 @@
 
 #include "Constants.h"
 #include "DiskIO.h"
+#include "Hessian.h"
 
 #include "sobol.hpp"
 
@@ -95,52 +96,6 @@ void process_options(int argc,  char *  argv[])
     }
     
     input_file = argv[0];
-}
-
-
-
-void getHessian(h2o::Potential& pot, vec& r_au, double s, mat& H)
-{
-    int N = r_au.n_rows;
-    int Nw = N/9;
-
-    vec Vrp(N), Vrm(N);
-    H.set_size(N,N);
-    
-    vec r(r_au * bohr);
-
-    for (int i=0; i<N; i++) {
-        double ri0 = r[i];
-        double V;
-        
-        r[i] = ri0 + s * bohr;
-        V = pot(Nw, r.memptr(), Vrp.memptr());
-        
-        r[i] = ri0 - s * bohr;
-        V = pot(Nw, r.memptr(), Vrm.memptr());
-        
-        H.col(i) = (Vrp - Vrm) / (2.0*s*autokcalpmol);
-        
-        r[i] = ri0;
-    }
-    
-    for (int i=1; i<N; i++) {
-        H.col(i).subvec(0, i-1) = 0.5 * (H.col(i).subvec(0, i-1)
-                                         + H.row(i).subvec(0, i-1).t() );
-    }
-}
-
-
-void massScaleHessian(vec& mass, mat& H)
-{
-    vec isqrt_mass = sqrt(mass);
-    for (int i=0; i<isqrt_mass.n_rows; i++) {
-	    isqrt_mass[i] = 1.0/isqrt_mass[i];
-    }
-    
-    for (int i=0; i<H.n_cols; i++) {
-        H.col(i) %= isqrt_mass * isqrt_mass[i];
-    }
 }
 
 
