@@ -6,7 +6,9 @@
 //
 //
 
-#include <omp.h>
+#include <iostream>
+
+#include <mpi.h>
 
 #include "DiskIO.h"
 #include "Hessian.h"
@@ -38,10 +40,7 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
     UX.zeros(dim);
     UX_q.zeros(dim, dim);
 
-#pragma omp parallel
     {
-        omp_set_nested(false);
-
         h2o::PES *pot = getPES();
         double Upot_private;
         vec UX_private, UX_(dim), y(dim), dq(dim);
@@ -51,8 +50,8 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
         UX_private.zeros(dim);
         UX_q_private.zeros(dim, dim);
         
-#pragma omp for schedule(static) nowait
-        for (int i=0; i < NSobol; i++) {
+        for (int i=(rank * NSobol) / nprocs;
+                i < ((rank+1) * NSobol) / nprocs; i++) {
             long long current_skip = sobol_skip + i;
             sobol::std_normal(y.n_rows, &current_skip, y.memptr());
             //cout << omp_get_thread_num() <<" "<< current_skip << endl;
@@ -67,14 +66,16 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
             UX_private += UX_;
             UX_q_private += UX_ * dq.t();
         }
-        
-#pragma omp critical
-        {
-            Upot += Upot_private;
-            UX += UX_private;
-            UX_q += UX_q_private;
-        }
         delete pot;
+
+        MPI_Reduce(&Upot_private, &Upot, 1,
+                MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+        MPI_Reduce(UX_private.memptr(), UX.memptr(), UX.n_elem,
+                MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+
+        MPI_Reduce(UX_q_private.memptr(), UX_q.memptr(), UX_q.n_elem,
+                MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
     }
     
     Upot /= NSobol;
@@ -91,14 +92,9 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
     mat U;
     vec omega, omegasq, d, UX;
 
-    int nmax_threads = omp_get_max_threads();
-    omp_set_num_threads(1);
     h2o::PES *pot = getPES();
     getHessian(*pot, q, 1e-3, Ks);
     delete pot;
-    omp_set_num_threads(nmax_threads);
-    cout << nmax_threads << " done with hessian\n";
-
     
     massScaleHessian(mass, Ks);
     regtransrot(transrotBasis(q, mass), Ks);    
@@ -146,7 +142,6 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
         
         omega = sqrt(abs(omegasq));
         
-        omega_out << omega.t();
         
         d = disp_disp_corr_diag(omega, kT);
         
@@ -155,28 +150,34 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
         finished = prod(abs(q - q_old) <= abs(q_old) * epsrel)
                     * prod(abs(d - d_old) <= abs(d_old) * epsrel);
         
-         F  = Upot;
+        F  = Upot;
+        vec omega_eckart = omega.subvec(6,omega.n_elem - 1);
         if (kT > 0.0) {
-            F += kT * sum(log(2.0*sinh(0.5/kT * omega)))
-            - 0.25*sum(omega/tanh(0.5/kT * omega)); // - 3*kT;
+            F += kT * sum(log(2.0*sinh(0.5/kT * omega_eckart)))
+            - 0.25*sum(omega_eckart/tanh(0.5/kT * omega_eckart)); // - 3*kT;
         }
         else {
-            F += 0.25 * sum(omega);
+            F += 0.25 * sum(omega_eckart);
         }
-        free_energy_out << F << endl;
+        if (rank == 0) {
+            omega_out << omega.t();
+            free_energy_out << F << endl;
 
-        cout << "iter: " << niter << endl;
+            cout << "iter: " << niter << endl;
+        }
     }
-    omega_out << endl;
-    save_for_vladimir("coord.xyz", F, q, Ks);
+    if (rank == 0) {
+        omega_out << endl;
+        save_for_vladimir("coord.xyz", F, q, Ks);
     
-    omega.shed_rows(0, 5);
-    
+        omega.shed_rows(0, 5);
+        
 
-    cout << "omega = " << omega.t()*autocm << endl;
-    cout << "<U> = " << Upot << endl;
-    cout << "<UX> = " << UX.t() << endl;
-    cout << "F = " << F * autokcalpmol <<" kcal/mol"<< endl;
+        cout << "omega = " << omega.t()*autocm << endl;
+        cout << "<U> = " << Upot << endl;
+        cout << "<UX> = " << UX.t() << endl;
+        cout << "F = " << F * autokcalpmol <<" kcal/mol"<< endl;
+    }
     
     return F;
 }

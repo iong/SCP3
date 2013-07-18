@@ -98,9 +98,9 @@ void process_options(int argc,  char *  argv[])
     input_file = argv[0];
 }
 
-int main (int argc, char *  argv[]) {
-
-````MPI_Init(&argc, &argv);
+int main (int argc, char *  argv[])
+{
+    MPI_Init(&argc, &argv);
 
     process_options(argc, argv);
 

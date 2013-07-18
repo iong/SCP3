@@ -17,6 +17,8 @@
 using namespace arma;
 using namespace std;
 
+#include <mpi.h>
+
 #include "Constants.h"
 #include "h2o.h"
 
@@ -28,6 +30,8 @@ class SCP1 {
     long long sobol_skip;
     long long NSobol;
     double qeps;
+
+    int rank, nprocs;
     
     ofstream omega_out;
     ofstream free_energy_out;
@@ -50,9 +54,14 @@ public:
         
         sobol_skip = 1 << ((int)floor(log2((float)NSobol)) + 1);
         //sobol_skip = 1000;
+        //
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+        MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
         
-        omega_out.open("omega_scp1.dat");
-        free_energy_out.open("free_energy.dat");
+        if (rank == 0) {
+            omega_out.open("omega_scp1.dat");
+            free_energy_out.open("free_energy.dat");
+        }
     }
     
     SCP1& setSobolSkip(long long s)
