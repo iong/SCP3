@@ -111,8 +111,8 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
     // compute M-sites, charges, 1-body terms
     double Eint(0);
     for (size_t i = 0; i < nw; ++i) {
-        size_t i3 = 3*i;
-        size_t i9 = 3*i3;
+        const size_t i3 = 3*i;
+        const size_t i9 = 3*i3;
 
         compute_M_site_crd(crd + i9, crd + i9 + 3, crd + i9 + 6, msite + i3);
 
@@ -129,7 +129,7 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
         ps::dms_nasa(dms_param1, dms_param2, dms_param3,
                      crd + i9, q3, 0, true);
 
-        double tmp = gamma2/gamma1;
+        const double tmp = gamma2/gamma1;
 
         using ttm3f_bits::CHARGECON;
 
@@ -142,19 +142,19 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
 
     double Evdw(0);
     for (size_t i = 0; i < nw; ++i) {
-        size_t i3 = 3*i;
-        size_t i9 = 3*i3;
+        const size_t i3 = 3*i;
+        const size_t i9 = 3*i3;
 
         // Hydrogens - M-sites
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            size_t j3 = 3*j;
+            const size_t j3 = 3*j;
 
             for (size_t l = 1; l < 3; ++l) {
-                size_t j3l = j3 + l;
-                size_t jh = 3*j3l;
+                const size_t j3l = j3 + l;
+                const size_t jh = 3*j3l;
 
                 double Rij[3], Rsq(0);
                 for (size_t k = 0; k < 3; ++k) {
@@ -176,19 +176,19 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
         // M-sites, Oxygens and Hydrogen - Hydrogen
 
         for (size_t j = i + 1; j < nw; ++j) {
-            size_t j3 = 3*j;
-            size_t j9 = 3*j3;
+            const size_t j3 = 3*j;
+            const size_t j9 = 3*j3;
 
             // H-H
             for (size_t a = 1; a < 3; ++a) {
-                size_t i3a = i3 + a;
+                const size_t i3a = i3 + a;
 
                 for (size_t b = 1; b < 3; ++b) {
-                    size_t j3b = j3 + b;
+                    const size_t j3b = j3 + b;
 
                     double Rsq(0);
                     for (size_t k = 0; k < 3; ++k) {
-                        double dx = crd[3*i3a + k] - crd[3*j3b + k];
+                        const double dx = crd[3*i3a + k] - crd[3*j3b + k];
                         Rsq += dx*dx;
                     }
 
@@ -207,14 +207,14 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
                 Rsq += Rij[k]*Rij[k];
             }
 
-            double dRij = std::sqrt(Rsq);
+            const double dRij = std::sqrt(Rsq);
 
             using ttm3f_bits::vdwC;
             using ttm3f_bits::vdwD;
             using ttm3f_bits::vdwE;
 
-            double dR6 = Rsq*Rsq*Rsq;
-            double expon = vdwD*std::exp(-vdwE*dRij);
+            const double dR6 = Rsq*Rsq*Rsq;
+            const double expon = vdwD*std::exp(-vdwE*dRij);
 
             Evdw += vdwC/dR6 + expon;
 
@@ -270,8 +270,8 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
         dip_prev[i] = dip[i];
     }
 
-    double dmix = 0.7;
-    double stath = DEBYE/ttm3f_bits::CHARGECON/(std::sqrt(double(nw)));
+    const double dmix = 0.7;
+    const double stath = DEBYE/ttm3f_bits::CHARGECON/(std::sqrt(double(nw)));
 
 #ifndef NDEBUG
     bool converged = false;
@@ -289,7 +289,7 @@ double ttm3f::operator()(size_t nw, const double* RESTRICT crd)
             dip[i] = polarM*(Efq[i] + Efd[i]);
             dip[i] = dmix*dip[i] + (1.0 - dmix)*dip_prev[i];
 
-            double delta = dip[i] - dip_prev[i];
+            const double delta = dip[i] - dip_prev[i];
             deltadip += delta*delta;
         }
 
@@ -347,8 +347,8 @@ double ttm3f::operator()
     // compute M-sites, charges, 1-body terms
     double Eint(0);
     for (size_t n = 0; n < nw; ++n) {
-        size_t n3 = 3*n;
-        size_t n9 = 3*n3;
+        const size_t n3 = 3*n;
+        const size_t n9 = 3*n3;
 
         compute_M_site_crd(crd + n9, crd + n9 + 3, crd + n9 + 6, msite + n3);
 
@@ -365,7 +365,7 @@ double ttm3f::operator()
         ps::dms_nasa(dms_param1, dms_param2, dms_param3,
                      crd + n9, q3, dq3, true);
 
-        double tmp = gamma2/gamma1;
+        const double tmp = gamma2/gamma1;
 
         charge[n3 + 0] = q3[0]/gamma1;                // M
         charge[n3 + 1] = q3[1] + tmp*(q3[1] + q3[2]); // H1
@@ -401,19 +401,19 @@ double ttm3f::operator()
 
     double Evdw(0);
     for (size_t i = 0; i < nw; ++i) {
-        size_t i3 = 3*i;
-        size_t i9 = 3*i3;
+        const size_t i3 = 3*i;
+        const size_t i9 = 3*i3;
 
         // Hydrogens - M-sites
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            size_t j3 = 3*j;
+            const size_t j3 = 3*j;
 
             for (size_t l = 1; l < 3; ++l) {
-                size_t j3l = j3 + l;
-                size_t jh = 3*j3l;
+                const size_t j3l = j3 + l;
+                const size_t jh = 3*j3l;
 
                 double Rij[3], Rsq(0);
                 for (size_t k = 0; k < 3; ++k) {
@@ -427,8 +427,8 @@ double ttm3f::operator()
                 phi[i3] += ts0*charge[j3l];
                 phi[j3l] += ts0*charge[i3];
 
-                double tmp1 = charge[j3l]*ts1;
-                double tmp2 = charge[i3]*tmp1;
+                const double tmp1 = charge[j3l]*ts1;
+                const double tmp2 = charge[i3]*tmp1;
                 for (size_t k = 0; k < 3; ++k) {
                     Efq[i3 + k] += tmp1*Rij[k];
                     grad[jh + k] += tmp2*Rij[k];
@@ -439,15 +439,15 @@ double ttm3f::operator()
         // M-sites, Oxygens and Hydrogen - Hydrogen
 
         for (size_t j = i + 1; j < nw; ++j) {
-            size_t j3 = 3*j;
-            size_t j9 = 3*j3;
+            const size_t j3 = 3*j;
+            const size_t j9 = 3*j3;
 
             // H-H
             for (size_t a = 1; a < 3; ++a) {
-                size_t i3a = i3 + a;
+                const size_t i3a = i3 + a;
 
                 for (size_t b = 1; b < 3; ++b) {
-                    size_t j3b = j3 + b;
+                    const size_t j3b = j3 + b;
 
                     double Rij[3], Rsq(0);
                     for (size_t k = 0; k < 3; ++k) {
@@ -462,7 +462,7 @@ double ttm3f::operator()
                     phi[j3b] += charge[i3a]*ts0;
 
                     // we do not store Efq on hydrogens, therefore
-                    double qq = charge[i3a]*charge[j3b]*ts1;
+                    const double qq = charge[i3a]*charge[j3b]*ts1;
                     for (size_t k = 0; k < 3; ++k) {
                         grad[3*i3a + k] -= qq*Rij[k];
                         grad[3*j3b + k] += qq*Rij[k];
@@ -477,18 +477,18 @@ double ttm3f::operator()
                 Rsq += Rij[k]*Rij[k];
             }
 
-            double dRij = std::sqrt(Rsq);
+            const double dRij = std::sqrt(Rsq);
 
             using ttm3f_bits::vdwC;
             using ttm3f_bits::vdwD;
             using ttm3f_bits::vdwE;
 
-            double dR6 = Rsq*Rsq*Rsq;
-            double expon = vdwD*std::exp(-vdwE*dRij);
+            const double dR6 = Rsq*Rsq*Rsq;
+            const double expon = vdwD*std::exp(-vdwE*dRij);
 
             Evdw += vdwC/dR6 + expon;
 
-            double tmp = -(6.0*vdwC/dR6)/Rsq - vdwE*expon/dRij;
+            const double tmp = -(6.0*vdwC/dR6)/Rsq - vdwE*expon/dRij;
             for (size_t k = 0; k < 3; ++k) {
                 grad[i9 + k] += tmp*Rij[k];
                 grad[j9 + k] -= tmp*Rij[k];
@@ -545,8 +545,8 @@ double ttm3f::operator()
         dip_prev[i] = dip[i];
     }
 
-    double dmix = 0.7;
-    double stath = DEBYE/ttm3f_bits::CHARGECON/(std::sqrt(double(nw)));
+    const double dmix = 0.7;
+    const double stath = DEBYE/ttm3f_bits::CHARGECON/(std::sqrt(double(nw)));
 
 #ifndef NDEBUG
     bool converged = false;
@@ -564,7 +564,7 @@ double ttm3f::operator()
             dip[i] = polarM*(Efq[i] + Efd[i]);
             dip[i] = dmix*dip[i] + (1.0 - dmix)*dip_prev[i];
 
-            double delta = dip[i] - dip_prev[i];
+            const double delta = dip[i] - dip_prev[i];
             deltadip += delta*delta;
         }
 
@@ -595,17 +595,17 @@ double ttm3f::operator()
     // charge-dipole and dipole-dipole
 
     for (size_t i = 0; i < nw; ++i) {
-        size_t i3 = 3*i;
+        const size_t i3 = 3*i;
 
         for (size_t j = 0; j < nw; ++j) {
             if (i == j)
                 continue;
 
-            size_t j3 = 3*j;
+            const size_t j3 = 3*j;
 
             for (size_t l = 1; l < 3; ++l) {
-                size_t j3l = j3 + l;
-                size_t jh = 3*j3l;
+                const size_t j3l = j3 + l;
+                const size_t jh = 3*j3l;
 
                 double Rij[3], Rsq(0), diR(0);
                 for (size_t k = 0; k < 3; ++k) {
@@ -618,7 +618,7 @@ double ttm3f::operator()
                 ttm3f_bits::smear12(std::sqrt(Rsq), AA_HM, ts1, ts2);
 
                 for (size_t k = 0; k < 3; ++k) {
-                    double derij =
+                    const double derij =
                         charge[j3l]*(3*ts2*diR*Rij[k] - ts1*dip[i3 + k]);
 
                     dM[i3 + k] += derij;
@@ -640,7 +640,7 @@ double ttm3f::operator()
             ttm3f_bits::smear123(std::sqrt(Rsq), AA_MM, ts1, ts2, ts3);
 
             for (size_t k = 0; k < 3; ++k) {
-                double derij =
+                const double derij =
                     charge[j3]*(3*ts2*diR*Rij[k] - ts1*dip[i3 + k]);
 
                 dM[i3 + k] += derij;
@@ -659,7 +659,7 @@ double ttm3f::operator()
                 }
 
                 for (size_t k = 0; k < 3; ++k) {
-                    double derij =
+                    const double derij =
                        - 3*ts2*(didj*Rij[k] + djR*dip[i3 + k]
                                             + diR*dip[j3 + k])
                        + 15*ts3*diR*djR*Rij[k];
@@ -677,11 +677,11 @@ double ttm3f::operator()
     using ttm3f_bits::gamma2;
 
     for (size_t i = 0; i < nw; ++i) {
-        size_t i3 = 3*i;
-        size_t i9 = 3*i3;
+        const size_t i3 = 3*i;
+        const size_t i9 = 3*i3;
 
         for (size_t k = 0; k < 3; ++k) {
-            double tmp = dM[i3 + k] - charge[i3]*Efq[i3 + k];
+            const double tmp = dM[i3 + k] - charge[i3]*Efq[i3 + k];
 
             grad[i9 + 0 + k] += gamma1*tmp; // O
             grad[i9 + 3 + k] += gamma2*tmp; // H
@@ -692,10 +692,10 @@ double ttm3f::operator()
     // derivatives from the adjustable charges of the NASA PES
 
     for (size_t n = 0; n < nw; ++n) {
-        size_t n3 = 3*n;
-        size_t io  = 9*n + 0;
-        size_t ih1 = 9*n + 3;
-        size_t ih2 = 9*n + 6;
+        const size_t n3 = 3*n;
+        const size_t io  = 9*n + 0;
+        const size_t ih1 = 9*n + 3;
+        const size_t ih2 = 9*n + 6;
 
         for (size_t k = 0; k < 3; ++k) {
             grad[ih1 + k] += GRDQ(0, 0, k)*phi[n3 + 1]  // phi(h1)

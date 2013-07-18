@@ -10,7 +10,7 @@ namespace h2o {
 class qtip4pf : public PES  {
 public:
     qtip4pf();
-    virtual ~qtip4pf();
+    ~qtip4pf();
 
     const char* name() const
     {
