@@ -14,7 +14,7 @@ namespace h2o {
 class ttm4_hbb2_x3b : public PES  {
 public:
     ttm4_hbb2_x3b();
-    virtual ~ttm4_hbb2_x3b();
+    ~ttm4_hbb2_x3b();
 
     const char* name() const
     {

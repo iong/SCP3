@@ -5537,7 +5537,7 @@ inline double distance(const double* p1, const double* p2)
     double result(0);
 
     for (int k = 0; k < 3; ++k) {
-        double delta = p1[k] - p2[k];
+        const double delta = p1[k] - p2[k];
         result += delta*delta;
     }
 
@@ -5558,15 +5558,15 @@ void gmorse(const double& g, const double& k, const double& r0,
             const double* a1, const double* a2,
                   double* g1,       double* g2)
 {
-    double r12[3] = {a1[0] - a2[0],
+    const double r12[3] = {a1[0] - a2[0],
                            a1[1] - a2[1],
                            a1[2] - a2[2]};
 
-    double r12sq = r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2];
-    double r = std::sqrt(r12sq);
+    const double r12sq = r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2];
+    const double r = std::sqrt(r12sq);
 
-    double x = k*(r - r0);
-    double gg = g*k*std::exp(-x)/r;
+    const double x = k*(r - r0);
+    const double gg = g*k*std::exp(-x)/r;
 
     for (int n = 0; n < 3; ++n) {
         g1[n] -= gg*r12[n];
@@ -5599,8 +5599,8 @@ double x3b::f_switch3(const double& r, double& g) const
         g = 0.0;
         return 0.0;
     } else if (r > x3b_bits::r3i) {
-        double t1 = 1.0/(x3b_bits::r3f - x3b_bits::r3i);
-        double x = (r - x3b_bits::r3i)*t1;
+        const double t1 = 1.0/(x3b_bits::r3f - x3b_bits::r3i);
+        const double x = (r - x3b_bits::r3i)*t1;
         g = 6*x*(x - 1.0)*t1;
         return 1 + x*x*(2*x - 3.0);
     } else {
@@ -5690,11 +5690,11 @@ double x3b::operator()
 
     double gab, gac, gbc;
 
-    double sab = f_switch3(drab, gab);
-    double sac = f_switch3(drac, gac);
-    double sbc = f_switch3(drbc, gbc);
+    const double sab = f_switch3(drab, gab);
+    const double sac = f_switch3(drac, gac);
+    const double sbc = f_switch3(drbc, gbc);
 
-    double s = sab*sac + sab*sbc + sac*sbc;
+    const double s = sab*sac + sab*sbc + sac*sbc;
 
     if (g1 == 0 || g2 == 0 || g3 == 0)
         return retval*s;

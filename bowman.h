@@ -10,7 +10,7 @@ namespace h2o {
 class bowman : public PES  {
 public:
     bowman();
-    virtual ~bowman();
+    ~bowman();
 
     const char* name() const
     {

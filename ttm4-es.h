@@ -11,6 +11,10 @@ namespace ttm {
 
 struct ttm4_es {
 
+    // computed for vibrationally averaged (CC-pol) monomer
+
+    static const double molecular_polarizability; // in A^3
+    static const double molecular_dipole; // in D
     ttm4_es();
     ~ttm4_es();
 
