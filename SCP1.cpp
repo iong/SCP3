@@ -107,8 +107,8 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
     mat isqrtM_U = U;
     isqrtM_U.each_col()  /= sqrt(mass);
 
-    int niter = 0;
-    for (bool finished = false; !finished; niter++) {
+    bool finished = false;
+    for (int niter = 0; niter < 500; niter++) {
         vec d_old = d;
         vec q_old = q;
  
