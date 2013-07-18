@@ -18,7 +18,9 @@
 #define ARMA_HAVE_POSIX_MEMALIGN
 #include <armadillo>
 
+#ifdef __FMA4__
 #include <x86intrin.h>
+#endif
 
 using namespace std;
 using namespace arma;
@@ -29,6 +31,12 @@ static double square(double x)
 {
     return x*x;
 }
+
+#if defined(__GNUG__)
+#define __assume_aligned(x, n) \
+        {}
+//(x) = __builtin_assume_aligned( (x), (n))
+#endif
 
 class ScaledMatrixElements {
 protected:

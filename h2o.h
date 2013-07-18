@@ -1,65 +1,51 @@
 #ifndef __H2O_H__
 #define __H2O_H__
 
+#include <cstdlib>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+#include "qtip4pf.h"
+
+#ifdef HAVE_BOWMAN
+#include "ps.h"
+#include "bowman-fortran.h"
+#include "bowman.h"
+#include "ttm4-hbb2-x3b.h"
+#endif
+
 namespace h2o {
-    class Potential {
-    public:
-        Potential() {}
+    static PES *PESFromString(const string& name)
+    {
+        PES *pot;
+#ifdef HAVE_BOWMAN
+        if (name == "whbb") {
+            pot = new h2o::bowman();
+        }
+        else if (name == "hbb2-pol") {
+            h2o::x3b_bits::load("x3b.nc");
+            pot = new h2o::ttm4_hbb2_x3b();
+        }
+#else
+        if (name == "whbb" || name == "hbb2-pol") {
+            cerr << "Support for Bowman's WHBB was not included." << endl;
+            exit(EXIT_FAILURE);
+        }
+#endif
+
+        else if (name == "qtip4pf") {
+            pot = new qtip4pf();
+        }
+        else {
+            cerr << "Unknown H2O potential: " << name << endl;
+            exit(EXIT_FAILURE);
+        }
         
-        virtual const char* name() const = 0;
-        virtual double operator()(size_t nw, const double*) = 0; // O H H O H H
-        virtual double operator()(size_t nw, const double*, double*) = 0; // O H H O H H
-    };
-}
-
-/*
-namespace h2o_i {
-#include <armadillo>
+        return pot;
+    }
     
-#include "F90.h"
-    
-    using namespace arma;
-class Potential {
-    public:
-        Potential() {}
-        virtual void operator()(vec& x, double& V, vec& Vx) = 0;
-};
-
-class qTIP4Pf : public Potential {
-    public:
-        qTIP4Pf() {}
-
-        virtual void operator()(vec& x, double& V, vec& Vx)
-        {
-            int nb_h2o = x.n_rows / 9;
-            TIP4P_UF(nb_h2o, x.memptr(), &V, Vx.memptr());
-
-            Vx *= -1.0;
-        }
-};
-
-class WHBB : public Potential {
-    bool    initialized;
-    double  eps;
-    public:
-        WHBB(double eps) :initialized(false) {
-            this->eps = eps;
-        }
-
-        virtual void operator()(vec& x, double& V, vec& Vx)
-        {
-            int nb_h2o = x.n_rows / 9;
-
-            if (!initialized) {
-                whbb_pes_init(nb_h2o);
-                initialized = true;
-            }
-
-            int nb_atoms = x.n_rows / 3;
-            whbb_fgrad(nb_atoms, x.memptr(), eps, &V, Vx.memptr());
-        }
-};
 }
- */
 
 #endif // __H2O_H__

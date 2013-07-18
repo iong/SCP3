@@ -513,7 +513,12 @@ double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
     const double costh =
         (ROH1[0]*ROH2[0] + ROH1[1]*ROH2[1] + ROH1[2]*ROH2[2])/(dROH1*dROH2);
 
-    assert (c5z_ready);
+    if (!c5z_ready) {
+        for (size_t i = 0; i < 245; ++i)
+            c5z[i] = f5z*c5zA[i] + fbasis*cbasis[i]
+                   + fcore*ccore[i] + frest*crest[i];
+        c5z_ready = true;
+    }
 
     const double deoh = f5z*deohA;
     const double phh1 = f5z*phh1A*std::exp(phh2);

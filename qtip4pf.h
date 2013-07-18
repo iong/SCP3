@@ -3,11 +3,11 @@
 
 #include <cstddef>
 
-#include "h2o.h"
+#include "PES.h"
 
 namespace h2o {
 
-class qtip4pf : public Potential  {
+class qtip4pf : public PES  {
 public:
     qtip4pf();
     ~qtip4pf();

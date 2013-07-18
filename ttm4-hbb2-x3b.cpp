@@ -49,15 +49,9 @@ namespace h2o {
 ttm4_hbb2_x3b::ttm4_hbb2_x3b()
 {
 }
-
-//----------------------------------------------------------------------------//
-
-void ttm4_hbb2_x3b::load(const char* filename)
+    
+ttm4_hbb2_x3b::~ttm4_hbb2_x3b()
 {
-    m_x3b.load(filename);
-    m_name = "TTM4+HBB2+X3B (";
-    m_name += filename;
-    m_name += ")";
 }
 
 //----------------------------------------------------------------------------//

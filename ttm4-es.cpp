@@ -80,6 +80,13 @@ inline void compute_M_site_crd
 
 namespace ttm {
 
+//
+// for CC-pol monomer geometry
+//
+
+const double ttm4_es::molecular_polarizability = 1.437714915622; // A^3
+const double ttm4_es::molecular_dipole = 1.867895838174; // D
+
 //----------------------------------------------------------------------------//
 
 ttm4_es::ttm4_es()
@@ -265,7 +272,11 @@ void ttm4_es::operator()
             for (size_t k = 0; k < i; ++k)
                 sum -= ddt[i*natom3 + k]*ddt[j*natom3 + k];
 
-            if(i == j) {
+            if (i == j) {
+                if (sum <= 0.0) {
+                    std::fill(dipole, dipole + natom3, 0.0);
+                    goto done;
+                }
                 assert(sum > 0.0);
                 diag[i] = std::sqrt(sum);
             } else {
@@ -297,6 +308,8 @@ void ttm4_es::operator()
 
     for (size_t i = 0; i < natom3; ++i)
         dipole[i] *= polar_sqrt[(i/3)%4];
+
+done:
 
     // compute the energies
 

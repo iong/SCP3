@@ -13,7 +13,7 @@
 
 void beasley_springer_moro(int nb_dims, double u[], double x[])
 {
-    int i, j;
+    int j;
     double r;
     
     double a[] = {2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637};

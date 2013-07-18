@@ -16,16 +16,23 @@
 
 #include <getopt.h>
 
+#ifdef OPENMP
+#include <omp.h>
+#endif
+
 #include <armadillo>
 
 #include "Constants.h"
 #include "DiskIO.h"
+#include "Hessian.h"
 #include "ScaledMatrixElements.h"
 
 #include "sobol.hpp"
 
 #include "qtip4pf.h"
 #include "ttm3f.h"
+
+#include "SCP1.h"
 
 #ifdef HAVE_BOWMAN
 #include "bowman-fortran.h"
@@ -44,7 +51,7 @@ static struct option program_options[] = {
     { "rng-file", required_argument, NULL, 'r'} ,
     { "doubles", required_argument, NULL, '2'},
     { "triples", required_argument, NULL, '3'},
-    { "potential", required_argument, NULL, 'p'},
+    { "PES", required_argument, NULL, 'p'},
     { "select-modes", required_argument, NULL, 'm'},
     { "distributed", required_argument, NULL, 'd'},
     { "no-gradient", no_argument, NULL, 'G'},
@@ -69,7 +76,7 @@ static int nb_segments = 1;
 
 static int block_width = 1024;
 
-string  h2o_potential("qtip4pf");
+string  h2o_pes("qtip4pf");
 
 
 void parse_mode_description(const string& desc, uvec& selected_modes)
@@ -133,7 +140,7 @@ void process_options(int argc,  char *  argv[])
                 rng_in.open(optarg);
                 break;
             case 'p':
-                h2o_potential = optarg;
+                h2o_pes = optarg;
                 break;
             case 'm':
                 parse_mode_description(optarg, selected_modes);
@@ -167,31 +174,7 @@ void process_options(int argc,  char *  argv[])
 }
 
 
-h2o::Potential *getPotential(const string& name)
-{
-    h2o::Potential *pot;
-    if (name == "whbb") {
-#ifdef HAVE_BOWMAN
-        pot = new h2o::bowman();
-#else
-        cerr << "Support for Bowman's WHBB was not included." << endl;
-        exit(EXIT_FAILURE);
-#endif
-    }
-    else if (name == "qtip4pf") {
-        pot = new h2o::qtip4pf();
-    }
-    else {
-        cerr << "Unknown H2O potential: " << h2o_potential << endl;
-        exit(EXIT_FAILURE);
-    }
-
-    return pot;
-}
-
-
-
-void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
+void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& MUa, const uvec& modes)
 {
     if (Nmodes2 > modes.n_rows || Nmodes3 > modes.n_rows) {
         cerr << "Number of double or triple excitations exceed number of modes."
@@ -261,7 +244,11 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
 
 #pragma omp parallel
         {
-            h2o::Potential *pot = getPotential(h2o_potential);
+#ifdef OPENMP
+            omp_set_nested(false);
+#endif
+
+            h2o::PES *pot = h2o::PESFromString(h2o_pes);
 
 #pragma omp for schedule(static)
             for (int j = 0; j < block_width; j++) {
@@ -339,60 +326,34 @@ void SCP3_a(const string& h2o_potential, const vec& x0, const vec& omega, const 
     }
 }
 
-
-void OHHOHH(vec& mass, vec& r, mat& H)
-{  
-    int iO = 0;
-    int iH = 3;
-    
-    uvec p(mass.n_rows);
-    
-    for (int i=0; i<mass.n_rows;) {
-        if (mass[i] == Omass) {
-            for (int j=0; j<3; j++) {
-                p[iO + j] = i + j;
-            }
-            
-            iO += 9;
-            i += 3;
-        }
-        else if (mass[i] == Hmass) {
-            for (int j=0; j<3; j++) {
-                p[iH + j] = i + j;
-            }
-
-            iH +=  3;
-            iH += 3 * (iH%9 == 0);
-            i += 3;
-        }
-        else {
-            cerr << "Uknown mass at i = "<< i << endl;
-            exit(EXIT_FAILURE);
-        }
-    }
-    
-    vec r_tmp(r);
-    for (int i=0; i<p.n_rows; i++) {
-        r[i] = r_tmp[p[i]];
-    }
-    
-    mat H_tmp = H.cols(p);
-    H = H_tmp.rows(p);
-
-    vec mass2 = mass(p);
-    mass = mass2;
-}
-
-
 int main (int argc, char *  argv[]) {
     process_options(argc, argv);
 
-    int N;
+#ifdef HAVE_BOWMAN
+    if (h2o_pes == "whbb" || h2o_pes == "hbb2-pol") {
+        ps::pot_nasa_init();
+        h2o::fortran::pes2b_init();
+        h2o::fortran::pes3b_init();
+        h2o::x3b_bits::load("x3b.nc");
+    }
+#endif
+
     mat H;
     vec mass, x0;
 
-    load_from_vladimir(input_file, N, mass, x0, H);
-    OHHOHH(mass, x0, H);
+    //load_from_vladimir(input_file, N, mass, x0, H);
+    //OHHOHH(mass, x0, H);
+    load_xyz(input_file, mass, x0);
+    OHHOHH(mass, x0);
+    x0 /= bohr;
+
+        
+    SCP1 scp1(mass, h2o_pes, NSobol);
+    double F0 = scp1(x0, 0.0, H);
+    
+    cout << "F0 = " << F0 << endl;
+                     
+    exit(EXIT_SUCCESS);
     
     vec omegasq0;
     mat U;
@@ -404,6 +365,7 @@ int main (int argc, char *  argv[]) {
         sout.close();
     }
 
+    int N = x0.n_rows / 3;
     if (Nmodes2 == 0) Nmodes2 = 3*N - 6;
 
     vec omega = sqrt(omegasq0.rows(6, 3*N - 1));
@@ -415,19 +377,11 @@ int main (int argc, char *  argv[]) {
         MUa.col(i) /= sqrt(mass)*alpha(i);
     }
 
-#ifdef HAVE_BOWMAN
-    if (h2o_potential == "whbb") {
-        ps::pot_nasa_init();
-        h2o::fortran::pes2b_init();
-        h2o::fortran::pes3b_init();
-    }
-#endif
-
     if (selected_modes.is_empty() ) {
         selected_modes = linspace<uvec>(0, MUa.n_cols - 1, MUa.n_cols);
     }
-
-    SCP3_a(h2o_potential, x0, omega, MUa, selected_modes);
+    
+    SCP3_a(h2o_pes, x0, omega, MUa, selected_modes);
     
     rng_in.close();
 }

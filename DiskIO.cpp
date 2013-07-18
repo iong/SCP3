@@ -100,6 +100,84 @@ load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
     fin.close();
 }
 
+void
+save_for_vladimir(const string &name, double F, vec& x0, mat& H)
+{
+    int N = x0.n_rows / 3;
+    ofstream fout(name.c_str());
+    
+    fout << N << endl
+        << "Free energy = " << F << endl;
+    
+    for (int i=0; i<x0.n_rows; i += 9) {
+        fout << "O " << x0.subvec(9*i  , 9*i+2).t()*bohr;
+        fout << "H " << x0.subvec(9*i+3, 9*i+5).t()*bohr;
+        fout << "H " << x0.subvec(9*i+6, 9*i+8).t()*bohr;
+    }
+    
+    for (int i=0; i < H.n_cols; i++) {
+        for (int j=0; j <= i; j++) {
+            fout << H(j, i) << endl;
+        }
+    }
+    
+    fout.close();
+}
+
+uvec OHHOHH(vec& mass, vec& r)
+{
+    int iO = 0;
+    int iH = 3;
+    
+    uvec p(mass.n_rows);
+    
+    for (int i=0; i<mass.n_rows;) {
+        if (mass[i] == Omass) {
+            for (int j=0; j<3; j++) {
+                p[iO + j] = i + j;
+            }
+            
+            iO += 9;
+            i += 3;
+        }
+        else if (mass[i] == Hmass) {
+            for (int j=0; j<3; j++) {
+                p[iH + j] = i + j;
+            }
+            
+            iH +=  3;
+            iH += 3 * (iH%9 == 0);
+            i += 3;
+        }
+        else {
+            cerr << "Uknown mass at i = "<< i << endl;
+            exit(EXIT_FAILURE);
+        }
+    }
+    
+    vec r_tmp(r);
+    for (int i=0; i<p.n_rows; i++) {
+        r[i] = r_tmp[p[i]];
+    }
+
+    vec mass2 = mass(p);
+    mass = mass2;
+    
+    return p;
+}
+
+
+uvec OHHOHH(vec& mass, vec& r, mat& H)
+{  
+    uvec p = OHHOHH(mass, r);
+    
+    mat H_tmp = H.cols(p);
+    H = H_tmp.rows(p);
+    
+    return p;
+}
+
+
 
 
 /** Save in column major mode **/

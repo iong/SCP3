@@ -66,6 +66,9 @@
 		C6E574E717209E410085BD1E /* ttm3f-bits.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C618F5F1171F83A900D73DEF /* ttm3f-bits.cpp */; };
 		C6E574E817209E410085BD1E /* ttm3f.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C618F5F3171F83A900D73DEF /* ttm3f.cpp */; };
 		C805940D16F7ACAF00B0CA2F /* TestScaledMatrixElements.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C805940B16F7ACAF00B0CA2F /* TestScaledMatrixElements.cpp */; };
+		C8A10B2B1794DB9C003438C1 /* SCP1.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8A10B291794DB9B003438C1 /* SCP1.cpp */; };
+		C8A10B2E1794DCA7003438C1 /* Hessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8A10B2C1794DCA7003438C1 /* Hessian.cpp */; };
+		C8A10B2F1794DCA7003438C1 /* Hessian.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C8A10B2C1794DCA7003438C1 /* Hessian.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildRule section */
@@ -144,9 +147,10 @@
 		C618F5FC171F83A900D73DEF /* x3b.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = x3b.h; sourceTree = "<group>"; };
 		C61BEAA416E9539900119648 /* ScaledMatrixElements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScaledMatrixElements.cpp; sourceTree = "<group>"; };
 		C6245F8A169E425800A75EE8 /* libarmadillo.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libarmadillo.dylib; path = /opt/local/lib/libarmadillo.dylib; sourceTree = "<absolute>"; };
+		C62610061796312E00A6CADE /* PES.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PES.h; sourceTree = "<group>"; };
 		C630F7641720B58600C2F5A9 /* SCP_Double_Excitations */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SCP_Double_Excitations; sourceTree = BUILT_PRODUCTS_DIR; };
 		C630F7661720B58600C2F5A9 /* nm_vmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = nm_vmd; sourceTree = BUILT_PRODUCTS_DIR; };
-		C630F7681720B58600C2F5A9 /* SCP_scaled_nm */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SCP_scaled_nm; sourceTree = BUILT_PRODUCTS_DIR; };
+		C630F7681720B58600C2F5A9 /* SCP3 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SCP3; sourceTree = BUILT_PRODUCTS_DIR; };
 		C630F76C1720B58600C2F5A9 /* TestSimplexIterator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestSimplexIterator; sourceTree = BUILT_PRODUCTS_DIR; };
 		C630F76E1720B58700C2F5A9 /* TestMatrixElements */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestMatrixElements; sourceTree = BUILT_PRODUCTS_DIR; };
 		C630F7701720B58700C2F5A9 /* SelectEW */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SelectEW; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -174,7 +178,6 @@
 		C6D92BEA170B4E4600AE23FB /* F90.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = F90.h; sourceTree = "<group>"; };
 		C6D92C0A170B501200AE23FB /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		C6D92C14170B540400AE23FB /* SelectEW.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SelectEW.cpp; sourceTree = "<group>"; };
-		C6DD83E616F38CD80075089B /* eig_sym.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = eig_sym.h; sourceTree = "<group>"; };
 		C6DD840916F3E57F0075089B /* TestMatrixElements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestMatrixElements.cpp; sourceTree = "<group>"; };
 		C6E574B9172071950085BD1E /* h2o.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = h2o.h; sourceTree = "<group>"; };
 		C6F98D9F16DEC93900F77302 /* libquadmath.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libquadmath.dylib; path = /opt/local/lib/gcc47/libquadmath.dylib; sourceTree = "<absolute>"; };
@@ -182,6 +185,10 @@
 		C805940B16F7ACAF00B0CA2F /* TestScaledMatrixElements.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestScaledMatrixElements.cpp; sourceTree = "<group>"; };
 		C805940C16F7ACAF00B0CA2F /* TestScaledMatrixElements.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestScaledMatrixElements.h; sourceTree = "<group>"; };
 		C894286D16DC162200D5D8F4 /* SimplexIterator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SimplexIterator.h; sourceTree = "<group>"; };
+		C8A10B291794DB9B003438C1 /* SCP1.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SCP1.cpp; sourceTree = "<group>"; };
+		C8A10B2A1794DB9C003438C1 /* SCP1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SCP1.h; sourceTree = "<group>"; };
+		C8A10B2C1794DCA7003438C1 /* Hessian.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Hessian.cpp; sourceTree = "<group>"; };
+		C8A10B2D1794DCA7003438C1 /* Hessian.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Hessian.h; sourceTree = "<group>"; };
 		C8B53CD216D6A8FE0010C56B /* DoubleExcitations.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DoubleExcitations.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -271,7 +278,6 @@
 		08FB7794FE84155DC02AAC07 /* SCP_Double_Excitations */ = {
 			isa = PBXGroup;
 			children = (
-				C6DD83E616F38CD80075089B /* eig_sym.h */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -290,6 +296,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				C62610061796312E00A6CADE /* PES.h */,
 				C6D23830176FEEB400E11336 /* HarmonicOscillatorBasis.cpp */,
 				C6D23831176FEEB400E11336 /* HarmonicOscillatorBasis.h */,
 				C630F7EA1720D7F100C2F5A9 /* Sobol */,
@@ -308,7 +315,11 @@
 				C61BEAA416E9539900119648 /* ScaledMatrixElements.cpp */,
 				C894286D16DC162200D5D8F4 /* SimplexIterator.h */,
 				C66398E916C1F48700FF6210 /* SCP3.cpp */,
+				C8A10B291794DB9B003438C1 /* SCP1.cpp */,
+				C8A10B2A1794DB9C003438C1 /* SCP1.h */,
 				C665E80E1714BF7F00F73EDD /* Upot.cpp */,
+				C8A10B2C1794DCA7003438C1 /* Hessian.cpp */,
+				C8A10B2D1794DCA7003438C1 /* Hessian.h */,
 				C6D92C14170B540400AE23FB /* SelectEW.cpp */,
 				C630F8591721B85B00C2F5A9 /* Tests */,
 			);
@@ -321,7 +332,7 @@
 			children = (
 				C630F7641720B58600C2F5A9 /* SCP_Double_Excitations */,
 				C630F7661720B58600C2F5A9 /* nm_vmd */,
-				C630F7681720B58600C2F5A9 /* SCP_scaled_nm */,
+				C630F7681720B58600C2F5A9 /* SCP3 */,
 				C630F76C1720B58600C2F5A9 /* TestSimplexIterator */,
 				C630F76E1720B58700C2F5A9 /* TestMatrixElements */,
 				C630F7701720B58700C2F5A9 /* SelectEW */,
@@ -451,8 +462,8 @@
 			dependencies = (
 			);
 			name = SCP3;
-			productName = SCP_scaled_nm;
-			productReference = C630F7681720B58600C2F5A9 /* SCP_scaled_nm */;
+			productName = SCP3;
+			productReference = C630F7681720B58600C2F5A9 /* SCP3 */;
 			productType = "com.apple.product-type.tool";
 		};
 		C665E7FE1714BF3B00F73EDD /* Upot */ = {
@@ -542,6 +553,9 @@
 /* Begin PBXProject section */
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+			};
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "SCP3" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -603,6 +617,8 @@
 				C630F7E01720CF5D00C2F5A9 /* sobol.cpp in Sources */,
 				C630F7E31720CFD800C2F5A9 /* beasley_springer_moro.cpp in Sources */,
 				C6D23832176FEEB400E11336 /* HarmonicOscillatorBasis.cpp in Sources */,
+				C8A10B2B1794DB9C003438C1 /* SCP1.cpp in Sources */,
+				C8A10B2E1794DCA7003438C1 /* Hessian.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -623,6 +639,7 @@
 				C68BA4D717172D2100851F7B /* Constants.cpp in Sources */,
 				C665E82E1714C28000F73EDD /* DiskIO.cpp in Sources */,
 				C665E80F1714BF7F00F73EDD /* Upot.cpp in Sources */,
+				C8A10B2F1794DCA7003438C1 /* Hessian.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -671,7 +688,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -717,16 +733,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /Users/ig/data/SCP2;
 				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
 				SDKROOT = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
@@ -736,16 +756,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /Users/ig/data/SCP2;
 				"INSTALL_PATH[sdk=*]" = /Users/ig/data/SCP2;
 				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
 				SDKROOT = "";
 				STRIP_INSTALLED_PRODUCT = NO;
 			};
@@ -757,11 +781,9 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				PREBINDING = NO;
 				PRODUCT_NAME = TestSimplexIterator;
 			};
 			name = Debug;
@@ -772,10 +794,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				PREBINDING = NO;
 				PRODUCT_NAME = TestSimplexIterator;
 				ZERO_LINK = NO;
 			};
@@ -789,7 +809,6 @@
 				COPY_PHASE_STRIP = NO;
 				ENABLE_OPENMP_SUPPORT = YES;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_VERSION = "";
@@ -801,8 +820,7 @@
 					"\"$(SRCROOT)\"",
 					/opt/local/lib/gcc47,
 				);
-				PREBINDING = NO;
-				PRODUCT_NAME = SCP_scaled_nm;
+				PRODUCT_NAME = SCP3;
 				SDKROOT = "";
 			};
 			name = Debug;
@@ -815,7 +833,6 @@
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_OPENMP_SUPPORT = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -826,8 +843,7 @@
 					"\"$(SRCROOT)\"",
 					/opt/local/lib/gcc47,
 				);
-				PREBINDING = NO;
-				PRODUCT_NAME = SCP_scaled_nm;
+				PRODUCT_NAME = SCP3;
 				SDKROOT = "";
 				ZERO_LINK = NO;
 			};
@@ -840,7 +856,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -849,7 +864,6 @@
 					/opt/local/lib,
 					/opt/local/lib/gcc47,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Upot;
 				SDKROOT = "";
 			};
@@ -862,7 +876,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /usr/local/bin;
@@ -870,7 +883,6 @@
 					/opt/local/lib,
 					/opt/local/lib/gcc47,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Upot;
 				SDKROOT = "";
 				ZERO_LINK = NO;
@@ -884,7 +896,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -894,7 +905,6 @@
 					/opt/local/lib,
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
 				PRODUCT_NAME = nm_vmd;
 				SDKROOT = "";
 			};
@@ -907,7 +917,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /usr/local/bin;
@@ -916,7 +925,6 @@
 					/opt/local/lib,
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
 				PRODUCT_NAME = nm_vmd;
 				SDKROOT = "";
 				ZERO_LINK = NO;
@@ -929,11 +937,9 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				PREBINDING = NO;
 				PRODUCT_NAME = InertiaTensor;
 			};
 			name = Debug;
@@ -944,10 +950,8 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
-				PREBINDING = NO;
 				PRODUCT_NAME = InertiaTensor;
 				ZERO_LINK = NO;
 			};
@@ -960,7 +964,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -970,7 +973,6 @@
 					/opt/local/lib,
 					/opt/local/lib/gcc47,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = SelectEW;
 				SDKROOT = "";
 			};
@@ -983,7 +985,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /usr/local/bin;
@@ -992,7 +993,6 @@
 					/opt/local/lib,
 					/opt/local/lib/gcc47,
 				);
-				PREBINDING = NO;
 				PRODUCT_NAME = SelectEW;
 				SDKROOT = "";
 				ZERO_LINK = NO;
@@ -1006,7 +1006,6 @@
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = /opt/local/include;
@@ -1016,7 +1015,6 @@
 					/opt/local/lib/gcc47,
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
 				PRODUCT_NAME = TestMatrixElements;
 				SDKROOT = "";
 			};
@@ -1029,7 +1027,6 @@
 				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_MODEL_TUNING = G5;
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /usr/local/bin;
@@ -1038,7 +1035,6 @@
 					/opt/local/lib/gcc47,
 				);
 				ONLY_ACTIVE_ARCH = YES;
-				PREBINDING = NO;
 				PRODUCT_NAME = TestMatrixElements;
 				SDKROOT = "";
 				ZERO_LINK = NO;

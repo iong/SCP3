@@ -10,6 +10,12 @@ endif
 include $(SRCDIR)/config/$(COMPILER).mk
 include $(SRCDIR)/config/blas.mk
 
+ifdef MPI
+CC:=mpicc
+CXX:=mpic++
+FC:=mpif90
+endif
+
 vpath %.cpp $(SRCDIR)
 vpath %.h $(SRCDIR)
 vpath %.f90 $(SRCDIR)
@@ -24,7 +30,6 @@ $(foreach x,CFLAGS CXXFLAGS,$(eval $(x) += $(COPT) ) )
 	FFLAGS    += $(FOPT)
 endif
 $(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(TARGET_FLAGS) ) )
-$(foreach x,CFLAGS CXXFLAGS FFLAGS,$(eval $(x) += $(OPENMP_FLAGS) ) )
 
 
 LIBS :=$(BLAS_LIBRARIES) -lhdf5_cpp -lhdf5 -lz
@@ -38,7 +43,7 @@ X2O_OBJ =  ps.o qtip4pf.o \
 ifdef WHBB
 	X2O_OBJ += bowman-bits.o bowman.o bowman-fortran.o ttm4-hbb2-x3b.o x3b.o
 	LDFLAGS += -L$(SRCDIR)/bowman
-	LIBS += -lpes3bifc_omp -lpes2bifc_omp -lifcore -limf -lsvml -Bstatic -lnetcdf -Bdynamic
+	LIBS += -lpes3bifc -lpes2bifc -lifcore -limf -lsvml -Bstatic -lnetcdf -Bdynamic -ldl
 	CPPFLAGS += -DHAVE_BOWMAN
 endif
 
@@ -47,12 +52,28 @@ all: SCP3
 %.o: %.f90
 	$(FC) -c $(FFLAGS) -o $@ $<
 
+%.o: %.cpp
+	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(cxxflags-$*) -o $@ $<
+
+%.o: %.c
+	$(CXX) -c $(CPPFLAGS) $(CCFLAGS) $(ccflags-$*) -o $@ $<
+
 sobol_stdnormal.o : sobol.o
 
-SCP3: SCP3.o ScaledMatrixElements.o HarmonicOscillatorBasis.o \
+cxxflags-SCP3 := $(OPENMP_FLAGS)
+cxxflags-ScaledMatrixElements := $(OPENMP_FLAGS)
+
+SCP3: SCP3.o Hessian.o ScaledMatrixElements.o \
+	HarmonicOscillatorBasis.o \
 	DiskIO.o sobol.o Constants.o beasley_springer_moro.o \
 	$(X2O_OBJ)
-	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(CXXFLAGS) $(OPENMP_FLAGS) $^ $(LDFLAGS) $(LIBS)
+
+SCP1: SCP1_main.o SCP1.o Hessian.o \
+	DiskIO.o sobol.o Constants.o beasley_springer_moro.o \
+	$(X2O_OBJ)
+	$(CXX) -o $@ $(CXXFLAGS) $(OPENMP_FLAGS) $^ $(LDFLAGS) $(LIBS)
+
 
 TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
 		ScaledMatrixElements.o
@@ -69,5 +90,18 @@ Upot: Upot.o Constants.o DiskIO.o  $(X2O_OBJ)
 
 clean:
 	$(RM) *.o *.mod
+
+mex_%.o : %.cpp
+	$(CXX) -O0 -g -c -o $@ -I$(MATLAB_ROOT)/extern/include $^
+
+mex_%.o : %.c
+	$(CC) -O0 -g -c -o $@ -I$(MATLAB_ROOT)/extern/include $^
+
+ScrambledSobol: mex_ScrambledSobol.o mex_MatousekAffineOwen.o
+	$(CXX) -O0 -g -o $@ $^  -L$(MATLAB_ROOT)/bin/maci64 -lmx -lmex -lmat \
+		-L$(MATLAB_ROOT)/runtime/maci64 -lmwmclmcrrt \
+		-Wl,-rpath -Wl,$(MATLAB_ROOT)/bin/maci64 \
+		-Wl,-rpath -Wl,$(MATLAB_ROOT)/runtime/maci64
+
 
 .PHONY: clean

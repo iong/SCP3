@@ -1,7 +1,6 @@
 double f_k1(int k)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += Vqk[i];
@@ -10,8 +9,8 @@ double f_k1(int k)
 }
 double f_k2(int k)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += qk[i]*Vqk[i];
@@ -20,8 +19,8 @@ double f_k2(int k)
 }
 double f_k3(int k)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -31,10 +30,10 @@ double f_k3(int k)
 }
 double f_k1_l1(int k, int l)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += ql[i]*Vqk[i] + qk[i]*Vql[i];
@@ -43,10 +42,10 @@ double f_k1_l1(int k, int l)
 }
 double f_k1_l2(int k, int l)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qli = ql[i]*ql[i];
@@ -56,10 +55,10 @@ double f_k1_l2(int k, int l)
 }
 double f_k2_l1(int k, int l)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -69,12 +68,12 @@ double f_k2_l1(int k, int l)
 }
 double f_k1_l1_j1(int k, int l, int j)
 {
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += sqrt(2.)*(qk[i]*ql[i]*Vqj[i] + qj[i]*ql[i]*Vqk[i] + qj[i]*qk[i]*Vql[i]);
@@ -84,10 +83,10 @@ double f_k1_l1_j1(int k, int l, int j)
 
 double m1_f_k1(int m, int k)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += qm[i]*Vqk[i] + qk[i]*Vqm[i];
@@ -97,10 +96,10 @@ double m1_f_k1(int m, int k)
 
 double m1_f_k2(int m, int k)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -112,10 +111,10 @@ double m1_f_k2(int m, int k)
 
 double m1_f_k3(int m, int k)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -127,12 +126,12 @@ double m1_f_k3(int m, int k)
 
 double m1_f_k1_l1(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += sqrt(2.)*(ql[i]*qm[i]*Vqk[i] + qk[i]*qm[i]*Vql[i] + qk[i]*ql[i]*Vqm[i]);
@@ -143,12 +142,12 @@ double m1_f_k1_l1(int m, int k, int l)
 
 double m1_f_k1_l2(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qli = ql[i]*ql[i];
@@ -158,12 +157,12 @@ double m1_f_k1_l2(int m, int k, int l)
 }
 double m1_f_k2_l1(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -173,14 +172,14 @@ double m1_f_k2_l1(int m, int k, int l)
 }
 double m1_f_k1_l1_j1(int m, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += qk[i]*ql[i]*qm[i]*Vqj[i] + qj[i]*(ql[i]*qm[i]*Vqk[i] + qk[i]*qm[i]*Vql[i] + qk[i]*ql[i]*Vqm[i]);
@@ -189,10 +188,10 @@ double m1_f_k1_l1_j1(int m, int k, int l, int j)
 }
 double m2_f_k2(int m, int k)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -203,10 +202,10 @@ double m2_f_k2(int m, int k)
 }
 double m2_f_k3(int m, int k)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -217,12 +216,12 @@ double m2_f_k3(int m, int k)
 }
 double m2_f_k1_l1(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -232,12 +231,12 @@ double m2_f_k1_l1(int m, int k, int l)
 }
 double m2_f_k1_l2(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -248,12 +247,12 @@ double m2_f_k1_l2(int m, int k, int l)
 }
 double m2_f_k2_l1(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -264,14 +263,14 @@ double m2_f_k2_l1(int m, int k, int l)
 }
 double m2_f_k1_l1_j1(int m, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -281,10 +280,10 @@ double m2_f_k1_l1_j1(int m, int k, int l, int j)
 }
 double m3_f_k3(int m, int k)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -295,12 +294,12 @@ double m3_f_k3(int m, int k)
 }
 double m3_f_k1_l1(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -310,12 +309,12 @@ double m3_f_k1_l1(int m, int k, int l)
 }
 double m3_f_k1_l2(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -326,12 +325,12 @@ double m3_f_k1_l2(int m, int k, int l)
 }
 double m3_f_k2_l1(int m, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -342,14 +341,14 @@ double m3_f_k2_l1(int m, int k, int l)
 }
 double m3_f_k1_l1_j1(int m, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -359,14 +358,14 @@ double m3_f_k1_l1_j1(int m, int k, int l, int j)
 }
 double m1_n1_f_k1_l1(int m, int n, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += ql[i]*qm[i]*qn[i]*Vqk[i] + qk[i]*(qm[i]*qn[i]*Vql[i] + ql[i]*qn[i]*Vqm[i] + ql[i]*qm[i]*Vqn[i]);
@@ -375,14 +374,14 @@ double m1_n1_f_k1_l1(int m, int n, int k, int l)
 }
 double m1_n1_f_k1_l2(int m, int n, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qli = ql[i]*ql[i];
@@ -392,14 +391,14 @@ double m1_n1_f_k1_l2(int m, int n, int k, int l)
 }
 double m1_n1_f_k2_l1(int m, int n, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -409,16 +408,16 @@ double m1_n1_f_k2_l1(int m, int n, int k, int l)
 }
 double m1_n1_f_k1_l1_j1(int m, int n, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += 2.*sqrt(2.)*(qk[i]*ql[i]*qm[i]*qn[i]*Vqj[i] + qj[i]*(ql[i]*qm[i]*qn[i]*Vqk[i] + qk[i]*(qm[i]*qn[i]*Vql[i] + ql[i]*qn[i]*Vqm[i] + ql[i]*qm[i]*Vqn[i])));
@@ -427,14 +426,14 @@ double m1_n1_f_k1_l1_j1(int m, int n, int k, int l, int j)
 }
 double m1_n2_f_k1_l2(int m, int n, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qli = ql[i]*ql[i];
@@ -445,14 +444,14 @@ double m1_n2_f_k1_l2(int m, int n, int k, int l)
 }
 double m1_n2_f_k2_l1(int m, int n, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -463,16 +462,16 @@ double m1_n2_f_k2_l1(int m, int n, int k, int l)
 }
 double m1_n2_f_k1_l1_j1(int m, int n, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qni = qn[i]*qn[i];
@@ -482,14 +481,14 @@ double m1_n2_f_k1_l1_j1(int m, int n, int k, int l, int j)
 }
 double m2_n1_f_k2_l1(int m, int n, int k, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qki = qk[i]*qk[i];
@@ -500,16 +499,16 @@ double m2_n1_f_k2_l1(int m, int n, int k, int l)
 }
 double m2_n1_f_k1_l1_j1(int m, int n, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -579,18 +578,18 @@ double m1_n1_p1_f_k1_l1_j1(int m, int n, int p, int k, int l, int j)
 
 double m1_n1_p1_f_k1_l1_j1(int m, int n, int p, int k, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqp = (double *) __builtin_assume_aligned(Vq.colptr(p), 32);
-    double * qp = (double *) __builtin_assume_aligned( q.colptr(p), 32);
-    double *Vqk = (double *) __builtin_assume_aligned(Vq.colptr(k), 32);
-    double * qk = (double *) __builtin_assume_aligned( q.colptr(k), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqp = Vq.colptr(p); __assume_aligned(Vqp, 32);
+    double * qp =  q.colptr(p); __assume_aligned( qp, 32);
+    double *Vqk = Vq.colptr(k); __assume_aligned(Vqk, 32);
+    double * qk =  q.colptr(k); __assume_aligned( qk, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += 2.*(qk[i]*ql[i]*qm[i]*qn[i]*qp[i]*Vqj[i] + qj[i]*ql[i]*qm[i]*qn[i]*qp[i]*Vqk[i] + qj[i]*qk[i]*(qm[i]*qn[i]*qp[i]*Vql[i] + ql[i]*qn[i]*qp[i]*Vqm[i] + ql[i]*qm[i]*qp[i]*Vqn[i] + ql[i]*qm[i]*qn[i]*Vqp[i]));
@@ -600,8 +599,8 @@ double m1_n1_p1_f_k1_l1_j1(int m, int n, int p, int k, int l, int j)
 #endif
 double m1_f_m1(int m)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += V[i] + qm[i]*Vqm[i];
@@ -610,8 +609,8 @@ double m1_f_m1(int m)
 }
 double m1_f_m2(int m)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -621,8 +620,8 @@ double m1_f_m2(int m)
 }
 double m1_f_m3(int m)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -632,10 +631,10 @@ double m1_f_m3(int m)
 }
 double m1_f_m1_l1(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += V[i]*ql[i] + qm[i]*(qm[i]*Vql[i] + ql[i]*Vqm[i]);
@@ -644,10 +643,10 @@ double m1_f_m1_l1(int m, int l)
 }
 double m1_f_m1_l2(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -658,10 +657,10 @@ double m1_f_m1_l2(int m, int l)
 }
 double m1_f_m2_l1(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -671,12 +670,12 @@ double m1_f_m2_l1(int m, int l)
 }
 double m1_f_m1_l1_j1(int m, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += 2.*(V[i]*qj[i]*ql[i] + qm[i]*(ql[i]*qm[i]*Vqj[i] + qj[i]*qm[i]*Vql[i] + qj[i]*ql[i]*Vqm[i]));
@@ -685,8 +684,8 @@ double m1_f_m1_l1_j1(int m, int l, int j)
 }
 double m2_f_m2(int m)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -697,8 +696,8 @@ double m2_f_m2(int m)
 
 double m2_f_m3(int m)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -708,10 +707,10 @@ double m2_f_m3(int m)
 }
 double m2_f_m1_l1(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -721,10 +720,10 @@ double m2_f_m1_l1(int m, int l)
 }
 double m2_f_m1_l2(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -735,10 +734,10 @@ double m2_f_m1_l2(int m, int l)
 }
 double m2_f_m2_l1(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -748,12 +747,12 @@ double m2_f_m2_l1(int m, int l)
 }
 double m2_f_m1_l1_j1(int m, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -763,8 +762,8 @@ double m2_f_m1_l1_j1(int m, int l, int j)
 }
 double m3_f_m3(int m)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -774,10 +773,10 @@ double m3_f_m3(int m)
 }
 double m3_f_m1_l1(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -787,10 +786,10 @@ double m3_f_m1_l1(int m, int l)
 }
 double m3_f_m1_l2(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -801,10 +800,10 @@ double m3_f_m1_l2(int m, int l)
 }
 double m3_f_m2_l1(int m, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -814,12 +813,12 @@ double m3_f_m2_l1(int m, int l)
 }
 double m3_f_m1_l1_j1(int m, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -829,12 +828,12 @@ double m3_f_m1_l1_j1(int m, int l, int j)
 }
 double m1_n1_f_m1_l1(int m, int n, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += 2.*(V[i]*ql[i]*qn[i] + qm[i]*(qm[i]*qn[i]*Vql[i] + ql[i]*qn[i]*Vqm[i] + ql[i]*qm[i]*Vqn[i]));
@@ -843,12 +842,12 @@ double m1_n1_f_m1_l1(int m, int n, int l)
 }
 double m1_n1_f_m1_l2(int m, int n, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qli = ql[i]*ql[i];
@@ -858,12 +857,12 @@ double m1_n1_f_m1_l2(int m, int n, int l)
 }
 double m1_n1_f_m2_l1(int m, int n, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -873,14 +872,14 @@ double m1_n1_f_m2_l1(int m, int n, int l)
 }
 double m1_n1_f_m1_l1_j1(int m, int n, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += V[i]*qj[i]*ql[i]*qn[i] + qm[i]*(ql[i]*qm[i]*qn[i]*Vqj[i] + qj[i]*(qm[i]*qn[i]*Vql[i] + ql[i]*qn[i]*Vqm[i] + ql[i]*qm[i]*Vqn[i]));
@@ -889,12 +888,12 @@ double m1_n1_f_m1_l1_j1(int m, int n, int l, int j)
 }
 double m1_n2_f_m1_l2(int m, int n, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -906,12 +905,12 @@ double m1_n2_f_m1_l2(int m, int n, int l)
 }
 double m1_n2_f_m2_l1(int m, int n, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -922,14 +921,14 @@ double m1_n2_f_m2_l1(int m, int n, int l)
 }
 double m1_n2_f_m1_l1_j1(int m, int n, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -940,12 +939,12 @@ double m1_n2_f_m1_l1_j1(int m, int n, int l, int j)
 }
 double m2_n1_f_m2_l1(int m, int n, int l)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -956,14 +955,14 @@ double m2_n1_f_m2_l1(int m, int n, int l)
 
 double m2_n1_f_m1_l1_j1(int m, int n, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -973,16 +972,16 @@ double m2_n1_f_m1_l1_j1(int m, int n, int l, int j)
 }
 double m1_n1_p1_f_m1_l1_j1(int m, int n, int p, int l, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqp = (double *) __builtin_assume_aligned(Vq.colptr(p), 32);
-    double * qp = (double *) __builtin_assume_aligned( q.colptr(p), 32);
-    double *Vql = (double *) __builtin_assume_aligned(Vq.colptr(l), 32);
-    double * ql = (double *) __builtin_assume_aligned( q.colptr(l), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqp = Vq.colptr(p); __assume_aligned(Vqp, 32);
+    double * qp =  q.colptr(p); __assume_aligned( qp, 32);
+    double *Vql = Vq.colptr(l); __assume_aligned(Vql, 32);
+    double * ql =  q.colptr(l); __assume_aligned( ql, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         ret += 4.*(V[i]*qj[i]*ql[i]*qn[i]*qp[i] + qm[i]*(ql[i]*qm[i]*qn[i]*qp[i]*Vqj[i] + qj[i]*(qm[i]*qn[i]*qp[i]*Vql[i] + ql[i]*qn[i]*qp[i]*Vqm[i] + ql[i]*qm[i]*qp[i]*Vqn[i] + ql[i]*qm[i]*qn[i]*Vqp[i])));
@@ -991,10 +990,10 @@ double m1_n1_p1_f_m1_l1_j1(int m, int n, int p, int l, int j)
 }
 double m1_n1_f_m1_n1(int m, int n)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qni = qn[i]*qn[i];
@@ -1004,10 +1003,10 @@ double m1_n1_f_m1_n1(int m, int n)
 }
 double m1_n1_f_m1_n2(int m, int n)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -1018,10 +1017,10 @@ double m1_n1_f_m1_n2(int m, int n)
 }
 double m1_n1_f_m2_n1(int m, int n)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -1032,12 +1031,12 @@ double m1_n1_f_m2_n1(int m, int n)
 }
 double m1_n1_f_m1_n1_j1(int m, int n, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qni = qn[i]*qn[i];
@@ -1047,10 +1046,10 @@ double m1_n1_f_m1_n1_j1(int m, int n, int j)
 }
 double m1_n2_f_m1_n2(int m, int n)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -1061,10 +1060,10 @@ double m1_n2_f_m1_n2(int m, int n)
 }
 double m1_n2_f_m2_n1(int m, int n)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -1075,12 +1074,12 @@ double m1_n2_f_m2_n1(int m, int n)
 }
 double m1_n2_f_m1_n1_j1(int m, int n, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qni = qn[i]*qn[i];
@@ -1090,10 +1089,10 @@ double m1_n2_f_m1_n1_j1(int m, int n, int j)
 }
 double m2_n1_f_m2_n1(int m, int n)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -1104,12 +1103,12 @@ double m2_n1_f_m2_n1(int m, int n)
 }
 double m2_n1_f_m1_n1_j1(int m, int n, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qmi = qm[i]*qm[i];
@@ -1120,14 +1119,14 @@ double m2_n1_f_m1_n1_j1(int m, int n, int j)
 }
 double m1_n1_p1_f_m1_n1_j1(int m, int n, int p, int j)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqp = (double *) __builtin_assume_aligned(Vq.colptr(p), 32);
-    double * qp = (double *) __builtin_assume_aligned( q.colptr(p), 32);
-    double *Vqj = (double *) __builtin_assume_aligned(Vq.colptr(j), 32);
-    double * qj = (double *) __builtin_assume_aligned( q.colptr(j), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqp = Vq.colptr(p); __assume_aligned(Vqp, 32);
+    double * qp =  q.colptr(p); __assume_aligned( qp, 32);
+    double *Vqj = Vq.colptr(j); __assume_aligned(Vqj, 32);
+    double * qj =  q.colptr(j); __assume_aligned( qj, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qni = qn[i]*qn[i];
@@ -1137,12 +1136,12 @@ double m1_n1_p1_f_m1_n1_j1(int m, int n, int p, int j)
 }
 double m1_n1_p1_f_m1_n1_p1(int m, int n, int p)
 {
-    double *Vqm = (double *) __builtin_assume_aligned(Vq.colptr(m), 32);
-    double * qm = (double *) __builtin_assume_aligned( q.colptr(m), 32);
-    double *Vqn = (double *) __builtin_assume_aligned(Vq.colptr(n), 32);
-    double * qn = (double *) __builtin_assume_aligned( q.colptr(n), 32);
-    double *Vqp = (double *) __builtin_assume_aligned(Vq.colptr(p), 32);
-    double * qp = (double *) __builtin_assume_aligned( q.colptr(p), 32);
+    double *Vqm = Vq.colptr(m); __assume_aligned(Vqm, 32);
+    double * qm =  q.colptr(m); __assume_aligned( qm, 32);
+    double *Vqn = Vq.colptr(n); __assume_aligned(Vqn, 32);
+    double * qn =  q.colptr(n); __assume_aligned( qn, 32);
+    double *Vqp = Vq.colptr(p); __assume_aligned(Vqp, 32);
+    double * qp =  q.colptr(p); __assume_aligned( qp, 32);
     double ret = 0;
     for (int i=0; i < V.n_rows; i++) {
         double _sqr_qpi = qp[i]*qp[i];

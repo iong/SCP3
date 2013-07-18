@@ -7,6 +7,8 @@
  *
  */
 
+#ifndef Constants_H
+#define Constants_H
 
 extern double bohr;
 extern double autocm;
@@ -18,3 +20,4 @@ extern double Omass;
 static const double autokcalpmol = 627.509474277194;
 
 
+#endif // Constants_H
