@@ -23,9 +23,8 @@ namespace h2o {
             pot = new h2o::bowman();
         }
         else if (name == "hbb2-pol") {
-            h2o::ttm4_hbb2_x3b *p = new h2o::ttm4_hbb2_x3b();
-            p->load("x3b.nc");
-            pot = p;
+            h2o::x3b_bits::load("x3b.nc");
+            pot = new h2o::ttm4_hbb2_x3b();
         }
 #else
         if (name == "whbb" || name == "hbb2-pol") {
