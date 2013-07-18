@@ -16,7 +16,7 @@ const double FPMIN = std::numeric_limits<double>::min()/EPS;
 
 double gser23(const double& x)
 {
-    const double a = 2.0/3.0;
+    double a = 2.0/3.0;
 
     double ap = a;
     double sum = 1.0/a;
@@ -36,7 +36,7 @@ double gser23(const double& x)
 
 double gcf23(const double& x)
 {
-    const double a = 2.0/3.0;
+    double a = 2.0/3.0;
 
     double b = x + 1.0 - a;
     double c = 1.0/FPMIN;
@@ -44,7 +44,7 @@ double gcf23(const double& x)
     double h = d;
 
     for (int i = 1;; ++i) {
-        const double an = -i*(i - a);
+        double an = -i*(i - a);
 
         b += 2.0;
         d = an*d + b;
@@ -57,7 +57,7 @@ double gcf23(const double& x)
             c = FPMIN;
 
         d = 1.0/d;
-        const double del = d*c;
+        double del = d*c;
         h *= del;
 
         if (std::fabs(del - 1.0) <= EPS)
@@ -75,7 +75,7 @@ double gcf23(const double& x)
 
 double gammq23(const double& x)
 {
-    const double exp_gammln_23 = 1.354117939426400e+00;
+    double exp_gammln_23 = 1.354117939426400e+00;
     return (x < 5.0/3.0 ? exp_gammln_23 - gser23(x) : gcf23(x));
 }
 
@@ -97,11 +97,11 @@ namespace ttm3f_bits {
 void smear0(const double& RESTRICT r12, const double& RESTRICT AA,
             double& RESTRICT ts0)
 {
-    const double dri = 1.0/r12;
+    double dri = 1.0/r12;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
 
     ts0 = (1.0 - exp1 + a_XX_13*rA*gammq23(a_XX*rA3))*dri;
 }
@@ -111,12 +111,12 @@ void smear0(const double& RESTRICT r12, const double& RESTRICT AA,
 void smear1(const double& RESTRICT r12, const double& RESTRICT AA,
             double& RESTRICT ts1)
 {
-    const double dri = 1.0/r12;
-    const double drsqi = dri*dri;
+    double dri = 1.0/r12;
+    double drsqi = dri*dri;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
 
     ts1 = (1.0 - exp1)*dri*drsqi;
 }
@@ -126,12 +126,12 @@ void smear1(const double& RESTRICT r12, const double& RESTRICT AA,
 void smear01(const double& RESTRICT r12, const double& RESTRICT AA,
              double& RESTRICT ts0, double& RESTRICT ts1)
 {
-    const double dri = 1.0/r12;
-    const double drsqi = dri*dri;
+    double dri = 1.0/r12;
+    double drsqi = dri*dri;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
 
     ts0 = (1.0 - exp1 + a_XX_13*rA*gammq23(a_XX*rA3))*dri;
     ts1 = (1.0 - exp1)*dri*drsqi;
@@ -142,12 +142,12 @@ void smear01(const double& RESTRICT r12, const double& RESTRICT AA,
 void smear12(const double& RESTRICT r12, const double& RESTRICT AA,
              double& RESTRICT ts1, double& RESTRICT ts2)
 {
-    const double dri = 1.0/r12;
-    const double drsqi = dri*dri;
+    double dri = 1.0/r12;
+    double drsqi = dri*dri;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
 
     ts1 = (1.0 - exp1)*dri*drsqi;
     ts2 = (ts1 - exp1*a_XX/(AA*AA*AA))*drsqi;
@@ -158,12 +158,12 @@ void smear12(const double& RESTRICT r12, const double& RESTRICT AA,
 void smear012(const double& RESTRICT r12, const double& RESTRICT AA,
               double& RESTRICT ts0, double& RESTRICT ts1, double& RESTRICT ts2)
 {
-    const double dri = 1.0/r12;
-    const double drsqi = dri*dri;
+    double dri = 1.0/r12;
+    double drsqi = dri*dri;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
 
     ts0 = (1.0 - exp1 + a_XX_13*rA*gammq23(a_XX*rA3))*dri;
     ts1 = (1.0 - exp1)*dri*drsqi;
@@ -175,14 +175,14 @@ void smear012(const double& RESTRICT r12, const double& RESTRICT AA,
 void smear123(const double& RESTRICT r12, const double& RESTRICT AA,
               double& RESTRICT ts1, double& RESTRICT ts2, double& RESTRICT ts3)
 {
-    const double dri = 1.0/r12;
-    const double drsqi = dri*dri;
+    double dri = 1.0/r12;
+    double drsqi = dri*dri;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
-    const double AA3 = AA*AA*AA;
-    const double AA6 = AA3*AA3;
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
+    double AA3 = AA*AA*AA;
+    double AA6 = AA3*AA3;
 
     ts1 = (1.0 - exp1)*dri*drsqi;
     ts2 = (ts1 - exp1*a_XX/AA3)*drsqi;
@@ -195,14 +195,14 @@ void smear0123(const double& RESTRICT r12, const double& RESTRICT AA,
                double& RESTRICT ts0, double& RESTRICT ts1,
                double& RESTRICT ts2, double& RESTRICT ts3)
 {
-    const double dri = 1.0/r12;
-    const double drsqi = dri*dri;
+    double dri = 1.0/r12;
+    double drsqi = dri*dri;
 
-    const double rA = r12/AA;
-    const double rA3 = rA*rA*rA;
-    const double exp1 = std::exp(-a_XX*rA3);
-    const double AA3 = AA*AA*AA;
-    const double AA6 = AA3*AA3;
+    double rA = r12/AA;
+    double rA3 = rA*rA*rA;
+    double exp1 = std::exp(-a_XX*rA3);
+    double AA3 = AA*AA*AA;
+    double AA6 = AA3*AA3;
 
     ts0 = (1.0 - exp1 + a_XX_13*rA*gammq23(a_XX*rA3))*dri;
     ts1 = (1.0 - exp1)*dri*drsqi;

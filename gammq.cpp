@@ -37,11 +37,11 @@ const double w[18] = {0.0055657196642445571,
 
 double gammpapprox(const double& a, const double& x, int psig)
 {
-    const double gln = ttm::gammln(a);
+    double gln = ttm::gammln(a);
 
-    const double a1 = a-1.0;
-    const double lna1 = std::log(a1);
-    const double sqrta1 = std::sqrt(a1);
+    double a1 = a-1.0;
+    double lna1 = std::log(a1);
+    double sqrta1 = std::sqrt(a1);
 
     double xu, t, sum, ans;
 
@@ -66,7 +66,7 @@ double gammpapprox(const double& a, const double& x, int psig)
 
 double gser(const double& a, const double& x)
 {
-    const double gln = ttm::gammln(a);
+    double gln = ttm::gammln(a);
 
     double ap = a;
     double sum = 1.0/a;
@@ -86,7 +86,7 @@ double gser(const double& a, const double& x)
 
 double gcf(const double& a, const double& x)
 {
-    const double gln = ttm::gammln(a);
+    double gln = ttm::gammln(a);
 
     double b = x + 1.0 - a;
     double c = 1.0/FPMIN;
@@ -94,7 +94,7 @@ double gcf(const double& a, const double& x)
     double h = d;
 
     for (int i = 1;; ++i) {
-        const double an = -i*(i - a);
+        double an = -i*(i - a);
 
         b += 2.0;
         d = an*d + b;
@@ -107,7 +107,7 @@ double gcf(const double& a, const double& x)
             c = FPMIN;
 
         d = 1.0/d;
-        const double del = d*c;
+        double del = d*c;
         h *= del;
 
         if (std::fabs(del - 1.0) <= EPS)
@@ -129,7 +129,7 @@ namespace ttm {
 
 double gammq(const double& a, const double& x)
 {
-    const int ASWITCH = 100;
+    int ASWITCH = 100;
 
     assert(x >= 0.0 && a > 0.0);
 

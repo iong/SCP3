@@ -92,8 +92,8 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
     // compute M-sites, charges, 1-body terms
     double E1b(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         compute_M_site_crd(crd + i9, crd + i9 + 3, crd + i9 + 6, msite + i3);
 
@@ -109,7 +109,7 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
         ps::dms_nasa(dms_param1, dms_param2, dms_param3,
                      crd + i9, q3, 0, true);
 
-        const double tmp = 0.5*gammaM/(1.0 - gammaM);
+        double tmp = 0.5*gammaM/(1.0 - gammaM);
 
         using ttm3f_bits::CHARGECON;
 
@@ -121,12 +121,12 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
     // 2-body terms
     double E2b(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
-            const size_t j9 = 3*j3;
+            size_t j3 = 3*j;
+            size_t j9 = 3*j3;
 
             // O-O distance
             double dRijsq = 0.0, Rij[3];
@@ -154,21 +154,21 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
                 using ttm3f_bits::vdwD;
                 using ttm3f_bits::vdwE;
 
-                const double dR6 = dRijsq*dRijsq*dRijsq;
-                const double expon = vdwD*std::exp(-vdwE*dRij);
+                double dR6 = dRijsq*dRijsq*dRijsq;
+                double expon = vdwD*std::exp(-vdwE*dRij);
 
                 Ettm3_vdw = vdwC/dR6 + expon;
             } // dRij >= r2i
 
-            const double Ettm3 = Ettm3_vdw + Ettm3_CC + Ettm3_CD_DD;
+            double Ettm3 = Ettm3_vdw + Ettm3_CC + Ettm3_CD_DD;
 
             if (dRij < r2f) {
-                const double ET1 = bowman_bits::pes2b(crd + i9, crd + j9);
+                double ET1 = bowman_bits::pes2b(crd + i9, crd + j9);
 
                 if (dRij < r2i) {
                     E2b += ET1;
                 } else {
-                    const double s = bowman_bits::f_switch(dRij, r2i, r2f);
+                    double s = bowman_bits::f_switch(dRij, r2i, r2f);
                     E2b += (1.0 - s)*ET1 + s*Ettm3;
                 }
             } else {
@@ -181,10 +181,10 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
 
     double E3b(0);
     for (size_t a = 0; a < nw; ++a) {
-        const size_t a9 = 9*a;
+        size_t a9 = 9*a;
 
         for (size_t b = a + 1; b < nw; ++b) {
-            const size_t b9 = 9*b;
+            size_t b9 = 9*b;
 
             double Rab[3], dRab(0);
             for (size_t k = 0; k < 3; ++k) {
@@ -201,7 +201,7 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
                 continue;
 
             for (size_t c = b + 1; c < nw; ++c) {
-                const size_t c9 = 9*c;
+                size_t c9 = 9*c;
 
                 double Rac[3], dRac(0);
                 double Rbc[3], dRbc(0);
@@ -215,16 +215,16 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
                 dRac = std::sqrt(dRac);
                 dRbc = std::sqrt(dRbc);
 
-                const double rmax = std::max(dRab, std::max(dRac, dRbc));
+                double rmax = std::max(dRab, std::max(dRac, dRbc));
 
                 if (rmax < r3f) {
-                    const double E3 =
+                    double E3 =
                         bowman_bits::pes3b(crd + a9, crd + b9, crd + c9);
 
                     if (rmax < r3i) {
                         E3b += E3;
                     } else {
-                        const double s = bowman_bits::f_switch(rmax, r3i, r3f);
+                        double s = bowman_bits::f_switch(rmax, r3i, r3f);
                         E3b += E3*(1.0 - s);
                     }
                 }
@@ -239,13 +239,13 @@ double bowman::operator()(size_t nw, const double* RESTRICT crd)
     ttm3f_bits::U_coul_CD_DD(nw, crd, msite, charge, scratch, ENb);
 
     for (size_t a = 0; a < nw; ++a) {
-        const size_t a3 = 3*a;
+        size_t a3 = 3*a;
 
         for (size_t b = a + 1; b < nw; ++b) {
-            const size_t b3 = 3*b;
+            size_t b3 = 3*b;
 
             for (size_t c = b + 1; c < nw; ++c) {
-                const size_t c3 = 3*c;
+                size_t c3 = 3*c;
 
                 double Eind;
                 ttm3f_bits::U_coul_CD_DD_3w
@@ -280,8 +280,8 @@ double bowman::operator()
     // M-site, charges, 1-body terms
     double E1b(0);
     for (size_t n = 0; n < nw; ++n) {
-        const size_t n3 = 3*n;
-        const size_t n9 = 3*n3;
+        size_t n3 = 3*n;
+        size_t n9 = 3*n3;
 
         compute_M_site_crd(crd + n9, crd + n9 + 3, crd + n9 + 6, msite + n3);
 
@@ -298,7 +298,7 @@ double bowman::operator()
         ps::dms_nasa(dms_param1, dms_param2, dms_param3,
                      crd + n9, q3, dq3, true);
 
-        const double tmp = gamma2/gamma1;
+        double tmp = gamma2/gamma1;
 
         charge[n3 + 0] = q3[0]/gamma1;                // M
         charge[n3 + 1] = q3[1] + tmp*(q3[1] + q3[2]); // H1
@@ -333,12 +333,12 @@ double bowman::operator()
     // 2-body terms
     double E2b(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
-            const size_t j9 = 3*j3;
+            size_t j3 = 3*j;
+            size_t j9 = 3*j3;
 
             // O-O distance
             double dRijsq = 0.0, Rij[3];
@@ -359,7 +359,7 @@ double bowman::operator()
                  grdq + 27*i, grdq + 27*j,
                  dttm3i, dtmpi, dttm3j, dtmpj);
 
-            const double w_CD_DD = nw - 3.0;
+            double w_CD_DD = nw - 3.0;
 
             E2b += w_CD_DD*Ettm3_CD_DD;
             for (size_t k = 0; k < 9; ++k) {
@@ -375,12 +375,12 @@ double bowman::operator()
                 using ttm3f_bits::vdwD;
                 using ttm3f_bits::vdwE;
 
-                const double dR6 = dRijsq*dRijsq*dRijsq;
-                const double expon = vdwD*std::exp(-vdwE*dRij);
+                double dR6 = dRijsq*dRijsq*dRijsq;
+                double expon = vdwD*std::exp(-vdwE*dRij);
 
                 Ettm3_vdw = vdwC/dR6 + expon;
 
-                const double tmp = -(6.0*vdwC/dR6)/dRijsq - vdwE*expon/dRij;
+                double tmp = -(6.0*vdwC/dR6)/dRijsq - vdwE*expon/dRij;
 
                 // assemble Ettm3 gradients in dttm3?
                 for (size_t k = 0; k < 3; ++k) {
@@ -393,11 +393,11 @@ double bowman::operator()
                 }
             } // dRij >= r2i
 
-            const double Ettm3 = Ettm3_vdw + Ettm3_CC + Ettm3_CD_DD;
+            double Ettm3 = Ettm3_vdw + Ettm3_CC + Ettm3_CD_DD;
 
             if (dRij < r2f) {
                 double dpesi[9], dpesj[9];
-                const double ET1 =
+                double ET1 =
                     bowman_bits::pes2b(crd + i9, crd + j9, dpesi, dpesj);
 
                 if (dRij < r2i) {
@@ -409,7 +409,7 @@ double bowman::operator()
                     }
                 } else {
                     double g; // ds/dr
-                    const double s = bowman_bits::f_switch(dRij, r2i, r2f, g);
+                    double s = bowman_bits::f_switch(dRij, r2i, r2f, g);
 
                     g *= (Ettm3 - ET1)/dRij;
 
@@ -439,10 +439,10 @@ double bowman::operator()
 
     double E3b(0);
     for (size_t a = 0; a < nw; ++a) {
-        const size_t a9 = 9*a;
+        size_t a9 = 9*a;
 
         for (size_t b = a + 1; b < nw; ++b) {
-            const size_t b9 = 9*b;
+            size_t b9 = 9*b;
 
             double Rab[3], dRab(0);
             for (size_t k = 0; k < 3; ++k) {
@@ -459,7 +459,7 @@ double bowman::operator()
                 continue;
 
             for (size_t c = b + 1; c < nw; ++c) {
-                const size_t c9 = 9*c;
+                size_t c9 = 9*c;
 
                 double Rac[3], dRac(0);
                 double Rbc[3], dRbc(0);
@@ -473,11 +473,11 @@ double bowman::operator()
                 dRac = std::sqrt(dRac);
                 dRbc = std::sqrt(dRbc);
 
-                const double rmax = std::max(dRab, std::max(dRac, dRbc));
+                double rmax = std::max(dRab, std::max(dRac, dRbc));
 
                 if (rmax < r3f) {
                     double dpesa[9], dpesb[9], dpesc[9];
-                    const double E3 =
+                    double E3 =
                         bowman_bits::pes3b(crd + a9, crd + b9, crd + c9,
                                            dpesa, dpesb, dpesc);
 
@@ -490,7 +490,7 @@ double bowman::operator()
                         }
                     } else {
                         double g;
-                        const double s =
+                        double s =
                             bowman_bits::f_switch(rmax, r3i, r3f, g);
 
                         E3b += E3*(1.0 - s);
@@ -538,16 +538,16 @@ double bowman::operator()
     ttm3f_bits::U_coul_CD_DD(nw, crd, msite, charge, scratch, ENb, grdq, grad);
 
     for (size_t a = 0; a < nw; ++a) {
-        const size_t a3 = 3*a;
-        const size_t a9 = 3*a3;
+        size_t a3 = 3*a;
+        size_t a9 = 3*a3;
 
         for (size_t b = a + 1; b < nw; ++b) {
-            const size_t b3 = 3*b;
-            const size_t b9 = 3*b3;
+            size_t b3 = 3*b;
+            size_t b9 = 3*b3;
 
             for (size_t c = b + 1; c < nw; ++c) {
-                const size_t c3 = 3*c;
-                const size_t c9 = 3*c3;
+                size_t c3 = 3*c;
+                size_t c9 = 3*c3;
 
                 double crd3[27], msite3[9], charge3[9];
                 double Eind, grdq3[3*27], grad3[27];

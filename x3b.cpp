@@ -5537,7 +5537,7 @@ inline double distance(const double* p1, const double* p2)
     double result(0);
 
     for (int k = 0; k < 3; ++k) {
-        const double delta = p1[k] - p2[k];
+        double delta = p1[k] - p2[k];
         result += delta*delta;
     }
 
@@ -5558,15 +5558,15 @@ void gmorse(const double& g, const double& k, const double& r0,
             const double* a1, const double* a2,
                   double* g1,       double* g2)
 {
-    const double r12[3] = {a1[0] - a2[0],
+    double r12[3] = {a1[0] - a2[0],
                            a1[1] - a2[1],
                            a1[2] - a2[2]};
 
-    const double r12sq = r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2];
-    const double r = std::sqrt(r12sq);
+    double r12sq = r12[0]*r12[0] + r12[1]*r12[1] + r12[2]*r12[2];
+    double r = std::sqrt(r12sq);
 
-    const double x = k*(r - r0);
-    const double gg = g*k*std::exp(-x)/r;
+    double x = k*(r - r0);
+    double gg = g*k*std::exp(-x)/r;
 
     for (int n = 0; n < 3; ++n) {
         g1[n] -= gg*r12[n];
@@ -5599,8 +5599,8 @@ double x3b::f_switch3(const double& r, double& g) const
         g = 0.0;
         return 0.0;
     } else if (r > m_r3i) {
-        const double t1 = 1.0/(m_r3f - m_r3i);
-        const double x = (r - m_r3i)*t1;
+        double t1 = 1.0/(m_r3f - m_r3i);
+        double x = (r - m_r3i)*t1;
         g = 6*x*(x - 1.0)*t1;
         return 1 + x*x*(2*x - 3.0);
     } else {
@@ -5625,17 +5625,17 @@ double x3b::operator()
     (const double* w1, const double* w2, const double* w3,
            double* g1,       double* g2,       double* g3) const
 {
-    const double* Oa  = w1;
-    const double* Ha1 = w1 + 3;
-    const double* Ha2 = w1 + 6;
+    double* Oa  = w1;
+    double* Ha1 = w1 + 3;
+    double* Ha2 = w1 + 6;
 
-    const double* Ob  = w2;
-    const double* Hb1 = w2 + 3;
-    const double* Hb2 = w2 + 6;
+    double* Ob  = w2;
+    double* Hb1 = w2 + 3;
+    double* Hb2 = w2 + 6;
 
-    const double* Oc  = w3;
-    const double* Hc1 = w3 + 3;
-    const double* Hc2 = w3 + 6;
+    double* Oc  = w3;
+    double* Hc1 = w3 + 3;
+    double* Hc2 = w3 + 6;
 
     double x[27];
 
@@ -5690,11 +5690,11 @@ double x3b::operator()
 
     double gab, gac, gbc;
 
-    const double sab = f_switch3(drab, gab);
-    const double sac = f_switch3(drac, gac);
-    const double sbc = f_switch3(drbc, gbc);
+    double sab = f_switch3(drab, gab);
+    double sac = f_switch3(drac, gac);
+    double sbc = f_switch3(drbc, gbc);
 
-    const double s = sab*sac + sab*sbc + sac*sbc;
+    double s = sab*sac + sab*sbc + sac*sbc;
 
     if (g1 == 0 || g2 == 0 || g3 == 0)
         return retval*s;

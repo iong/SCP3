@@ -24,9 +24,9 @@ namespace {
 inline double dist(const double* RESTRICT x1,
                    const double* RESTRICT x2)
 {
-    const double d1 = x1[0] - x2[0];
-    const double d2 = x1[1] - x2[1];
-    const double d3 = x1[2] - x2[2];
+    double d1 = x1[0] - x2[0];
+    double d2 = x1[1] - x2[1];
+    double d3 = x1[2] - x2[2];
 
     return std::sqrt(d1*d1 + d2*d2 + d3*d3);
 }
@@ -58,7 +58,9 @@ ttm4_hbb2_x3b::~ttm4_hbb2_x3b()
 
 void ttm4_hbb2_x3b::load(const char* filename)
 {
+#pragma omp critical {
     m_x3b.load(filename);
+}
     m_name = "TTM4+HBB2+X3B (";
     m_name += filename;
     m_name += ")";
@@ -79,15 +81,15 @@ double ttm4_hbb2_x3b::operator()
 
     double E2b(0), U2b_ind(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
-            const size_t j9 = 3*j3;
+            size_t j3 = 3*j;
+            size_t j9 = 3*j3;
 
             // O-O distance
-            const double dRij = dist(crd + i9, crd + j9);
+            double dRij = dist(crd + i9, crd + j9);
 
             double dimer[18];
             std::copy(crd + i9, crd + i9 + 9, dimer);
@@ -98,16 +100,16 @@ double ttm4_hbb2_x3b::operator()
 
             if (dRij < r2f) {
 #               ifdef DISABLE_HBB2
-                const double ET1 = 0.0;
+                double ET1 = 0.0;
 #               else
-                const double ET1 = bowman_bits::pes2b(crd + i9, crd + j9);
+                double ET1 = bowman_bits::pes2b(crd + i9, crd + j9);
 #               endif // DISABLE_HBB2
 
                 if (dRij < r2i) {
                     E2b += ET1;
                     U2b_ind += Ettm4_ind;
                 } else {
-                    const double s = bowman_bits::f_switch(dRij, r2i, r2f);
+                    double s = bowman_bits::f_switch(dRij, r2i, r2f);
                     E2b += (1.0 - s)*ET1 + s*Ettm4_elec;
                     U2b_ind += (1.0 - s)*Ettm4_ind;
                 }
@@ -121,12 +123,12 @@ double ttm4_hbb2_x3b::operator()
 
     double E3b(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i9 = 9*i;
+        size_t i9 = 9*i;
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j9 = 9*j;
+            size_t j9 = 9*j;
             for (size_t k = j + 1; k < nw; ++k) {
-                const size_t k9 = 9*k;
-                const double E3 = m_x3b(crd + i9, crd + j9, crd + k9, 0, 0, 0);
+                size_t k9 = 9*k;
+                double E3 = m_x3b(crd + i9, crd + j9, crd + k9, 0, 0, 0);
                 E3b += E3;
             }
         }
@@ -159,7 +161,7 @@ double ttm4_hbb2_x3b::operator()
 
     E1b = 0.0;
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i9 = 9*i;
+        size_t i9 = 9*i;
         double ps_grad[9];
         E1b += ps::pot_nasa(crd + i9, ps_grad);
         for (size_t k = 0; k < 9; ++k)
@@ -170,12 +172,12 @@ double ttm4_hbb2_x3b::operator()
 
     double E2b(0), U2b_ind(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i3 = 3*i;
-        const size_t i9 = 3*i3;
+        size_t i3 = 3*i;
+        size_t i9 = 3*i3;
 
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j3 = 3*j;
-            const size_t j9 = 3*j3;
+            size_t j3 = 3*j;
+            size_t j9 = 3*j3;
 
             // O-O distance
             double Rij[3], dRij(0);
@@ -197,11 +199,11 @@ double ttm4_hbb2_x3b::operator()
             if (dRij < r2f) {
                 double dpesi[9], dpesj[9];
 #               ifdef DISABLE_HBB2
-                const double ET1 = 0.0;
+                double ET1 = 0.0;
                 for (size_t k = 0; k < 9; ++k)
                     dpesi[k] = dpesj[k] = 0.0;
 #               else
-                const double ET1 =
+                double ET1 =
                     bowman_bits::pes2b(crd + i9, crd + j9, dpesi, dpesj);
 #               endif // DISABLE_HBB2
 
@@ -220,7 +222,7 @@ double ttm4_hbb2_x3b::operator()
                     }
                 } else {
                     double g;
-                    const double s = bowman_bits::f_switch(dRij, r2i, r2f, g);
+                    double s = bowman_bits::f_switch(dRij, r2i, r2f, g);
                     E2b += (1.0 - s)*ET1 + s*Ettm4_elec;
                     U2b_ind += (1.0 - s)*Ettm4_ind;
 
@@ -252,20 +254,20 @@ double ttm4_hbb2_x3b::operator()
 
     double E3b(0);
     for (size_t i = 0; i < nw; ++i) {
-        const size_t i9 = 9*i;
+        size_t i9 = 9*i;
         for (size_t j = i + 1; j < nw; ++j) {
-            const size_t j9 = 9*j;
+            size_t j9 = 9*j;
             for (size_t k = j + 1; k < nw; ++k) {
-                const size_t k9 = 9*k;
+                size_t k9 = 9*k;
 
                 double d3bi[9], d3bj[9], d3bk[9];
 
 #               ifdef DISABLE_X3B
-                const double E3 = 0.0;
+                double E3 = 0.0;
                 for (size_t a = 0; a < 9; ++a)
                     d3bi[a] = d3bj[a] = d3bk[a] = 0.0;
 #               else
-                const double E3 = m_x3b(crd + i9, crd + j9, crd + k9,
+                double E3 = m_x3b(crd + i9, crd + j9, crd + k9,
                                         d3bi, d3bj, d3bk);
 #               endif // DISABLE_X3B
 
