@@ -123,7 +123,6 @@ int main (int argc, char *  argv[])
         
     SCP1 scp1(mass, h2o_pes, NSobol, !H.is_empty());
     double F0 = scp1(x0, 0.0, H, max_iterations);
-    double F0 = scp1(x0, 0.0, H);
     
     cout << "F0 = " << F0 << endl;
 
