@@ -34,6 +34,7 @@ static struct option program_options[] = {
     { "skip", required_argument, NULL, 'S'} ,
     { "rng-file", required_argument, NULL, 'r'} ,
     { "PES", required_argument, NULL, 'p'},
+    { "max-itertions", required_argument, NULL, 'L'},
     {NULL, 0, NULL, 0}
 };
 
@@ -44,10 +45,7 @@ static string input_file;
 
 static ifstream rng_in;
 
-static int proc_id = 0;
-static int nb_proc = 1;
-
-static int block_width = 1;
+static int max_iterations=200;
 
 string  h2o_pes("qtip4pf");
 
@@ -55,7 +53,7 @@ string  h2o_pes("qtip4pf");
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:r:p:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:r:p:L:", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -79,6 +77,9 @@ void process_options(int argc,  char *  argv[])
                 break;
             case 'p':
                 h2o_pes = optarg;
+                break;
+            case 'L':
+                max_iterations = atoi(optarg);
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;

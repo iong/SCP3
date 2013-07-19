@@ -96,7 +96,7 @@ public:
     
     
     
-    double operator()(vec& q, double kT, mat& Ks);
+    double operator()(vec& q, double kT, mat& Ks, int max_iterations=200);
 };
 
 #endif /* defined(__SCP3__SCP1__) */

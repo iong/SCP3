@@ -86,7 +86,7 @@ double SCP1::average(const vec& q, const vec& d, const mat& isqrtM_U, vec& UX, m
 }
 
 
-double SCP1::operator()(vec& q, double kT, mat& Ks)
+double SCP1::operator()(vec& q, double kT, mat& Ks, int max_iterations)
 {
     double Upot, F;
     mat U;
@@ -110,7 +110,7 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
     isqrtM_U.each_col()  /= sqrt(mass);
 
     bool finished = false;
-    for (int niter = 0; niter < 200; niter++) {
+    for (int niter = 0; niter < max_iterations; niter++) {
         vec d_old = d;
         vec q_old = q;
  
