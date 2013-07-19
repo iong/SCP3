@@ -132,10 +132,17 @@ double SCP1::operator()(vec& q, double kT, mat& Ks, int max_iterations)
                 KD.col(i).fill(0.0);
             }
         }
+        mat Ks_old = Ks;
         Ks = KD * U.t();
         
         KD = Ks + Ks.t();
-        Ks = 0.5 * KD;
+
+        if (niter < min(50, max_iterations) ) {
+            Ks = 0.5*KD;
+        }
+        else {
+            Ks = 0.5*Ks_old + 0.5*0.5 * KD;
+        }
 
         regtransrot(transrotBasis(q, mass), Ks);
 
