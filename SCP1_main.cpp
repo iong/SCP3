@@ -118,7 +118,6 @@ int main (int argc, char *  argv[])
     vec mass, x0;
 
     load_from_vladimir(input_file, mass, x0, H);
-    cout << H.n_elem << endl;
     OHHOHH(mass, x0, H);
         
     SCP1 scp1(mass, h2o_pes, NSobol, !H.is_empty());
