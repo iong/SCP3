@@ -117,9 +117,9 @@ save_for_vladimir(const string &name, double F, vec& x0, mat& H)
         << "Free energy = " << F << endl;
     
     for (int i=0; i<x0.n_rows; i += 9) {
-        fout << "O " << x0.subvec(9*i  , 9*i+2).t()*bohr;
-        fout << "H " << x0.subvec(9*i+3, 9*i+5).t()*bohr;
-        fout << "H " << x0.subvec(9*i+6, 9*i+8).t()*bohr;
+        fout << "O " << x0.subvec(i  , i+2).t()*bohr;
+        fout << "H " << x0.subvec(i+3, i+5).t()*bohr;
+        fout << "H " << x0.subvec(i+6, i+8).t()*bohr;
     }
     
     for (int i=0; i < H.n_cols; i++) {
