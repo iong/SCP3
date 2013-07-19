@@ -92,12 +92,15 @@ double SCP1::operator()(vec& q, double kT, mat& Ks)
     mat U;
     vec omega, omegasq, d, UX;
 
-    h2o::PES *pot = getPES();
-    getHessian(*pot, q, 1e-3, Ks);
-    delete pot;
+    if (Ks.is_empty()) {
+        h2o::PES *pot = getPES();
+        getHessian(*pot, q, 1e-3, Ks);
+        delete pot;
+
+        massScaleHessian(mass, Ks);
+        regtransrot(transrotBasis(q, mass), Ks);    
+    }
     
-    massScaleHessian(mass, Ks);
-    regtransrot(transrotBasis(q, mass), Ks);    
 
     eig_sym(omegasq, U, Ks);
     omega = sqrt(abs(omegasq));

@@ -116,13 +116,12 @@ int main (int argc, char *  argv[])
     mat H;
     vec mass, x0;
 
-    //load_from_vladimir(input_file, N, mass, x0, H);
-    //OHHOHH(mass, x0, H);
-    load_xyz(input_file, mass, x0);
-    OHHOHH(mass, x0);
-    x0 /= bohr;
+    load_from_vladimir(input_file, mass, x0, H);
+    cout << H.n_elem << endl;
+    OHHOHH(mass, x0, H);
         
-    SCP1 scp1(mass, h2o_pes, NSobol);
+    SCP1 scp1(mass, h2o_pes, NSobol, !H.is_empty());
+    double F0 = scp1(x0, 0.0, H, max_iterations);
     double F0 = scp1(x0, 0.0, H);
     
     cout << "F0 = " << F0 << endl;

@@ -43,7 +43,8 @@ class SCP1 {
         return h2o::PESFromString(PES_name);
     }
 public:
-    SCP1(const vec& mass_, const string& PES_name_, long long NSobol_) :
+    SCP1(const vec& mass_, const string& PES_name_, long long NSobol_,
+            bool append=false) :
         mass(mass_),
         PES_name(PES_name_),
         NSobol(NSobol_)
@@ -59,8 +60,9 @@ public:
         nprocs = MPI::COMM_WORLD.Get_size();
         
         if (rank == 0) {
-            omega_out.open("omega_scp1.dat");
-            free_energy_out.open("free_energy.dat");
+            ios_base::openmode mode = (append)?ios_base::app : ios_base::trunc;
+            omega_out.open("omega_scp1.dat", mode);
+            free_energy_out.open("free_energy.dat", mode);
         }
     }
     

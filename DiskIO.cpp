@@ -76,7 +76,6 @@ load_from_vladimir(string &name, vec &mass, vec& x0, mat& H)
     
     mass.resize(3*N);
     x0.resize(3*N);
-    H.resize(3*N, 3*N);
     
     char skipbuf[256];
     fin.getline(skipbuf, sizeof(skipbuf));
@@ -90,14 +89,21 @@ load_from_vladimir(string &name, vec &mass, vec& x0, mat& H)
         fin >> x0[3*i] >> x0[3*i+1] >> x0[3*i+2];
     }
     x0 /= bohr;
+
+    H.set_size(3*N, 3*N);
     
     for (int i=0; i < 3*N; i++) {
         for (int j=0; j <= i; j++) {
             fin >> H(j, i);
+            if (!fin.good())
+            {
+                H.reset();
+                goto done;
+            }
             H(i, j) = H(j, i);
         }
     }
-    
+done: 
     fin.close();
 }
 
@@ -172,8 +178,10 @@ uvec OHHOHH(vec& mass, vec& r, mat& H)
 {  
     uvec p = OHHOHH(mass, r);
     
-    mat H_tmp = H.cols(p);
-    H = H_tmp.rows(p);
+    if (!H.is_empty()) {
+        mat H_tmp = H.cols(p);
+        H = H_tmp.rows(p);
+    }
     
     return p;
 }
