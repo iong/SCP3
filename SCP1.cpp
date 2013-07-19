@@ -165,17 +165,12 @@ double SCP1::operator()(vec& q, double kT, mat& Ks, int max_iterations)
         if (rank == 0) {
             omega_out << omega.t();
             free_energy_out << F << endl;
+            save_for_vladimir("coord.xyz", F, q, Ks);
 
             cout << "iter: " << niter << endl;
         }
     }
     if (rank == 0) {
-        omega_out << endl;
-        save_for_vladimir("coord.xyz", F, q, Ks);
-    
-        omega.shed_rows(0, 5);
-        
-
         cout << "omega = " << omega.t()*autocm << endl;
         cout << "<U> = " << Upot << endl;
         cout << "<UX> = " << UX.t() << endl;
