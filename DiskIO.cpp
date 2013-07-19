@@ -67,8 +67,9 @@ load_xyz(string &name, vec &mass, vec& x0)
 
 
 void
-load_from_vladimir(string &name, int &N, vec &mass, vec& x0, mat& H)
+load_from_vladimir(string &name, vec &mass, vec& x0, mat& H)
 {
+    int N;
     ifstream fin(name.c_str());
     
     fin >> N;
