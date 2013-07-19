@@ -100,7 +100,7 @@ void process_options(int argc,  char *  argv[])
 
 int main (int argc, char *  argv[])
 {
-    MPI_Init(&argc, &argv);
+    MPI::Init(argc, argv);
 
     process_options(argc, argv);
 
@@ -127,5 +127,5 @@ int main (int argc, char *  argv[])
     
     cout << "F0 = " << F0 << endl;
 
-    MPI_Finalize();
+    MPI::Finalize();
 }

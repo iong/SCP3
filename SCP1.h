@@ -55,8 +55,8 @@ public:
         sobol_skip = 1 << ((int)floor(log2((float)NSobol)) + 1);
         //sobol_skip = 1000;
         //
-        MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-        MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
+        rank = MPI::COMM_WORLD.Get_rank();
+        nprocs = MPI::COMM_WORLD.Get_size();
         
         if (rank == 0) {
             omega_out.open("omega_scp1.dat");
