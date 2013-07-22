@@ -138,7 +138,7 @@ double SCP1::operator()(vec& q, double kT, mat& Ks, int max_iterations)
         KD = Ks + Ks.t();
 
         if (niter < min(50, max_iterations) ) {
-            Ks = 0.5*KD;
+            Ks = 0.5*Ks_old + 0.5*0.5 * KD;
         }
         else {
             Ks = 0.5*Ks_old + 0.5*0.5 * KD;
