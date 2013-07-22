@@ -16,9 +16,11 @@
 
 #include <getopt.h>
 
+/*
 #ifdef OPENMP
 #include <omp.h>
 #endif
+*/
 
 #include <armadillo>
 
@@ -29,18 +31,7 @@
 
 #include "sobol.hpp"
 
-#include "qtip4pf.h"
-#include "ttm3f.h"
-
-#include "SCP1.h"
-
-#ifdef HAVE_BOWMAN
-#include "bowman-fortran.h"
-#include "bowman.h"
-#include "ps.h"
-#endif
-
-
+#include "h2o.h"
 
 using namespace std;
 using namespace arma;
@@ -242,15 +233,15 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
 
         by /=  sqrt(2.0);
 
-#pragma omp parallel
+//#pragma omp parallel
         {
-#ifdef OPENMP
-            omp_set_nested(false);
-#endif
+//#ifdef OPENMP
+//            omp_set_nested(false);
+//#endif
 
             h2o::PES *pot = h2o::PESFromString(h2o_pes);
 
-#pragma omp for schedule(static)
+//#pragma omp for schedule(static)
             for (int j = 0; j < block_width; j++) {
                 double V;
 
@@ -274,15 +265,16 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
 
             delete pot;
         }
+
+        cout << "finished pot eval\n";
             
-/*
         if (use_gradient) {
             sme.addEpot(by.rows(modes), bV, bVy.rows(modes), M);
         }
         else {
             sme.addEpot(by.rows(modes), bV, M);
         }
-*/
+
         if ( (i+block_width)%(1<<14)==0) {
             mat Mout = M / (i+block_width - seq_start);
             sme.addHODiagonal(Mout);
@@ -341,20 +333,11 @@ int main (int argc, char *  argv[]) {
     mat H;
     vec mass, x0;
 
-    //load_from_vladimir(input_file, N, mass, x0, H);
-    //OHHOHH(mass, x0, H);
-    load_xyz(input_file, mass, x0);
-    OHHOHH(mass, x0);
+    load_from_vladimir(input_file, mass, x0, H);
+    OHHOHH(mass, x0, H);
     x0 /= bohr;
 
         
-    SCP1 scp1(mass, h2o_pes, NSobol);
-    double F0 = scp1(x0, 0.0, H);
-    
-    cout << "F0 = " << F0 << endl;
-                     
-    exit(EXIT_SUCCESS);
-    
     vec omegasq0;
     mat U;
     eig_sym(omegasq0, U, H);
