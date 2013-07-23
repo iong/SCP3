@@ -72,7 +72,7 @@ SCP3: SCP3.o Hessian.o ScaledMatrixElements.o \
 SCP1: SCP1_main.o SCP1.o Hessian.o \
 	DiskIO.o sobol.o Constants.o beasley_springer_moro.o \
 	$(X2O_OBJ)
-	$(CXX) -o $@ $(CXXFLAGS) $(OPENMP_FLAGS) $^ $(LDFLAGS) $(LIBS)
+	$(CXX) -o $@ $(CXXFLAGS) $^ $(LDFLAGS) $(LIBS)
 
 
 TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
