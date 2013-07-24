@@ -344,7 +344,6 @@ int main (int argc, char *  argv[])
 
     load_from_vladimir(input_file, mass, x0, H);
     OHHOHH(mass, x0, H);
-    x0 /= bohr;
 
         
     vec omegasq0;
