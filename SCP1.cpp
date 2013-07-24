@@ -151,7 +151,8 @@ double SCP1::operator()(vec& q, double kT, mat& Ks, int max_iterations)
         isqrtM_U.each_col()  /= sqrt(mass);
         
         omega = sqrt(abs(omegasq));
-        //omega(omegasq < -1.0/(autocm*autocm)).fill(omega_cutoff);
+        //omega((omega > 1.0/autocm) % (omega < omega_cutoff)).fill(omega_cutoff);
+        omega(find(omegasq < -1.0/(autocm*autocm))).fill(omega_cutoff);
         
         
         d = disp_disp_corr_diag(omega, kT);
