@@ -5595,12 +5595,12 @@ namespace h2o {
 
 double x3b::f_switch3(const double& r, double& g) const
 {
-    if (r > x3b_bits::r3f) {
+    if (r > m_r3f) {
         g = 0.0;
         return 0.0;
-    } else if (r > x3b_bits::r3i) {
-        const double t1 = 1.0/(x3b_bits::r3f - x3b_bits::r3i);
-        const double x = (r - x3b_bits::r3i)*t1;
+    } else if (r > m_r3i) {
+        const double t1 = 1.0/(m_r3f - m_r3i);
+        const double x = (r - m_r3i)*t1;
         g = 6*x*(x - 1.0)*t1;
         return 1 + x*x*(2*x - 3.0);
     } else {
@@ -5612,11 +5612,11 @@ double x3b::f_switch3(const double& r, double& g) const
 //----------------------------------------------------------------------------//
 
 x3b::x3b()
+: m_kOO(1.0e+3), m_kOH(1.0e+3), m_kHH(1.0e+3),
+  m_r0_OO(0), m_r0_OH(0), m_r0_HH(0),
+  m_r3i(1.0e+3), m_r3f(1.0e+4)
 {
-    if (!x3b_bits::initialized) {
-        std::cerr << "x3b_bits::load() was not called.\n";
-        std::exit(EXIT_FAILURE);
-    }
+    std::fill(m_coeffs, m_coeffs + ncoeffs, 0.0);
 }
 
 //----------------------------------------------------------------------------//
@@ -5639,36 +5639,36 @@ double x3b::operator()
 
     double x[27];
 
-    x[0] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hb1);
-    x[1] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hb2);
-    x[2] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hc1);
-    x[3] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hc2);
-    x[4] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hb1);
-    x[5] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hb2);
-    x[6] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hc1);
-    x[7] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hc2);
-    x[8] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Hb1, Hc1);
-    x[9] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Hb1, Hc2);
-    x[10] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Hb2, Hc1);
-    x[11] = morse(x3b_bits::kHH, x3b_bits::r0_HH, Hb2, Hc2);
-    x[12] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hb1);
-    x[13] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hb2);
-    x[14] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hc1);
-    x[15] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hc2);
-    x[16] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Ob, Ha1);
-    x[17] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Ob, Ha2);
-    x[18] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Ob, Hc1);
-    x[19] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Ob, Hc2);
-    x[20] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oc, Ha1);
-    x[21] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oc, Ha2);
-    x[22] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oc, Hb1);
-    x[23] = morse(x3b_bits::kOH, x3b_bits::r0_OH, Oc, Hb2);
-    x[24] = morse(x3b_bits::kOO, x3b_bits::r0_OO, Oa, Ob);
-    x[25] = morse(x3b_bits::kOO, x3b_bits::r0_OO, Oa, Oc);
-    x[26] = morse(x3b_bits::kOO, x3b_bits::r0_OO, Ob, Oc);
+    x[0] = morse(m_kHH, m_r0_HH, Ha1, Hb1);
+    x[1] = morse(m_kHH, m_r0_HH, Ha1, Hb2);
+    x[2] = morse(m_kHH, m_r0_HH, Ha1, Hc1);
+    x[3] = morse(m_kHH, m_r0_HH, Ha1, Hc2);
+    x[4] = morse(m_kHH, m_r0_HH, Ha2, Hb1);
+    x[5] = morse(m_kHH, m_r0_HH, Ha2, Hb2);
+    x[6] = morse(m_kHH, m_r0_HH, Ha2, Hc1);
+    x[7] = morse(m_kHH, m_r0_HH, Ha2, Hc2);
+    x[8] = morse(m_kHH, m_r0_HH, Hb1, Hc1);
+    x[9] = morse(m_kHH, m_r0_HH, Hb1, Hc2);
+    x[10] = morse(m_kHH, m_r0_HH, Hb2, Hc1);
+    x[11] = morse(m_kHH, m_r0_HH, Hb2, Hc2);
+    x[12] = morse(m_kOH, m_r0_OH, Oa, Hb1);
+    x[13] = morse(m_kOH, m_r0_OH, Oa, Hb2);
+    x[14] = morse(m_kOH, m_r0_OH, Oa, Hc1);
+    x[15] = morse(m_kOH, m_r0_OH, Oa, Hc2);
+    x[16] = morse(m_kOH, m_r0_OH, Ob, Ha1);
+    x[17] = morse(m_kOH, m_r0_OH, Ob, Ha2);
+    x[18] = morse(m_kOH, m_r0_OH, Ob, Hc1);
+    x[19] = morse(m_kOH, m_r0_OH, Ob, Hc2);
+    x[20] = morse(m_kOH, m_r0_OH, Oc, Ha1);
+    x[21] = morse(m_kOH, m_r0_OH, Oc, Ha2);
+    x[22] = morse(m_kOH, m_r0_OH, Oc, Hb1);
+    x[23] = morse(m_kOH, m_r0_OH, Oc, Hb2);
+    x[24] = morse(m_kOO, m_r0_OO, Oa, Ob);
+    x[25] = morse(m_kOO, m_r0_OO, Oa, Oc);
+    x[26] = morse(m_kOO, m_r0_OO, Ob, Oc);
 
     double g[27];
-    double retval = evpolyg(x3b_bits::coeffs, x, g);
+    double retval = evpolyg(m_coeffs, x, g);
 
     double rab[3], rac[3], rbc[3];
     double drab(0), drac(0), drbc(0);
@@ -5717,33 +5717,33 @@ double x3b::operator()
     double* gHc1 = g3 + 3;
     double* gHc2 = g3 + 6;
 
-    gmorse(g[0],  x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hb1, gHa1, gHb1);
-    gmorse(g[1],  x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hb2, gHa1, gHb2);
-    gmorse(g[2],  x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hc1, gHa1, gHc1);
-    gmorse(g[3],  x3b_bits::kHH, x3b_bits::r0_HH, Ha1, Hc2, gHa1, gHc2);
-    gmorse(g[4],  x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hb1, gHa2, gHb1);
-    gmorse(g[5],  x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hb2, gHa2, gHb2);
-    gmorse(g[6],  x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hc1, gHa2, gHc1);
-    gmorse(g[7],  x3b_bits::kHH, x3b_bits::r0_HH, Ha2, Hc2, gHa2, gHc2);
-    gmorse(g[8],  x3b_bits::kHH, x3b_bits::r0_HH, Hb1, Hc1, gHb1, gHc1);
-    gmorse(g[9],  x3b_bits::kHH, x3b_bits::r0_HH, Hb1, Hc2, gHb1, gHc2);
-    gmorse(g[10], x3b_bits::kHH, x3b_bits::r0_HH, Hb2, Hc1, gHb2, gHc1);
-    gmorse(g[11], x3b_bits::kHH, x3b_bits::r0_HH, Hb2, Hc2, gHb2, gHc2);
-    gmorse(g[12], x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hb1, gOa, gHb1);
-    gmorse(g[13], x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hb2, gOa, gHb2);
-    gmorse(g[14], x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hc1, gOa, gHc1);
-    gmorse(g[15], x3b_bits::kOH, x3b_bits::r0_OH, Oa, Hc2, gOa, gHc2);
-    gmorse(g[16], x3b_bits::kOH, x3b_bits::r0_OH, Ob, Ha1, gOb, gHa1);
-    gmorse(g[17], x3b_bits::kOH, x3b_bits::r0_OH, Ob, Ha2, gOb, gHa2);
-    gmorse(g[18], x3b_bits::kOH, x3b_bits::r0_OH, Ob, Hc1, gOb, gHc1);
-    gmorse(g[19], x3b_bits::kOH, x3b_bits::r0_OH, Ob, Hc2, gOb, gHc2);
-    gmorse(g[20], x3b_bits::kOH, x3b_bits::r0_OH, Oc, Ha1, gOc, gHa1);
-    gmorse(g[21], x3b_bits::kOH, x3b_bits::r0_OH, Oc, Ha2, gOc, gHa2);
-    gmorse(g[22], x3b_bits::kOH, x3b_bits::r0_OH, Oc, Hb1, gOc, gHb1);
-    gmorse(g[23], x3b_bits::kOH, x3b_bits::r0_OH, Oc, Hb2, gOc, gHb2);
-    gmorse(g[24], x3b_bits::kOO, x3b_bits::r0_OO, Oa, Ob, gOa, gOb);
-    gmorse(g[25], x3b_bits::kOO, x3b_bits::r0_OO, Oa, Oc, gOa, gOc);
-    gmorse(g[26], x3b_bits::kOO, x3b_bits::r0_OO, Ob, Oc, gOb, gOc);
+    gmorse(g[0],  m_kHH, m_r0_HH, Ha1, Hb1, gHa1, gHb1);
+    gmorse(g[1],  m_kHH, m_r0_HH, Ha1, Hb2, gHa1, gHb2);
+    gmorse(g[2],  m_kHH, m_r0_HH, Ha1, Hc1, gHa1, gHc1);
+    gmorse(g[3],  m_kHH, m_r0_HH, Ha1, Hc2, gHa1, gHc2);
+    gmorse(g[4],  m_kHH, m_r0_HH, Ha2, Hb1, gHa2, gHb1);
+    gmorse(g[5],  m_kHH, m_r0_HH, Ha2, Hb2, gHa2, gHb2);
+    gmorse(g[6],  m_kHH, m_r0_HH, Ha2, Hc1, gHa2, gHc1);
+    gmorse(g[7],  m_kHH, m_r0_HH, Ha2, Hc2, gHa2, gHc2);
+    gmorse(g[8],  m_kHH, m_r0_HH, Hb1, Hc1, gHb1, gHc1);
+    gmorse(g[9],  m_kHH, m_r0_HH, Hb1, Hc2, gHb1, gHc2);
+    gmorse(g[10], m_kHH, m_r0_HH, Hb2, Hc1, gHb2, gHc1);
+    gmorse(g[11], m_kHH, m_r0_HH, Hb2, Hc2, gHb2, gHc2);
+    gmorse(g[12], m_kOH, m_r0_OH, Oa, Hb1, gOa, gHb1);
+    gmorse(g[13], m_kOH, m_r0_OH, Oa, Hb2, gOa, gHb2);
+    gmorse(g[14], m_kOH, m_r0_OH, Oa, Hc1, gOa, gHc1);
+    gmorse(g[15], m_kOH, m_r0_OH, Oa, Hc2, gOa, gHc2);
+    gmorse(g[16], m_kOH, m_r0_OH, Ob, Ha1, gOb, gHa1);
+    gmorse(g[17], m_kOH, m_r0_OH, Ob, Ha2, gOb, gHa2);
+    gmorse(g[18], m_kOH, m_r0_OH, Ob, Hc1, gOb, gHc1);
+    gmorse(g[19], m_kOH, m_r0_OH, Ob, Hc2, gOb, gHc2);
+    gmorse(g[20], m_kOH, m_r0_OH, Oc, Ha1, gOc, gHa1);
+    gmorse(g[21], m_kOH, m_r0_OH, Oc, Ha2, gOc, gHa2);
+    gmorse(g[22], m_kOH, m_r0_OH, Oc, Hb1, gOc, gHb1);
+    gmorse(g[23], m_kOH, m_r0_OH, Oc, Hb2, gOc, gHb2);
+    gmorse(g[24], m_kOO, m_r0_OO, Oa, Ob, gOa, gOb);
+    gmorse(g[25], m_kOO, m_r0_OO, Oa, Oc, gOa, gOc);
+    gmorse(g[26], m_kOO, m_r0_OO, Ob, Oc, gOb, gOc);
 
     // gradients of the switching function
 
@@ -5764,53 +5764,36 @@ double x3b::operator()
 
 //----------------------------------------------------------------------------//
 
-namespace x3b_bits {
-    double kOO = 1.0e+3;
-    double kOH = 1.0e+3;
-    double kHH = 1.0e+3;
-    double r0_OO = 0;
-    double r0_OH = 0;
-    double r0_HH = 0;
-    double r3i = 1.0e+3;
-    double r3f = 1.0e+4;
-    double coeffs[ncoeffs];
-    bool initialized = false;
-
-void load(const char* filename)
+void x3b::load(const char* filename)
 {
-    if (initialized)
-    {
-        return;
-    }
-
     assert(filename);
 
     int rc, ncid;
     if ((rc = nc_open(filename, NC_NOWRITE, &ncid)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r3i", &r3i)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r3i", &m_r3i)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r3f", &r3f)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r3f", &m_r3f)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r0_OO", &r0_OO)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r0_OO", &m_r0_OO)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r0_OH", &r0_OH)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r0_OH", &m_r0_OH)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r0_HH", &r0_HH)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "r0_HH", &m_r0_HH)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "kOO", &kOO)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "kOO", &m_kOO)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "kOH", &kOH)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "kOH", &m_kOH)))
         error(rc);
 
-    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "kHH", &kHH)))
+    if ((rc = nc_get_att_double(ncid, NC_GLOBAL, "kHH", &m_kHH)))
         error(rc);
 
     int varid;
@@ -5819,14 +5802,12 @@ void load(const char* filename)
         error(rc);
 
     for (size_t n = 0; n < 131; ++n) {
-        if ((rc = nc_get_var1_double(ncid, varid, &n, coeffs + n)))
+        if ((rc = nc_get_var1_double(ncid, varid, &n, m_coeffs + n)))
             error(rc);
     }
 
     if ((rc = nc_close(ncid)))
         error(rc);
-    initialized = true;
-}
 }
 
 //----------------------------------------------------------------------------//

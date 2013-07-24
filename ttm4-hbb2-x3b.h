@@ -16,6 +16,8 @@ public:
     ttm4_hbb2_x3b();
     ~ttm4_hbb2_x3b();
 
+    void load(const char*);
+
     const char* name() const
     {
         return m_name.c_str();

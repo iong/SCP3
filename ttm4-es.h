@@ -15,6 +15,7 @@ struct ttm4_es {
 
     static const double molecular_polarizability; // in A^3
     static const double molecular_dipole; // in D
+
     ttm4_es();
     ~ttm4_es();
 

@@ -483,15 +483,6 @@ static double c5z[245];
 
 namespace ps {
 
-void pot_nasa_init()
-{
-    for (size_t i = 0; i < 245; ++i)
-        c5z[i] = f5z*c5zA[i] + fbasis*cbasis[i] + fcore*ccore[i]
-            + frest*crest[i];
-    c5z_ready = true;
-}
-
-
 double pot_nasa(const double* RESTRICT rr, double* RESTRICT dr)
 {
     double ROH1[3], ROH2[3], RHH[3], dROH1(0), dROH2(0), dRHH(0);
