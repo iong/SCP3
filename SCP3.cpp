@@ -187,42 +187,35 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
     int nw = x0.n_rows / 9;
     
     int local_work = block_width / nprocs;
-    vec bV(local_work), global_bV;
-    mat by(Nmodes0, local_work), global_by,
-        bVy(Nmodes0, local_work), global_bVy; 
+    vec bV(local_work);
+    mat by(Nmodes0, block_width), bVy(Nmodes0, local_work);
+
+    h2o::PES *pot = h2o::PESFromString(h2o_pes);
 
     for (int i = 0; i < NSobol; i += block_width) {
         MPI::COMM_WORLD.Barrier();
 
-        int local_start = i + local_work * myrank;
-        int local_stop = local_start + local_work;
-
         if (rng_in.is_open()) {
-            for (int j=i; j < local_start; j++) {
-                double tmp;
-                for (int k=0; k<Nmodes0; k++) rng_in >> tmp; 
-            }
-            for (int j=0; j < local_work; j++) {
+            for (int j=0; j < block_width; j++) {
                 for (int k=0; k<Nmodes0; k++) {
                     rng_in >> by(k, j);
                 }
             }
         }
         else {
-            for (int j=0; j < local_work; j++) {
-                long long int current_skip = sobol_skip + local_start + j;
-                sobol::std_normal(by.n_rows, &current_skip, by.colptr(j));
+            for (int j=0; j < block_width; j++) {
+                sobol::std_normal(by.n_rows, &sobol_skip, by.colptr(j));
             }
         }
 
         by /=  sqrt(2.0);
 
-        h2o::PES *pot = h2o::PESFromString(h2o_pes);
+        int local_block_offset = local_work * myrank;
 
         for (int j = 0; j < local_work; j++) {
             double V;
 
-            vec r = bohr *(x0 + MUa*by.col(j));
+            vec r = bohr *(x0 + MUa*by.col(j + local_block_offset));
             
             if (use_gradient) {
                 vec Vr(r.n_rows);
@@ -230,46 +223,35 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
                 V = (*pot)(nw, r.memptr(), Vr.memptr()) / autokcalpmol;
                 Vr *= bohr/autokcalpmol;
                 
-                bVy.col(j) = MUa.t() * Vr - omega % by.col(j);
+                bVy.col(j) = MUa.t() * Vr - omega % by.col(j + local_block_offset);
             }
             else {
                 V = (*pot)(nw, r.memptr()) / autokcalpmol;
             }
 
-            bV[j] = V - 0.5 * dot(by.col(j), omega % by.col(j));
+            bV[j] = V - 0.5 * dot(by.col(j + local_block_offset),
+                    omega % by.col(j + local_block_offset));
 
         }
 
-        delete pot;
-
-        if (myrank == 0) {
-            global_bV.zeros(block_width);
-            global_by.zeros(Nmodes0, block_width);
-            global_bVy.zeros(Nmodes0, block_width);
-        }
+        mat global_by(Nmodes0, block_width);
+        mat global_bVy(Nmodes0, block_width);
+        vec global_bV(block_width);
 
         MPI::COMM_WORLD.Gather(bV.memptr(), local_work, MPI::DOUBLE,
                 global_bV.memptr(), local_work, MPI::DOUBLE, 0);
 
         MPI::COMM_WORLD.Gather(
-                by.memptr(), by.n_rows * local_work, MPI::DOUBLE,
-                global_by.memptr(), by.n_rows * local_work, MPI::DOUBLE, 0);
-
-        MPI::COMM_WORLD.Gather(
-                bVy.memptr(), bVy.n_rows * local_work, MPI::DOUBLE,
-                global_bVy.memptr(), bVy.n_rows * local_work, MPI::DOUBLE, 0);
-
+                bVy.memptr(), local_work * bVy.n_rows, MPI::DOUBLE,
+                global_bVy.memptr(), local_work * bVy.n_rows, MPI::DOUBLE, 0);
 
         if (myrank != 0) continue;
 
-        cout << "finished pot eval\n";
-            
         if (use_gradient) {
-            sme.addEpot(global_by.rows(modes), global_bV,
-                    global_bVy.rows(modes), M);
+            sme.addEpot(by.rows(modes), global_bV, global_bVy.rows(modes), M);
         }
         else {
-            sme.addEpot(global_by.rows(modes), global_bV, M);
+            sme.addEpot(by.rows(modes), global_bV, M);
         }
 
         if ( (i+block_width)%(1<<14)==0) {
