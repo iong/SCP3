@@ -16,8 +16,6 @@
 
 #include <getopt.h>
 
-#include <mpi.h>
-
 #include <armadillo>
 
 #include "Constants.h"
@@ -56,9 +54,6 @@ static ifstream rng_in;
 static uvec selected_modes;
 
 static bool use_gradient = true;
-
-static int myrank = 0;
-static int nprocs = 1;
 
 static int block_width = 1024;
 
@@ -171,7 +166,6 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
     
     mat M;
     ofstream E0out_sd, E0out_t;
-    if (myrank ==0) {
         M.zeros(Nstates, Nstates);
         E0out_sd.open("E0_sd.dat");
         E0out_t .open("E0_t.dat" );
@@ -181,20 +175,16 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
         
         fixed(E0out_t);
         E0out_t.precision(10);
-    }
     
  
     int nw = x0.n_rows / 9;
     
-    int local_work = block_width / nprocs;
-    vec bV(local_work);
-    mat by(Nmodes0, block_width), bVy(Nmodes0, local_work);
+    vec bV(block_width);
+    mat by(Nmodes0, block_width), bVy(Nmodes0, block_width);
 
     h2o::PES *pot = h2o::PESFromString(h2o_pes);
 
     for (int i = 0; i < NSobol; i += block_width) {
-        MPI::COMM_WORLD.Barrier();
-
         if (rng_in.is_open()) {
             for (int j=0; j < block_width; j++) {
                 for (int k=0; k<Nmodes0; k++) {
@@ -210,12 +200,10 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
 
         by /=  sqrt(2.0);
 
-        int local_block_offset = local_work * myrank;
-
-        for (int j = 0; j < local_work; j++) {
+        for (int j = 0; j < block_width; j++) {
             double V;
 
-            vec r = bohr *(x0 + MUa*by.col(j + local_block_offset));
+            vec r = bohr *(x0 + MUa*by.col(j));
             
             if (use_gradient) {
                 vec Vr(r.n_rows);
@@ -223,35 +211,22 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
                 V = (*pot)(nw, r.memptr(), Vr.memptr()) / autokcalpmol;
                 Vr *= bohr/autokcalpmol;
                 
-                bVy.col(j) = MUa.t() * Vr - omega % by.col(j + local_block_offset);
+                bVy.col(j) = MUa.t() * Vr - omega % by.col(j);
             }
             else {
                 V = (*pot)(nw, r.memptr()) / autokcalpmol;
             }
 
-            bV[j] = V - 0.5 * dot(by.col(j + local_block_offset),
-                    omega % by.col(j + local_block_offset));
+            bV[j] = V - 0.5 * dot(by.col(j),
+                    omega % by.col(j));
 
         }
-
-        mat global_by(Nmodes0, block_width);
-        mat global_bVy(Nmodes0, block_width);
-        vec global_bV(block_width);
-
-        MPI::COMM_WORLD.Gather(bV.memptr(), local_work, MPI::DOUBLE,
-                global_bV.memptr(), local_work, MPI::DOUBLE, 0);
-
-        MPI::COMM_WORLD.Gather(
-                bVy.memptr(), local_work * bVy.n_rows, MPI::DOUBLE,
-                global_bVy.memptr(), local_work * bVy.n_rows, MPI::DOUBLE, 0);
-
-        if (myrank != 0) continue;
 
         if (use_gradient) {
-            sme.addEpot(by.rows(modes), global_bV, global_bVy.rows(modes), M);
+            sme.addEpot(by.rows(modes), bV, bVy.rows(modes), M);
         }
         else {
-            sme.addEpot(by.rows(modes), global_bV, M);
+            sme.addEpot(by.rows(modes), bV, M);
         }
 
         if ( (i+block_width)%(1<<14)==0) {
@@ -286,8 +261,6 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
         }
     }
 
-    if (myrank != 0) return;
-
     E0out_sd.close();
     E0out_t.close();
     
@@ -298,16 +271,6 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
 
 int main (int argc, char *  argv[])
 {
-    int provided = MPI::Init_thread(argc, argv, MPI::THREAD_FUNNELED);
-
-    if (provided < MPI::THREAD_FUNNELED) {
-        cerr << "Fucked!\n" << provided <<" "<< MPI::THREAD_FUNNELED <<endl;
-        exit(EXIT_FAILURE);
-    }
-
-    myrank   = MPI::COMM_WORLD.Get_rank();
-    nprocs = MPI::COMM_WORLD.Get_size();
-
     process_options(argc, argv);
 
 #ifdef HAVE_BOWMAN
@@ -332,11 +295,9 @@ int main (int argc, char *  argv[])
     mat U;
     eig_sym(omegasq0, U, H);
 
-    if (myrank == 0) {
         ofstream sout("omega0.dat");
         sout << sqrt(abs(omegasq0))*autocm << endl;
         sout.close();
-    }
 
     int N = x0.n_rows / 3;
     if (Nmodes2 == 0) Nmodes2 = 3*N - 6;
@@ -357,6 +318,4 @@ int main (int argc, char *  argv[])
     SCP3_a(h2o_pes, x0, omega, MUa, selected_modes);
     
     rng_in.close();
-
-    MPI::Finalize();
 }
