@@ -35,6 +35,7 @@ static struct option program_options[] = {
     { "rng-file", required_argument, NULL, 'r'} ,
     { "PES", required_argument, NULL, 'p'},
     { "max-itertions", required_argument, NULL, 'L'},
+    { "cutoff", required_argument, NULL, 'c'},
     {NULL, 0, NULL, 0}
 };
 
@@ -46,6 +47,7 @@ static string input_file;
 static ifstream rng_in;
 
 static int max_iterations=200;
+static double omega_cutoff = -1;
 
 string  h2o_pes("qtip4pf");
 
@@ -53,7 +55,7 @@ string  h2o_pes("qtip4pf");
 void process_options(int argc,  char *  argv[])
 {
     int ch;
-    while ( (ch = getopt_long(argc, argv, "S:N:r:p:L:", program_options, NULL)) != -1) {
+    while ( (ch = getopt_long(argc, argv, "S:N:r:p:L:c:", program_options, NULL)) != -1) {
         int p2;
         switch (ch) {
             case 'N':
@@ -80,6 +82,9 @@ void process_options(int argc,  char *  argv[])
                 break;
             case 'L':
                 max_iterations = atoi(optarg);
+                break;
+            case 'c':
+                omega_cutoff = atof(optarg) / autocm;
                 break;
             default:
                 cerr << "Unknown option: " << ch << endl;
@@ -119,6 +124,11 @@ int main (int argc, char *  argv[])
     OHHOHH(mass, x0, H);
         
     SCP1 scp1(mass, h2o_pes, NSobol, !H.is_empty());
+
+    if (omega_cutoff > 0) {
+        scp1.setCutoff(omega_cutoff);
+    }
+
     double F0 = scp1(x0, 0.0, H, max_iterations);
     
     cout << "F0 = " << F0 << endl;
