@@ -82,7 +82,7 @@ TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
 TestSimplexIterator: TestSimplexIterator.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-SelectEW: SelectEW.o DiskIO.o
+SelectEW: SelectEW.o DiskIO.o Constants.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
 Upot: Upot.o Constants.o DiskIO.o  $(X2O_OBJ)
