@@ -34,8 +34,7 @@ static double square(double x)
 
 #if defined(__GNUG__)
 #define __assume_aligned(x, n) \
-        {}
-//(x) = __builtin_assume_aligned( (x), (n))
+    (x) = (double *) __builtin_assume_aligned( (x), (n))
 #endif
 
 class ScaledMatrixElements {
