@@ -24,6 +24,9 @@ static double NuclearMass(string &species)
     if (species.compare("H") == 0 ) {
         return Hmass;
     }
+    else if (species.compare("D") == 0 ) {
+        return Dmass;
+    }
     else if (species.compare("C") == 0 ) {
         return Cmass;
     }
@@ -147,7 +150,7 @@ uvec OHHOHH(vec& mass, vec& r)
             iO += 9;
             i += 3;
         }
-        else if (mass[i] == Hmass) {
+        else if (mass[i] == Hmass || mass[i] == Dmass) {
             for (int j=0; j<3; j++) {
                 p[iH + j] = i + j;
             }

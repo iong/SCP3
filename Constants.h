@@ -14,6 +14,7 @@ extern double bohr;
 extern double autocm;
 extern double autoK;
 extern double Hmass;
+extern double Dmass;
 extern double Cmass;
 extern double Omass;
 
