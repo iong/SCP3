@@ -25,7 +25,7 @@ vec SCP1::disp_disp_corr_diag(const vec& omega, double kT)
         d = 0.5 / (omega * tanh(0.5/kT * omega) );
     }
 
-    d ( find(abs(omega) < omega_cutoff) ).fill(0.0);
+    d ( find(omega < (omega_cutoff)) ).fill(0.0);
 
     return d;
 }
@@ -152,8 +152,8 @@ double SCP1::operator()(vec& q, double kT, mat& Ks, int max_iterations)
         
         omega = sqrt(abs(omegasq));
         //omega((omega > 1.0/autocm) % (omega < omega_cutoff)).fill(omega_cutoff);
-        omega(find(omegasq < -1.0/(autocm*autocm))).fill(omega_cutoff);
-        
+        //omega(find((omega < omega_cutoff) % (omega > 1e-8) ).fill(omega_cutoff);)
+
         
         d = disp_disp_corr_diag(omega, kT);
         
