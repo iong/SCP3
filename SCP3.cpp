@@ -199,7 +199,9 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
         }
 
         by /=  sqrt(2.0);
-
+            //TODO: This is one is column major!
+            //TODO: Paesani style test program
+            //TODO: Describe Makefile, how to compile, how to launch
         for (int j = 0; j < block_width; j++) {
             double V;
 
@@ -228,7 +230,7 @@ void SCP3_a(const string& h2o_pes, const vec& x0, const vec& omega, const mat& M
         else {
             sme.addEpot(by.rows(modes), bV, M);
         }
-
+            //At this point, M only has the difference of potential energy.
         if ( (i+block_width)%(1<<14)==0) {
             double E0[3];
 
