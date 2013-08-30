@@ -74,6 +74,11 @@ load_from_vladimir(string &name, vec &mass, vec& x0, mat& H)
 {
     int N;
     ifstream fin(name.c_str());
+
+    if ( !fin.good() ) {
+        cerr << "File not found: " << name << endl;
+        exit(EXIT_FAILURE);
+    }
     
     fin >> N;
     
