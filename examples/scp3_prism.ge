@@ -1,0 +1,16 @@
+#!/bin/bash
+#$ -q chem -pe openmp 32
+#$ -cwd -m beas
+
+
+INTEL=/data/apps/user_contributed_software/igeorges/intel
+export INTEL_LICENSE_FILE=$INTEL/licenses
+. $INTEL/composer_xe_2013/bin/compilervars.sh intel64
+module add igeorges/all
+
+export OMP_NUM_THREADS=32
+export BOWMAN_DATADIR=../../../whbb/bowman_data
+SCRAMBLED_SOBOL=/w2/igeorges/SCP3/MatousekAffineOwen48.dat
+
+../../../build/SCP3 -B 1024 -p qtip4pf -2 48 -3 48 -N 21 \
+        -r $SCRAMBLED_SOBOL prism_T0K_1M_D50.dat
