@@ -40,3 +40,10 @@ explanation easier.
    submits individual jobs for each `*.h5` file in the current directory.
 
 For `Makefile` options and technical details see the [Wiki](https://github.com/iong/SCP3/wiki).
+
+TODO
+====
+
+- [ ] Actually create `scp3_ew.*` files.
+- [ ] `SelectEW` outputs ASCII files.
+- [ ] Describe `SelectEW` in Wiki
