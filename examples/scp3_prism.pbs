@@ -1,0 +1,37 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=32,mem=8gb
+#PBS -q mf_long
+#PBS -m bea
+#PBS -M igeorges@uci.edu
+
+function actual_work() {
+    cd $PBS_O_WORKDIR
+    export BOWMAN_DATADIR=$HOME/src/SCP3/bowman/data
+
+    export OMP_NUM_THREADS=32
+    SCRAMBLED_SOBOL=/work/cluster/igeorges/SCP3/MatousekAffineOwen48.dat
+
+    exe=../../../build/SCP3
+    $exe -B 1024 -p qtip4pf -2 48 -3 48 -N 21 \
+        -r $SCRAMBLED_SOBOL prism_T0K_1M_D50.dat
+}
+
+# Informational output
+echo "=================================== PBS JOB ==================================="
+date
+echo
+echo "The job will be started on the following node(s):"
+cat "${PBS_NODEFILE}"
+echo
+echo "PBS User:           $PBS_O_LOGNAME"
+echo "Job directory:      $PBS_L_RUNDIR"
+echo "Job-id:             $PBS_JOBID"
+echo "Job Array-id:       $PBS_ARRAYID"
+echo "Jobname:            $PBS_JOBNAME"
+echo "Queue:              $PBS_QUEUE"
+echo "Number of nodes:    $PBS_L_NODENUMBER"
+echo "PBS startdirectory: $PBS_O_HOST:$PBS_O_WORKDIR"
+echo "=================================== PBS JOB ==================================="
+echo
+
+actual_work
