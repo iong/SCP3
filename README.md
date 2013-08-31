@@ -11,7 +11,8 @@ explanation easier.
 
         git clone https://github.com/iong/SCP3.git
 
-The source code is now in `SCP3`.
+   The source code is now in `SCP3`.
+
 3. Switch to the directory where you want to keep the executables and create a
    symbolic link to the Makefile in the source directory
 
