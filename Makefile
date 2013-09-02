@@ -47,7 +47,7 @@ ifdef WHBB
 	CPPFLAGS += -DHAVE_BOWMAN
 endif
 
-all: SCP3 SelectEW
+all: SCP3 eigensolver
 
 %.o: %.f90
 	$(FC) -c $(FFLAGS) -o $@ $<
@@ -82,7 +82,7 @@ TestMatrixElements: TestMatrixElements.o TestScaledMatrixElements.o \
 TestSimplexIterator: TestSimplexIterator.cpp
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
-SelectEW: SelectEW.o DiskIO.o Constants.o
+eigensolver: eigensolver.o DiskIO.o Constants.o
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LDFLAGS) $(LIBS)
 
 Upot: Upot.o Constants.o DiskIO.o  $(X2O_OBJ)
