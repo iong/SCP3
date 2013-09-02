@@ -6,6 +6,7 @@
  *  Copyright 2013 UCI Chemistry. All rights reserved.
  *
  */
+#include <fstream>
 #include <string>
 #include <H5Cpp.h>
 
@@ -83,33 +84,24 @@ int main(int argc, char *argv[])
 {
     mat M;
 
-    string h5name_in(argv[1]);
-    int subspace_size = atoi(argv[2]);
+    string fin_name(argv[1]);
+    int n_eigenpairs = atoi(argv[2]);
 
-    load_hdf5(h5name_in, M);
+    load_hdf5(fin_name, M);
     
     mat EV;
-    vec EW = dsyevr(M, subspace_size, &EV);
+    vec EW = dsyevr(M, n_eigenpairs, &EV);
     
-    string h5name_out = h5name_in.substr(0, h5name_in.length() - 3) + "_EWV.h5";
-    H5File h5out(h5name_out, H5F_ACC_TRUNC);
-    
-    FloatType dtype(PredType::NATIVE_FLOAT);
-    FloatType mem_dtype(PredType::NATIVE_DOUBLE);
+    string fout_name = "eigenpairs" 
+	    + fin_name.substr(2, fin_name.length() - 5)
+	    + ".dat";
 
-    hsize_t dims[2];
-    dims[0] = EW.n_rows;
-    dims[1] = EV.n_rows;
-    
-    DataSpace dspace(1, dims);
-    DataSet dset = h5out.createDataSet("EW", dtype, dspace);
-    dset.write(EW.memptr(), mem_dtype);
-    dset.close();
-    
-    dspace = DataSpace(2, dims);
-    dset = h5out.createDataSet("EV", dtype, dspace);
-    dset.write(EV.memptr(), mem_dtype);
-    dset.close();
+    ofstream fout(fout_name.c_str());
 
-    h5out.close();
+    fout <<"# Lowest "<< n_eigenpairs <<" eigenvalues\n";
+    fout << EW;
+    fout << "# Corresponding eigenvectors, one per line." << endl;
+    fout << EV.t() << endl;
+
+    fout.close();
 }
