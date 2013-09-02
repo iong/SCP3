@@ -47,7 +47,7 @@ ifdef WHBB
 	CPPFLAGS += -DHAVE_BOWMAN
 endif
 
-all: SCP3
+all: SCP3 SelectEW
 
 %.o: %.f90
 	$(FC) -c $(FFLAGS) -o $@ $<
