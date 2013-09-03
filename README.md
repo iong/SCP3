@@ -74,10 +74,3 @@ Crash course
         git pull
 
 For `Makefile` options and technical details see the [Wiki](https://github.com/iong/SCP3/wiki).
-
-TODO
-====
-
-- [ ] Actually create `scp3_ew.*` files.
-- [ ] `SelectEW` outputs ASCII files.
-- [ ] Describe `SelectEW` in Wiki
