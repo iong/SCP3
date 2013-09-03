@@ -13,15 +13,18 @@ Crash course
 
    The source code is now in `SCP3`.
 
-3. Switch to the directory where you want to keep the executables and create a
+4. Switch to the directory where you want to keep the executables and create a
    symbolic link to the Makefile in the source directory
 
         cd /w2/mandelsh/SCP3/build
         ln -s ~/SCP3/Makefile .
 
-4. Run `make` to compile. This will build `SCP3` and `SelectEW`. The latter reads the matrices stored `SCP3` in the `*.h5` files and computes the lowest eigenvalues and eigenvectors.
+5. Run `make` to compile. This will build `SCP3` and `SelectEW`. The latter
+   reads the matrices stored `SCP3` in the `*.h5` files and computes the lowest
+   eigenvalues and eigenvectors.
 
-5. Switch to the folder where you want to keep the data and copy the queue submitting script from the `examples/` directory.
+5. Switch to the folder where you want to keep the data and copy the queue
+   submitting script from the `examples/` directory.
 
         cd /w2/mandelsh/SCP3/TIP4P/hexamer/prism
         cp ~/SCP3/examples/scp3_prism.ge .
@@ -30,7 +33,6 @@ Crash course
 6. Submit the job.
 
         qsub scp3_prism.ge
-
 
    `SCP3` will write the Hamiltonian matrix in binary HDF5 files in regular
    intervals, by default every 2^17 Sobol points.
@@ -44,9 +46,8 @@ Crash course
 
         /w2/mandelsh/SCP3/build/eigensolver sM_2097152.h5 10
 
-   The examples directory also include a script to run the `eigensolver` in the
-   queuing system. I'd recommend to copy it at the top of the SCP3 directory
-   hierarchy:
+   The examples directory also includes a script to run `eigensolver` in the
+   queuing system. I'd recommend to copy it at the top of the SCP3 hierarchy:
 
         cp ~/SCP3/examples/eigensolver.ge /w2/mandelsh/SCP3/
 
@@ -54,23 +55,23 @@ Crash course
 
         qsub -N sM_0131072.h5 /w2/mandelsh/SCP3/eigensolver.ge
         qsub -N sM_0262144.h5 /w2/mandelsh/SCP3/eigensolver.ge
-	...
+        ...
 
    The `-N` option to `qsub` specifies the name of the job, i.e. the name which
    will be displayed by `qstat`. `eigensolver.ge` reads this name to find out
    which file to use. This way, a single script can be used for all Hamiltonian
    matrices for all structures for all potentials.
 
-   Shortcut: one can submit a job for every `sM_*.h5` file in the current
-   directory with a single command:
+   Shortcut: with a single command one can submit a job for every `sM_*.h5`
+   file in the current directory:
 
         for x in sM_*.h5; do qsub -N $x ../../../eigensolver.ge; done
 
-8. I will always push my changes to <github.org/iong/SCP3>. To update your
-   version of the code, type
+8. I will always push my changes to <https://github.org/iong/SCP3>. To update
+   your version of the code, type
 
         cd ~/SCP3
-	git pull
+        git pull
 
 For `Makefile` options and technical details see the [Wiki](https://github.com/iong/SCP3/wiki).
 
