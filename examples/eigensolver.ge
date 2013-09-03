@@ -1,0 +1,14 @@
+#!/bin/bash
+#$ -q free64 -pe openmp 8
+#$ -cwd -m beas
+
+INTEL=/data/apps/user_contributed_software/igeorges/intel
+export INTEL_LICENSE_FILE=$INTEL/licenses
+. $INTEL/bin/compilervars.sh intel64
+
+module add igeorges/all
+
+export OMP_NUM_THREADS=8
+
+../../../build/eigensolver ${JOB_NAME} 20
+
