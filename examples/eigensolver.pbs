@@ -1,0 +1,33 @@
+#!/bin/bash
+#PBS -l nodes=1:ppn=8,mem=8gb
+#PBS -q mf_medium
+#PBS -m bea
+#PBS -M igeorges@uci.edu
+
+function actual_work() {
+    cd $PBS_O_WORKDIR
+
+    export OMP_NUM_THREADS=8
+    ../../../build/eigensolver ${PBS_JOBNAME} 20
+
+}
+
+# Informational output
+echo "=================================== PBS JOB ==================================="
+date
+echo
+echo "The job will be started on the following node(s):"
+cat "${PBS_NODEFILE}"
+echo
+echo "PBS User:           $PBS_O_LOGNAME"
+echo "Job directory:      $PBS_L_RUNDIR"
+echo "Job-id:             $PBS_JOBID"
+echo "Job Array-id:       $PBS_ARRAYID"
+echo "Jobname:            $PBS_JOBNAME"
+echo "Queue:              $PBS_QUEUE"
+echo "Number of nodes:    $PBS_L_NODENUMBER"
+echo "PBS startdirectory: $PBS_O_HOST:$PBS_O_WORKDIR"
+echo "=================================== PBS JOB ==================================="
+echo
+
+actual_work
