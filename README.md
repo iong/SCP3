@@ -1,12 +1,14 @@
 Crash course
 
-1. Switch to your home directory. This is not necessary at all, but make the
+1. Switch to your home directory. This is not necessary at all, but it makes the
    explanation easier.
 
 2. If on HPC, prepare the environment by running
 
-        module add igeorges/all
+        module add gcc/4.7.3 igeorges/all
 
+   Vladimir already has this line in his `~/.bashrc`.
+ 
 3. Clone the code from github, unless you already have it.
 
         git clone https://github.com/iong/SCP3.git
@@ -73,4 +75,7 @@ Crash course
         cd ~/SCP3
         git pull
 
-For `Makefile` options and technical details see the [Wiki](https://github.com/iong/SCP3/wiki).
+The [Wiki](https://github.com/iong/SCP3/wiki) includes a detailed description of
+* [How To Compile](https://github.com/iong/SCP3/wiki/How-to-Compile)
+* [All `SCP3` and `eigensolver` options](https://github.com/iong/SCP3/wiki/Using-SCP3)
+* [The `module` environment on HPC](https://github.com/iong/SCP3/wiki/Technicalities)
