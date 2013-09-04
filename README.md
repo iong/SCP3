@@ -75,7 +75,7 @@ Crash course
         cd ~/SCP3
         git pull
 
-The [Wiki](https://github.com/iong/SCP3/wiki) includes detailed description of
+The [Wiki](https://github.com/iong/SCP3/wiki) includes a detailed description of
 * [How To Compile](https://github.com/iong/SCP3/wiki/How-to-Compile)
 * [All `SCP3` and `eigensolver` options](https://github.com/iong/SCP3/wiki/Using-SCP3)
 * [The `module` environment on HPC](https://github.com/iong/SCP3/wiki/Technicalities)
