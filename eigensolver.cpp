@@ -97,6 +97,7 @@ int main(int argc, char *argv[])
 	    + ".dat";
 
     ofstream fout(fout_name.c_str());
+    fout.precision(15);
 
     fout <<"# Lowest "<< n_eigenpairs <<" eigenvalues\n";
     fout << EW;
