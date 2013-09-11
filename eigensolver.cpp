@@ -100,9 +100,10 @@ int main(int argc, char *argv[])
     fout.precision(15);
 
     fout <<"# Lowest "<< n_eigenpairs <<" eigenvalues\n";
-    fout << EW;
+    EW.raw_print(fout);
+
     fout << "# Corresponding eigenvectors, one per line." << endl;
-    fout << EV.t() << endl;
+    EV.t().raw_print(fout);
 
     fout.close();
 }
